@@ -274,9 +274,12 @@
   // --- Translation & Localization Engine ---
   function t(key) {
     const lang = state.currentLang;
-    if (!window.MMS_DATA || !window.MMS_DATA.translations) return key;
+    if (!window.MMS_DATA || !window.MMS_DATA.translations) return null;
     const trans = window.MMS_DATA.translations[lang] || window.MMS_DATA.translations['hi'];
-    return trans[key] || (window.MMS_DATA.translations['en'] && window.MMS_DATA.translations['en'][key]) || key;
+    if (trans && trans[key] !== undefined) return trans[key];
+    const fallback = window.MMS_DATA.translations['en'];
+    if (fallback && fallback[key] !== undefined) return fallback[key];
+    return null;
   }
 
   function setLanguage(newLang) {
