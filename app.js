@@ -285,7 +285,13 @@
     expenses: JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || 'null') || window.MMS_DATA.initialExpenses || [],
 
     inventory: JSON.parse(localStorage.getItem(STORAGE_KEYS.INVENTORY) || 'null') || window.MMS_DATA.initialInventory,
-    jobs: JSON.parse(localStorage.getItem(STORAGE_KEYS.JOBS) || 'null') || window.MMS_DATA.initialJobCards || [],
+    jobs: (() => {
+      let jList = JSON.parse(localStorage.getItem(STORAGE_KEYS.JOBS) || 'null');
+      if (!Array.isArray(jList) || jList.length === 0) {
+        jList = window.MMS_DATA ? (window.MMS_DATA.initialJobCards || []) : [];
+      }
+      return jList.filter(j => !isDummyRecord(j));
+    })(),
     invoices: (() => {
       let list = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVOICES) || 'null') || window.MMS_DATA.initialInvoices || [];
       if (!Array.isArray(list)) list = [];
@@ -8076,172 +8082,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     }
   }
 
-  window.MMS_APP = {
-    openWorkAssignmentModal,
-    renderMyWorkModule,
-    filterAssignEmployees,
-    closeWorkAssignmentModal,
-    filterAssignEmployees,
-    selectAssignEmployee,
-    setAssignScheduleType,
-    confirmWorkAssignment,
-    startEmployeeJob,
-    finishEmployeeJob,
-    resetEmployeeDevice,
-    renderEmployeeJobAlerts,
-    exportAttendanceCSV,
-    openLoginModal: () => {
-      if (state && state.currentUser) {
-        showPortal();
-      } else {
-        const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
-        if (modal) {
-          modal.classList.remove('hidden'); modal.style.display = 'flex'; modal.style.zIndex = '99999';
-          modal.classList.add('flex');
-        }
-      }
-    },
-    exportOldDataToExcel: exportOldDataToExcel,
-    purgeOldDataWithConfirmation: purgeOldDataWithConfirmation,
-    checkStorageHealth: checkStorageHealth,
-    CloudSync: CloudSync,
-    searchJobStatus,
-    openNewSKUModal,
-    restockSKU,
-    clearKhataUdhar,
-    printJobToken,
-    adminPunchOut,
-    setAttendanceDateFilter,
-    setAttendanceCustomDate,
-    toggleAlertDropdown,
-    clearAllAlerts,
-    renderDutyAlertBadge,
-    setExpenseDateFilter,
-    renderBranchFilterBar,
-    renderBranchFilterBarDark,
-    renderDashboard,
-    switchPortalTab,
-    switchContactBranch,
-    setPortalLanguage,
-    setCRMSubTab,
-    setCRMSearchQuery,
-    setSalesFilter,
-    setSalesCustomDate,
-    checkGeofenceSecurity,
-    quickRoleLogin,
-    printInvoiceReceipt,
-    renderSettingsModule,
-    fillCurrentGPSForBranch,
-    saveBranchSettings,
-    handleEmployeePhotoUpload,
-    handleDocUpload,
-    toggleDesktopSidebar,
-    openMobileSidebar,
-    closeMobileSidebar,
-    verifyAndOpenStore,
-    toggleStoreOpenStatus,
-    adminOverrideStore,
-    promptManualAttendance,
-    setLanguage,
-    showPortal,
-    showPublicSite,
-    updateCartQty,
-    updateCartRate,
-    removeCartItem,
-    setCustomerType,
-    setPosPaymentMode,
-    selectContactFromDirectory,
-    filterSkuSearch,
-    selectSearchedSku,
-    openQuickSkuAdd: (name) => {
-      state.quickSkuVisible = true;
-      state.quickSkuPrefill = name || '';
-      renderPOS();
-    },
-    closeQuickSkuAdd: () => {
-      state.quickSkuVisible = false;
-      renderPOS();
-    },
-    saveQuickSku,
-    setShopStatus: (mode) => setShopManualStatus(mode),
-    setPortalActiveBranch,
-    printSlip: () => {
-      if (window.MMS_APP.currentInvoice) printSlipIframe(window.MMS_APP.currentInvoice);
-    },
-    shareWhatsApp: () => {
-      if (window.MMS_APP.currentInvoice) shareInvoiceViaWhatsApp(window.MMS_APP.currentInvoice);
-    },
-    downloadSlip: () => {
-      if (window.MMS_APP.currentInvoice) downloadInvoicePNG(window.MMS_APP.currentInvoice);
-    },
-    copySlip: () => {
-      if (window.MMS_APP.currentInvoice) copyInvoicePNG(window.MMS_APP.currentInvoice);
-    },
-    openRestockModal,
-    openReceivePaymentModal,
-    openNewJobModal,
-    updateJobStatus,
-    filterContactSuggestions,
-    selectContactSuggestion,
-    setDirectorySubTab,
-    filterDirectorySearch,
-    exportDirectoryToExcel,
-    setSalesDateFilter,
-    setSalesCustomDate,
-    sendDailyClosingReport,
-    exportBackup,
-    showExistingInvoice: (invNo) => {
-      const inv = state.invoices.find(i => i.invoiceNo === invNo);
-      if (inv) showInvoiceModal(inv);
-    },
-    currentInvoice: null,
+  
 
-    // Attendance Module
-    openPunchModal,
-    closePunchModal,
-    startCamera,
-    captureSelfie,
-    handlePhotoUpload,
-    getGPSLocation,
-    submitPunch,
-    approveAttendance,
-    rejectAttendance,
-    previewSelfieImage,
-    exportAttendanceToExcel,
-
-    // Staff HR & Dynamic Hours / Salary Engine
-    openAddStaffModal,
-    openEditStaffModal: (id) => openAddStaffModal(id),
-    closeAddStaffModal,
-    updateStaffMathPreview,
-    saveStaff,
-    openIssueAdvanceModal,
-    closeIssueAdvanceModal,
-    saveAdvance,
-    openSalarySlipModal,
-    closeSalarySlipModal,
-    printSalarySlip,
-    shareSalarySlipWhatsApp,
-    markSalaryPaid,
-
-    // Store Overhead Expenses
-    openAddExpenseModal,
-    closeAddExpenseModal,
-    saveExpense,
-    deleteExpense,
-    setPosBillingBranch,
-    calculateDistanceMeters,
-    previewSelfieModal,
-    filterPunchEmployees,
-    autoGenerateMonthSalaries,
-    deleteJobOrInvoice,
-    exportExpensesToExcel
-  };
-
-})();
-
-
-  // =========================================================================
+// =========================================================================
   // WORK ASSIGNMENT & JOB TRACKING MODULE
   // =========================================================================
   let currentAssignToken = null;
@@ -8925,3 +8768,181 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       </div>
     `;
   }
+
+  window.MMS_APP = {
+    openWorkAssignmentModal,
+    renderMyWorkModule,
+    filterAssignEmployees,
+    closeWorkAssignmentModal,
+    filterAssignEmployees,
+    selectAssignEmployee,
+    setAssignScheduleType,
+    confirmWorkAssignment,
+    startEmployeeJob,
+    finishEmployeeJob,
+    resetEmployeeDevice,
+    renderEmployeeJobAlerts,
+    exportAttendanceCSV,
+    openLoginModal: () => {
+      if (state && state.currentUser) {
+        showPortal();
+      } else {
+        const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
+        if (modal) {
+          modal.classList.remove('hidden'); modal.style.display = 'flex'; modal.style.zIndex = '99999';
+          modal.classList.add('flex');
+        }
+      }
+    },
+    exportOldDataToExcel: exportOldDataToExcel,
+    purgeOldDataWithConfirmation: purgeOldDataWithConfirmation,
+    checkStorageHealth: checkStorageHealth,
+    CloudSync: CloudSync,
+    searchJobStatus,
+    openNewSKUModal,
+    restockSKU,
+    clearKhataUdhar,
+    printJobToken,
+    adminPunchOut,
+    setAttendanceDateFilter,
+    setAttendanceCustomDate,
+    toggleAlertDropdown,
+    clearAllAlerts,
+    renderDutyAlertBadge,
+    setExpenseDateFilter,
+    renderBranchFilterBar,
+    renderBranchFilterBarDark,
+    renderDashboard,
+    switchPortalTab,
+    switchTab: switchPortalTab,
+    switchContactBranch,
+    setPortalLanguage,
+    setCRMSubTab,
+    setCRMSearchQuery,
+    setSalesFilter,
+    setSalesCustomDate,
+    checkGeofenceSecurity,
+    quickRoleLogin,
+    printInvoiceReceipt,
+    renderSettingsModule,
+    fillCurrentGPSForBranch,
+    saveBranchSettings,
+    handleEmployeePhotoUpload,
+    handleDocUpload,
+    toggleDesktopSidebar,
+    openMobileSidebar,
+    closeMobileSidebar,
+    verifyAndOpenStore,
+    toggleStoreOpenStatus,
+    adminOverrideStore,
+    promptManualAttendance,
+    setLanguage,
+    showPortal,
+    showPublicSite,
+    updateCartQty,
+    updateCartRate,
+    removeCartItem,
+    setCustomerType,
+    setPosPaymentMode,
+    selectContactFromDirectory,
+    filterSkuSearch,
+    selectSearchedSku,
+    openQuickSkuAdd: (name) => {
+      state.quickSkuVisible = true;
+      state.quickSkuPrefill = name || '';
+      renderPOS();
+    },
+    closeQuickSkuAdd: () => {
+      state.quickSkuVisible = false;
+      renderPOS();
+    },
+    saveQuickSku,
+    setShopStatus: (mode) => setShopManualStatus(mode),
+    setPortalActiveBranch,
+    printSlip: () => {
+      if (window.MMS_APP.currentInvoice) printSlipIframe(window.MMS_APP.currentInvoice);
+    },
+    shareWhatsApp: () => {
+      if (window.MMS_APP.currentInvoice) shareInvoiceViaWhatsApp(window.MMS_APP.currentInvoice);
+    },
+    downloadSlip: () => {
+      if (window.MMS_APP.currentInvoice) downloadInvoicePNG(window.MMS_APP.currentInvoice);
+    },
+    copySlip: () => {
+      if (window.MMS_APP.currentInvoice) copyInvoicePNG(window.MMS_APP.currentInvoice);
+    },
+    openRestockModal,
+    openReceivePaymentModal,
+    openNewJobModal,
+    updateJobStatus,
+    filterContactSuggestions,
+    selectContactSuggestion,
+    setDirectorySubTab,
+    filterDirectorySearch,
+    exportDirectoryToExcel,
+    setSalesDateFilter,
+    setSalesCustomDate,
+    sendDailyClosingReport,
+    exportBackup,
+    showExistingInvoice: (invNo) => {
+      const inv = state.invoices.find(i => i.invoiceNo === invNo);
+      if (inv) showInvoiceModal(inv);
+    },
+    currentInvoice: null,
+
+    // Attendance Module
+    openPunchModal,
+    closePunchModal,
+    startCamera,
+    captureSelfie,
+    handlePhotoUpload,
+    getGPSLocation,
+    submitPunch,
+    approveAttendance,
+    rejectAttendance,
+    previewSelfieImage,
+    exportAttendanceToExcel,
+
+    // Staff HR & Dynamic Hours / Salary Engine
+    openAddStaffModal,
+    openEditStaffModal: (id) => openAddStaffModal(id),
+    closeAddStaffModal,
+    updateStaffMathPreview,
+    saveStaff,
+    openIssueAdvanceModal,
+    closeIssueAdvanceModal,
+    saveAdvance,
+    openSalarySlipModal,
+    closeSalarySlipModal,
+    printSalarySlip,
+    shareSalarySlipWhatsApp,
+    markSalaryPaid,
+
+    // Store Overhead Expenses
+    openAddExpenseModal,
+    closeAddExpenseModal,
+    saveExpense,
+    deleteExpense,
+    setPosBillingBranch,
+    calculateDistanceMeters,
+    previewSelfieModal,
+    filterPunchEmployees,
+    autoGenerateMonthSalaries,
+    deleteJobOrInvoice,
+    exportExpensesToExcel,
+
+    // Work Assignment & Employee Daily Work
+    openWorkAssignmentModal,
+    closeWorkAssignmentModal,
+    selectAssignEmployee,
+    filterAssignEmployees,
+    setAssignScheduleType,
+    updateAssignWhatsAppLink,
+    confirmWorkAssignment,
+    startEmployeeJob,
+    finishEmployeeJob,
+    renderMyWorkModule
+
+  };
+
+})();
