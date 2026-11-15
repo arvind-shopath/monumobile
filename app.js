@@ -244,20 +244,40 @@
   };
 
   
-  // --- Auto-Purge Legacy Dummy Data ---
-  const DUMMY_TOKENS = ['MMS-INV-203', 'MMS-INV-205', 'MMS-2026-88', 'MMS-1001', 'MMS-1002', 'MMS-1003'];
-  const DUMMY_PHONES = ['9876543210'];
-  const DUMMY_NAMES = ['Rahul Sharma', 'राहुल शर्मा'];
+    // --- Auto-Purge All Dummy Data on Startup ---
+  const DUMMY_TOKENS = [
+    'MMS-JOB-201', 'MMS-JOB-202', 'MMS-JOB-203', 'job_201', 'job_202', 'job_203',
+    'MMS-INV-203', 'MMS-INV-204', 'MMS-INV-205', 'MMS-2026-88',
+    'MMS-1001', 'MMS-1002', 'MMS-1003'
+  ];
+  const DUMMY_PHONES = ['9876543210', '9876501234', '9876505678', '9876509012'];
+  const DUMMY_NAMES = ['Rahul Sharma', 'राहुल शर्मा', 'Rajesh Verma', 'राजेश वर्मा', 'दीपक कुमार', 'अमित सिंह'];
 
   function isDummyRecord(item) {
     if (!item) return false;
-    const id = item.invoiceNo || item.billNo || item.token || item.tokenNo || item.id || '';
+    const id = item.token || item.tokenNo || item.invoiceNo || item.billNo || item.id || '';
     if (DUMMY_TOKENS.includes(id)) return true;
     const phone = item.customerPhone || item.phone || '';
     if (DUMMY_PHONES.includes(phone)) return true;
     const name = item.customerName || item.name || '';
     if (DUMMY_NAMES.some(dn => name.includes(dn))) return true;
     return false;
+  }
+
+  // Active Purge of LocalStorage on Load
+  try {
+    ['mms_jobs_v10', 'mms_invoices_v10'].forEach(k => {
+      let raw = localStorage.getItem(k);
+      if (raw) {
+        let parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          let clean = parsed.filter(item => !isDummyRecord(item));
+          localStorage.setItem(k, JSON.stringify(clean));
+        }
+      }
+    });
+  } catch (purgeErr) {
+    console.warn('Local purge notice:', purgeErr);
   }
 
   const state = {
