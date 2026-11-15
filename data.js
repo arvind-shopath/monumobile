@@ -24,9 +24,9 @@ window.MMS_DATA = {
   // Bilingual Localization
   translations: {
     hi: {
-      topTagline: "🏢 3 एक्सप्रेस लैब्स: हजरतगंज, नाका हिंडोला (लखनऊ) व कन्नौज",
-      topAddress: "🏢 3 एक्सप्रेस लैब्स: हजरतगंज, नाका हिंडोला (लखनऊ) व कन्नौज",
-      topTimings: "⏰ लखनऊ: 12:00 PM - 09:00 PM • कन्नौज: 10:00 AM - 06:00 PM",
+      topTagline: "🏢 3 एक्सप्रेस लैब्स: हजरतगंज, नाका हिंडोला (लखनऊ) व उन्नाव",
+      topAddress: "🏢 3 एक्सप्रेस लैब्स: हजरतगंज, नाका हिंडोला (लखनऊ) व उन्नाव",
+      topTimings: "⏰ लखनऊ (हजरतगंज व नाका): 12:00 PM - 09:00 PM • उन्नाव (रियलमी केयर): 10:00 AM - 07:00 PM",
       loginPortal: "लॉगिन",
       staffLogin: "लॉगिन",
       navHome: "होम",
@@ -149,9 +149,9 @@ window.MMS_DATA = {
     },
 
     en: {
-      topTagline: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Kannauj",
-      topAddress: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Kannauj",
-      topTimings: "⏰ Lucknow: 12:00 PM - 09:00 PM • Kannauj: 10:00 AM - 06:00 PM",
+      topTagline: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Unnao (Realme Care)",
+      topAddress: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Unnao (Realme Care)",
+      topTimings: "⏰ Lucknow: 12:00 PM - 09:00 PM • Unnao (Realme Care): 10:00 AM - 07:00 PM",
       loginPortal: "Login",
       staffLogin: "Login",
       navHome: "Home",
@@ -351,24 +351,84 @@ window.MMS_DATA = {
   },
 
   // Pre-seeded SKU Inventory with comprehensive categories
+    // Pre-seeded SKU Inventory with comprehensive branch categorization
   initialInventory: [
-    { sku: "GLS-IP13-OCA", name: "iPhone 13 Touch Glass (OCA Grade A)", category: "Glass (केवल टच/ग्लास)", costPrice: 350, sellPrice: 1200, stock: 12, minStock: 3, unit: "Pcs" },
-    { sku: "SCR-IP13-ORG", name: "iPhone 13 OLED Display Folder (OEM Premium)", category: "Screen (पूरा फोल्डर)", costPrice: 3200, sellPrice: 4800, stock: 4, minStock: 2, unit: "Pcs" },
-    { sku: "GLS-SAM-S21", name: "Samsung S21 5G Curved Front Glass", category: "Glass (केवल टच/ग्लास)", costPrice: 400, sellPrice: 1400, stock: 8, minStock: 2, unit: "Pcs" },
-    { sku: "SCR-SAM-S21-AMO", name: "Samsung Galaxy S21 AMOLED Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 3, minStock: 2, unit: "Pcs" },
-    { sku: "SCR-RN12-COM", name: "Redmi Note 12 Pro Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1600, sellPrice: 2600, stock: 7, minStock: 3, unit: "Pcs" },
-    { sku: "BAT-IP12-HP", name: "iPhone 12 High-Capacity Battery", category: "Battery (बैटरी)", costPrice: 1100, sellPrice: 1999, stock: 5, minStock: 2, unit: "Pcs" },
-    { sku: "BAT-OP9-65W", name: "OnePlus 9 / 9R 4500mAh Dual-Cell Battery", category: "Battery (बैटरी)", costPrice: 1050, sellPrice: 1850, stock: 2, minStock: 3, unit: "Pcs" },
-    { sku: "BAT-SAM-M31", name: "Samsung M31 / M21 6000mAh Battery", category: "Battery (बैटरी)", costPrice: 750, sellPrice: 1350, stock: 8, minStock: 2, unit: "Pcs" },
-    { sku: "SUB-VIVO-V27", name: "Vivo V27 Charging Board with IC", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 380, sellPrice: 850, stock: 5, minStock: 2, unit: "Pcs" },
-    { sku: "AUD-EAR-IP", name: "iPhone Earpiece Speaker & Sensor Flex", category: "Audio (माइक/स्पीकर)", costPrice: 250, sellPrice: 650, stock: 6, minStock: 2, unit: "Pcs" },
-    { sku: "IC-PM8150B", name: "PM8150B Power Management IC (Original)", category: "Motherboard IC (चिप लेवल)", costPrice: 340, sellPrice: 900, stock: 4, minStock: 2, unit: "Pcs" },
-    { sku: "BGL-OPPO-R8", name: "Oppo Reno 8 AG Matte Back Glass", category: "Back Glass & Lens", costPrice: 280, sellPrice: 799, stock: 6, minStock: 2, unit: "Pcs" },
-    { sku: "CHG-65W-GAN", name: "Monu Pro 65W GaN Fast Charger (Type-C)", category: "Accessories (एक्सेसरीज)", costPrice: 550, sellPrice: 1199, stock: 14, minStock: 4, unit: "Pcs" },
-    { sku: "CBL-TC-100W", name: "Heavy Braided 100W Type-C Cable (1.5M)", category: "Accessories (एक्सेसरीज)", costPrice: 110, sellPrice: 299, stock: 25, minStock: 5, unit: "Pcs" },
-    { sku: "TMP-11D-AST", name: "11D Super Tough Tempered Glass (Assorted)", category: "Accessories (एक्सेसरीज)", costPrice: 25, sellPrice: 149, stock: 60, minStock: 15, unit: "Pcs" },
-    { sku: "OCA-GLUE-50P", name: "Mechanic 250um OCA Optical Glue (Pack 50)", category: "Tools & Consumables", costPrice: 420, sellPrice: 750, stock: 6, minStock: 2, unit: "Pack" }
+    // ==========================================
+    // 🏢 उन्नाव शाखा (Realme Authorized Service Center Spares & BBK Ecosystem)
+    // ==========================================
+    { sku: "SCR-R12P-CRV", name: "Realme 12 Pro+ 5G Curved OLED Display Combo (Genuine Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 4200, sellPrice: 6200, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-R11P-CRV", name: "Realme 11 Pro / 11 Pro+ 5G Curved AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-R10P-CRV", name: "Realme 10 Pro+ 5G 120Hz Curved AMOLED Screen", category: "Screen (पूरा फोल्डर)", costPrice: 3400, sellPrice: 4999, stock: 3, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RGT-N5-ORG", name: "Realme GT Neo 5 / GT3 144Hz AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4600, sellPrice: 6800, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RGT-2P", name: "Realme GT 2 Pro 2K LTPO AMOLED Combo (Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 5200, sellPrice: 7500, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-R9P-AMO", name: "Realme 9 Pro+ 5G Super AMOLED Display (In-Display Fingerprint)", category: "Screen (पूरा फोल्डर)", costPrice: 2800, sellPrice: 4200, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RNZ70-AMO", name: "Realme Narzo 70 Pro 5G 120Hz AMOLED Screen Combo", category: "Screen (पूरा फोल्डर)", costPrice: 2600, sellPrice: 3900, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RNZ60-AMO", name: "Realme Narzo 60 / 60 Pro AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 2700, sellPrice: 4100, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RNZ50-OG", name: "Realme Narzo 50 / 50A Prime FHD+ Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1250, sellPrice: 2200, stock: 8, minStock: 3, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RC55-OG", name: "Realme C55 / C53 Mini Capsule FHD+ Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 1100, sellPrice: 1950, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SUB-R67W-VOOC", name: "Realme 67W SuperVOOC Original Charging Sub-board (Type-C IC)", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 360, sellPrice: 850, stock: 12, minStock: 4, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SUB-R80W-FLX", name: "Realme 80W / 120W SuperVOOC Fast Charge Main Flex Cable", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 240, sellPrice: 650, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SUB-R33W-DART", name: "Realme 33W Dart Charge PCB Board & Mic Flex", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 280, sellPrice: 699, stock: 15, minStock: 4, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "BAT-BLP803-ORG", name: "Realme Original Battery BLP803 4500mAh (7 Pro / 8 Pro)", category: "Battery (बैटरी)", costPrice: 750, sellPrice: 1450, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "BAT-BLP923-ORG", name: "Realme Original Battery BLP923 5000mAh (9 Pro / 10 Pro)", category: "Battery (बैटरी)", costPrice: 800, sellPrice: 1550, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "BAT-BLP989-ORG", name: "Realme Genuine Battery BLP989 5000mAh (11 Pro / 11 Pro+)", category: "Battery (बैटरी)", costPrice: 880, sellPrice: 1699, stock: 7, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "BAT-BLP997-ORG", name: "Realme Genuine Battery BLP997 5000mAh (12 Pro / 12 Pro+)", category: "Battery (बैटरी)", costPrice: 950, sellPrice: 1799, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "BAT-BLP827-ORG", name: "Realme Original Battery BLP827 5000mAh (Narzo 30 / 50)", category: "Battery (बैटरी)", costPrice: 720, sellPrice: 1399, stock: 9, minStock: 3, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-11R-AMO", name: "OnePlus 11R 5G 120Hz Super Fluid AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 4800, sellPrice: 6999, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-NORD-CE3", name: "OnePlus Nord CE 3 / CE 3 Lite 5G Fluid Display Assembly", category: "Screen (पूरा फोल्डर)", costPrice: 2200, sellPrice: 3500, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RENO10-CRV", name: "Oppo Reno 10 Pro / Pro+ 5G 3D Curved AMOLED Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4400, sellPrice: 6500, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SCR-RENO8-AMO", name: "Oppo Reno 8 5G Super AMOLED Display Combo (OG)", category: "Screen (पूरा फोल्डर)", costPrice: 2900, sellPrice: 4400, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_unnao" },
+    { sku: "SUB-OPPO-65W", name: "Oppo 65W SuperVOOC Type-C Charging Flex & Jack Board", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 320, sellPrice: 750, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_unnao" },
+
+    // ==========================================
+    // 🏢 नाका हिंडोला शाखा (Wholesale Fast-Moving Spares & Lab Consumables)
+    // ==========================================
+    { sku: "SCR-RN13P-AMO", name: "Redmi Note 13 Pro 5G 1.5K AMOLED Display Folder (OG)", category: "Screen (पूरा फोल्डर)", costPrice: 2800, sellPrice: 4200, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-RN12-COM", name: "Redmi Note 12 5G Super AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1750, sellPrice: 2750, stock: 8, minStock: 3, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-RN11-AMO", name: "Redmi Note 10 / 11 Super AMOLED Folder (Diamond Grade)", category: "Screen (पूरा फोल्डर)", costPrice: 1650, sellPrice: 2600, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-POCO-X6P", name: "Poco X6 Pro 5G 120Hz Flow AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3100, sellPrice: 4600, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-VIVO-V29", name: "Vivo V27 / V29 / V30 Pro 3D Curved AMOLED Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3900, sellPrice: 5800, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-VIVO-Y21", name: "Vivo Y20 / Y21 / Y16 / T1 FHD+ IPS Display Folder (OG Grade)", category: "Screen (पूरा फोल्डर)", costPrice: 950, sellPrice: 1800, stock: 14, minStock: 4, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-IQOO-N7", name: "iQOO Neo 7 / Neo 9 Pro 120Hz AMOLED Screen Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3200, sellPrice: 4800, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "SCR-SAM-A14", name: "Samsung Galaxy A14 / A15 / A24 5G AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1450, sellPrice: 2400, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "BAT-SAM-M31", name: "Samsung M31 / M21 / M30s 6000mAh Battery (Genuine)", category: "Battery (बैटरी)", costPrice: 750, sellPrice: 1350, stock: 12, minStock: 3, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-MCH-UVG", name: "Mechanic UV Curable Solder Mask Green Oil (PCB Jumper)", category: "Tools & Consumables", costPrice: 140, sellPrice: 299, stock: 20, minStock: 5, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-RL-007GA", name: "Relife RL-007GA 0.009mm Ultra Fine Dot Repair Jumper Wire", category: "Tools & Consumables", costPrice: 180, sellPrice: 380, stock: 15, minStock: 4, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-QL-ICOPY", name: "QianLi iCopy Plus 2.2 True Tone & Battery Data Flex", category: "Tools & Consumables", costPrice: 650, sellPrice: 1200, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-B7000-110", name: "Zhanlida B-7000 Multi-Purpose Waterproof Frame Glue (110ml)", category: "Tools & Consumables", costPrice: 110, sellPrice: 250, stock: 35, minStock: 10, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-T7000-110", name: "Zhanlida T-7000 Black Strong Waterproof Adhesive (110ml)", category: "Tools & Consumables", costPrice: 120, sellPrice: 260, stock: 30, minStock: 10, unit: "Pcs", branchId: "branch_naka" },
+    { sku: "TOOL-SUN-OCA50", name: "Sunshine Universal 250um OCA Optical Sheets (Pack of 50)", category: "Tools & Consumables", costPrice: 380, sellPrice: 700, stock: 12, minStock: 3, unit: "Pack", branchId: "branch_naka" },
+    { sku: "SUB-UNI-TC100", name: "Universal Type-C 16-Pin & 24-Pin Solder Jacks (Pack of 100)", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 450, sellPrice: 900, stock: 8, minStock: 2, unit: "Pack", branchId: "branch_naka" },
+    { sku: "SUB-UNI-USB100", name: "Universal Micro USB 5-Pin/7-Pin Charging Ports (Pack of 100)", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 280, sellPrice: 600, stock: 10, minStock: 2, unit: "Pack", branchId: "branch_naka" },
+
+    // ==========================================
+    // 🏢 हजरतगंज शाखा (Flagship Apple & Samsung Chip-Level Lab)
+    // ==========================================
+    { sku: "SCR-IP15PM-ORG", name: "iPhone 15 Pro Max Super Retina XDR OLED Screen (Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 12500, sellPrice: 17500, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-IP14PM-ORG", name: "iPhone 14 Pro Max Dynamic Island OLED Assembly", category: "Screen (पूरा फोल्डर)", costPrice: 9800, sellPrice: 14200, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-IP13PM-ORG", name: "iPhone 13 Pro / 13 Pro Max 120Hz ProMotion OLED Screen", category: "Screen (पूरा फोल्डर)", costPrice: 7800, sellPrice: 11500, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "GLS-IP13-OCA", name: "iPhone 13 Touch Glass (OCA Grade A)", category: "Glass (केवल टच/ग्लास)", costPrice: 350, sellPrice: 1200, stock: 15, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-IP13-ORG", name: "iPhone 13 OLED Display Folder (OEM Premium)", category: "Screen (पूरा फोल्डर)", costPrice: 3200, sellPrice: 4800, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-IP12-ORG", name: "iPhone 12 / 12 Pro OLED Display Assembly (OEM Grade)", category: "Screen (पूरा फोल्डर)", costPrice: 2800, sellPrice: 4200, stock: 7, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-IP11PM-ORG", name: "iPhone 11 Pro Max Super Retina OLED Combo", category: "Screen (पूरा फोल्डर)", costPrice: 2500, sellPrice: 3800, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BGL-IP-AGLASER", name: "iPhone 13 / 14 / 15 AG Matte Back Glass (Laser Cut)", category: "Back Glass & Lens", costPrice: 320, sellPrice: 999, stock: 12, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "TOOL-JCID-FLEX", name: "JCID V1SE Face ID & Dot Projector Repair Flex Cable", category: "Tools & Consumables", costPrice: 450, sellPrice: 1100, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-IP13-TI", name: "iPhone 13 High-Capacity TI-Chip Battery (Zero Cycle)", category: "Battery (बैटरी)", costPrice: 1200, sellPrice: 2199, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-S24U-ORG", name: "Samsung Galaxy S24 Ultra Dynamic AMOLED 2X Combo (With Frame)", category: "Screen (पूरा फोल्डर)", costPrice: 14500, sellPrice: 19500, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-S23U-CRV", name: "Samsung Galaxy S23 Ultra Curved Dynamic AMOLED Display", category: "Screen (पूरा फोल्डर)", costPrice: 11800, sellPrice: 16200, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-S22U-AMO", name: "Samsung Galaxy S22 Ultra 5G AMOLED Screen Combo", category: "Screen (पूरा फोल्डर)", costPrice: 8900, sellPrice: 12800, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-SAM-S21-AMO", name: "Samsung Galaxy S21 AMOLED Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-ZFOLD-ORG", name: "Samsung Galaxy Z Fold 4 / Fold 5 Inner Folding Screen Assembly", category: "Screen (पूरा फोल्डर)", costPrice: 22000, sellPrice: 28500, stock: 1, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-PIX8P-ORG", name: "Google Pixel 8 Pro LTPO OLED Display Assembly (OEM)", category: "Screen (पूरा फोल्डर)", costPrice: 7200, sellPrice: 10800, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-PIX7P-ORG", name: "Google Pixel 7 / 7 Pro 120Hz Curved OLED Combo", category: "Screen (पूरा फोल्डर)", costPrice: 5600, sellPrice: 8400, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "IC-PM8350-ORG", name: "Qualcomm PM8350 Power Management IC (PMIC Original)", category: "Motherboard IC (चिप लेवल)", costPrice: 420, sellPrice: 1100, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "IC-PM8450-ORG", name: "Qualcomm PM8450 Power Management IC (Snapdragon 8 Gen 1)", category: "Motherboard IC (चिप लेवल)", costPrice: 550, sellPrice: 1350, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "IC-WTR5975-RF", name: "WTR3925 / WTR5975 RF Transceiver Baseband IC (No Network Fix)", category: "Motherboard IC (चिप लेवल)", costPrice: 380, sellPrice: 950, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "IC-IP-AUDIO", name: "Apple iPhone Big Audio IC (Audio Disease Repair)", category: "Motherboard IC (चिप लेवल)", costPrice: 350, sellPrice: 850, stock: 7, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "CHG-65W-GAN", name: "Monu Pro 65W GaN Fast Charger (Type-C Super Fast)", category: "Accessories (एक्सेसरीज)", costPrice: 550, sellPrice: 1199, stock: 20, minStock: 5, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "CBL-TC-100W", name: "Heavy Braided 100W Type-C Cable (1.5M Ultra Durable)", category: "Accessories (एक्सेसरीज)", costPrice: 110, sellPrice: 299, stock: 35, minStock: 5, unit: "Pcs", branchId: "branch_hazratganj" }
   ],
+
 
   // Pre-seeded Repair Job Cards (Fresh Clean Slate)
   initialJobCards: [],
@@ -465,27 +525,27 @@ window.MMS_DATA = {
       tag: "फास्ट स्क्रीन फोल्डर व होलसेल स्पेयर पार्ट्स",
       mapsUrl: "https://maps.google.com/?q=26.8370,80.9241"
     },
-    {
-      id: "branch_kannauj",
-      name: "कन्नौज शाखा (Saraimeera Kannauj)",
-      shortName: "कन्नौज (सरायमीरा)",
-      city: "कन्नौज",
+        {
+      id: "branch_unnao",
+      name: "उन्नाव शाखा (Realme Authorized Service Center)",
+      shortName: "उन्नाव (रियलमी केयर)",
+      city: "उन्नाव",
       phone: "9839988776",
       whatsapp: "919839988776",
-      address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
-      lat: 27.0283,
-      lng: 79.926383,
+      address: "निकट रेलवे स्टेशन / गांधी नगर तिराहा, लखनऊ-कानपुर रोड, उन्नाव, उत्तर प्रदेश 209801",
+      lat: 26.5458,
+      lng: 80.4900,
       radiusMeters: 100,
       openTime: "10:00",
-      closeTime: "18:00",
-      image: "images/branch_kannauj_banner.jpg",
-      tag: "ऑथराइज्ड सर्विस सेंटर • चिप लेवल लैब",
-      mapsUrl: "https://maps.google.com/?q=27.0283,79.926383"
+      closeTime: "19:00",
+      image: "images/branch_unnao_banner.jpg",
+      tag: "रियलमी ऑथराइज्ड सर्विस सेंटर • 100% ओरिजिनल पार्ट्स",
+      mapsUrl: "https://maps.google.com/?q=26.5458,80.4900"
     }
   ],
 
   // Employee HR Database - 3 Real Staff Accounts Only
-  staff: [
+    staff: [
     {
       id: "emp_101",
       name: "मोनू जी (Monu)",
@@ -551,8 +611,53 @@ window.MMS_DATA = {
       active: true,
       joinDate: "2024-05-10",
       photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80"
+    },
+    {
+      id: "emp_104",
+      name: "राहुल कश्यप (Rahul)",
+      phone: "9871122334",
+      pass: "Mms@112233",
+      role: "technician",
+      roleLabel: "नाका हिंडोला स्टाफ (इंजीनियर)",
+      branchId: "branch_naka",
+      branchName: "नाका हिंडोला लैब",
+      shiftHours: 9,
+      shiftInTime: "12:00 PM",
+      shiftOutTime: "09:00 PM",
+      shiftInTime24: "12:00",
+      shiftOutTime24: "21:00",
+      allowedLeaves: 2,
+      baseSalary: 18000,
+      targetHours: 252,
+      hourlyRate: 71.43,
+      active: true,
+      joinDate: "2024-06-01",
+      photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=200&auto=format&fit=crop&q=80"
+    },
+    {
+      id: "emp_105",
+      name: "विकास पाल (Vikas Pal)",
+      phone: "9839988776",
+      pass: "Mms@988776",
+      role: "technician",
+      roleLabel: "रियलमी सर्टिफाइड इंजीनियर (उन्नाव)",
+      branchId: "branch_unnao",
+      branchName: "उन्नाव (रियलमी केयर)",
+      shiftHours: 9,
+      shiftInTime: "10:00 AM",
+      shiftOutTime: "07:00 PM",
+      shiftInTime24: "10:00",
+      shiftOutTime24: "19:00",
+      allowedLeaves: 2,
+      baseSalary: 22000,
+      targetHours: 234,
+      hourlyRate: 94.01,
+      active: true,
+      joinDate: "2024-02-15",
+      photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80"
     }
   ],
+
 
   // Smart Attendance Log Seeds (Fresh Clean Slate)
   initialAttendance: [],

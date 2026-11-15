@@ -255,7 +255,7 @@ export default {
             paid: 2200,
             due: 0,
             status: "delivered",
-            branchName: "कन्नौज शाखा (सरायमीरा)"
+            branchName: "उन्नाव शाखा (Realme Authorized Service Center)"
           }
         };
 

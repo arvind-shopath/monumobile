@@ -243,6 +243,23 @@
     DUTY_ALERTS: 'mms_duty_alerts_v10'
   };
 
+  
+  // --- Auto-Purge Legacy Dummy Data ---
+  const DUMMY_TOKENS = ['MMS-INV-203', 'MMS-INV-205', 'MMS-2026-88', 'MMS-1001', 'MMS-1002', 'MMS-1003'];
+  const DUMMY_PHONES = ['9876543210'];
+  const DUMMY_NAMES = ['Rahul Sharma', 'राहुल शर्मा'];
+
+  function isDummyRecord(item) {
+    if (!item) return false;
+    const id = item.invoiceNo || item.billNo || item.token || item.tokenNo || item.id || '';
+    if (DUMMY_TOKENS.includes(id)) return true;
+    const phone = item.customerPhone || item.phone || '';
+    if (DUMMY_PHONES.includes(phone)) return true;
+    const name = item.customerName || item.name || '';
+    if (DUMMY_NAMES.some(dn => name.includes(dn))) return true;
+    return false;
+  }
+
   const state = {
     currentLang: localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
     currentUser: JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH) || 'null'),
@@ -272,6 +289,7 @@
     invoices: (() => {
       let list = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVOICES) || 'null') || window.MMS_DATA.initialInvoices || [];
       if (!Array.isArray(list)) list = [];
+      list = list.filter(inv => !isDummyRecord(inv));
       return list.map(inv => {
         const invNo = inv.invoiceNo || inv.billNo || ('MMS-INV-' + (inv.id || ''));
         return {
@@ -300,7 +318,7 @@
     branchStatus: JSON.parse(localStorage.getItem(STORAGE_KEYS.BRANCH_STATUS) || 'null') || {
       branch_hazratganj: { isOpen: true, openedBy: 'मोनू जी (Monu)', time: '12:00 PM', distance: 0 },
       branch_naka: { isOpen: true, openedBy: 'सूरज वर्मा (Suraj)', time: '12:00 PM', distance: 0 },
-      branch_kannauj: { isOpen: false, openedBy: null, time: null, distance: null }
+      branch_unnao: { isOpen: true, openedBy: 'विकास पाल (Vikas)', time: '10:00 AM', distance: 0 }
     },
     salesFilter: { type: 'today', customDate: '' },
 
@@ -311,7 +329,7 @@
       { name: 'अमन रिपेयरिंग सेंटर (Aman Repair Center)', phone: '9123456789', type: 'shopkeeper' },
       { name: 'लखनऊ मोबाइल हब (Lucknow Mobile Hub)', phone: '9455667788', type: 'shopkeeper' },
       { name: 'अरविंद शुक्ला', phone: '9723338321', type: 'customer' },
-      { name: 'राहुल शर्मा (Rahul Sharma)', phone: '9876543210', type: 'customer' },
+      
       { name: 'अमित कुमार वर्मा (Amit Verma)', phone: '9911223344', type: 'customer' }
     ],
 
@@ -899,7 +917,7 @@
           paid: 2200,
           due: 0,
           status: 'delivered',
-          branchName: 'कन्नौज शाखा (सरायमीरा)'
+          branchName: 'उन्नाव शाखा (रियलमी केयर) (सरायमीरा)'
         }
       };
       if (LOCAL_DEMO_LOOKUP[val]) {
@@ -1296,7 +1314,8 @@
     applyPortalLanguageUI();
     // Re-render active tab view
     if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
-      if (state.activeAdminTab === 'dashboard') renderDashboard();
+      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
+      else if (state.activeAdminTab === 'dashboard') renderDashboard();
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
     else if (state.activeAdminTab === 'inventory') renderInventory();
@@ -1398,9 +1417,9 @@
     } else if (isManager) {
       allowedTabs = ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance', 'settings'];
     } else {
-      // Pure Employee / Technician:
-      // USER REQUIREMENT: "इसमें साइडबार में जो ऑप्शन आ रहे हैं उसमें सिर्फ सेटिंग का ऑप्शन और सेल्फी और जीपीएस अटेंडेंस आएगा.."
-      allowedTabs = ['attendance', 'settings'];
+      // Employee / Technician: User specifically requires:
+      // "अब इंप्लाई का डेली वर्क भी तो दिखाई देगा.. प्लीज वर्क का ऑप्शन भी बढ़ाइये.. जहां उसे असाइन्ड काम दिखाई देगा.."
+      allowedTabs = ['mywork', 'attendance', 'settings'];
     }
 
     // Toggle Sidebar Navigation Buttons
@@ -1532,7 +1551,7 @@
     } else if (roleType === 'manager') {
       target = { phone: "9988772211", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_hazratganj" };
     } else {
-      target = { phone: "9839988776", role: "technician", name: "विकास पाल (Vikas Pal - Tech Kannauj)", branchId: "branch_kannauj" };
+      target = { phone: "9839988776", role: "technician", name: "विकास पाल (Vikas Pal - Tech Kannauj)", branchId: "branch_unnao" };
     }
     state.currentUser = target;
     localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(target));
@@ -1556,13 +1575,13 @@
       ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'balance', 'attendance', 'staff', 'settings']
       : isManager 
         ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance', 'settings']
-        : ['attendance', 'settings'];
+        : ['mywork', 'attendance', 'settings'];
 
     // Enforce allowed tab strictly for all roles
     if (!allowedTabs.includes(tab)) {
-      tab = isEmployee ? 'attendance' : 'dashboard';
+      tab = isEmployee ? 'mywork' : 'dashboard';
     }
-    state.activeAdminTab = tab || (isEmployee ? 'attendance' : 'dashboard');
+    state.activeAdminTab = tab || (isEmployee ? 'mywork' : 'dashboard');
     if (window.innerWidth < 1024) closeMobileSidebar();
 
     // Update Sidebar Navigation button active classes & STRICT VISIBILITY
@@ -1636,7 +1655,8 @@
 
     // Render corresponding view module with fail-safe error protection
     try {
-      if (state.activeAdminTab === 'dashboard') renderDashboard();
+      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
+      else if (state.activeAdminTab === 'dashboard') renderDashboard();
       else if (state.activeAdminTab === 'pos') renderPOS();
       else if (state.activeAdminTab === 'inventory') renderInventory();
       else if (state.activeAdminTab === 'khata') renderKhata();
@@ -2231,7 +2251,7 @@
                   <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="ml-1 bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold rounded-lg px-2 py-0.5 border-none outline-none cursor-pointer">
                     <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">हजरतगंज (Head Lab)</option>
                     <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' || (state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''} class="text-slate-900">नाका हिंडोला (लखनऊ)</option>
-                    <option value="branch_kannauj" ${(state.posBillingBranch || state.activeBranch) === 'branch_kannauj' || (state.posBillingBranch || state.activeBranch) === 'branch_kannauj' ? 'selected' : ''} class="text-slate-900">कन्नौज (सरायमीरा)</option>
+                    <option value="branch_unnao" ${(state.posBillingBranch || state.activeBranch) === 'branch_unnao' || (state.posBillingBranch || state.activeBranch) === 'branch_unnao' ? 'selected' : ''} class="text-slate-900">कन्नौज (सरायमीरा)</option>
                   </select>
                 </div>
               </div>
@@ -4038,7 +4058,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="p-4 border-b border-slate-100">
             <h4 class="text-sm font-black text-slate-900">🏢 3 शाखाओं का तुलनात्मक लाभ-हानि खाता (Branch-Wise P&L)</h4>
-            <p class="text-xs text-slate-500">हजरतगंज (Head Lab), अमीनाबाद और कन्नौज शाखा का अलग-अलग परफॉर्मेंस</p>
+            <p class="text-xs text-slate-500">हजरतगंज (Head Lab), अमीनाबाद और उन्नाव शाखा (रियलमी केयर) का अलग-अलग परफॉर्मेंस</p>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -4821,8 +4841,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       branchHeading = 'हजरतगंज शाखा - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
     } else if (branchFilter === 'branch_naka' || branchFilter === 'branch_naka') {
       branchHeading = 'नाका हिंडोला शाखा - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
-    } else if (branchFilter === 'branch_kannauj' || branchFilter === 'branch_kannauj') {
-      branchHeading = 'कन्नौज शाखा - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
+    } else if (branchFilter === 'branch_unnao' || branchFilter === 'branch_unnao') {
+      branchHeading = 'उन्नाव शाखा (रियलमी केयर) - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
     } else {
       branchHeading = `${getBranchName(branchFilter)} - रजिस्टर्ड रिकॉर्ड`;
     }
@@ -5066,7 +5086,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const isEmployee = !isOwner && !isManager;
 
     if (isEmployee) {
-      const empBranch = (state.currentUser && state.currentUser.branchId) ? state.currentUser.branchId : 'branch_kannauj';
+      const empBranch = (state.currentUser && state.currentUser.branchId) ? state.currentUser.branchId : 'branch_unnao';
       state.activeBranch = empBranch;
       container.innerHTML = `
         <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
@@ -5089,7 +5109,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         ${isOwner ? `<option value="all" ${curBranch === 'all' ? 'selected' : ''}>🏢 सभी शाखाएं (All Branches)</option>` : ''}
         <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (Head Lab)</option>
         <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला शाखा</option>
-        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज शाखा</option>
+        <option value="branch_unnao" ${curBranch === 'branch_unnao' ? 'selected' : ''}>📍 उन्नाव शाखा (रियलमी केयर)</option>
       </select>
     `;
   }
@@ -5106,7 +5126,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBar(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isKannauj = cur === 'branch_kannauj' || cur === 'branch_kannauj';
+    const isKannauj = cur === 'branch_unnao' || cur === 'branch_unnao';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-slate-500 px-2 flex items-center gap-1">
@@ -5121,7 +5141,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
           <span>📍</span> कन्नौज
         </button>
       </div>
@@ -5131,7 +5151,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBarDark(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isKannauj = cur === 'branch_kannauj' || cur === 'branch_kannauj';
+    const isKannauj = cur === 'branch_unnao' || cur === 'branch_unnao';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-blue-200 px-2 flex items-center gap-1">
@@ -5146,7 +5166,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
           <span>📍</span> कन्नौज
         </button>
       </div>
@@ -5158,7 +5178,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (!branchId || branchId === 'all') return 'सभी शाखाएं (All Branches)';
     if (branchId === 'branch_hazratganj') return 'हजरतगंज (श्रीराम टावर)';
     if (branchId === 'branch_naka' || branchId === 'branch_naka') return 'नाका हिंडोला (लखनऊ)';
-    if (branchId === 'branch_kannauj' || branchId === 'branch_kannauj') return 'कन्नौज (सरायमीरा)';
+    if (branchId === 'branch_unnao' || branchId === 'branch_unnao') return 'उन्नाव (रियलमी केयर)';
     const b = (state.branches || []).find(x => x.id === branchId);
     return b ? b.name : branchId;
   }
@@ -5456,8 +5476,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       // Exclude Admin Monu Ji from employee attendance
       if (a.empId === 'emp_101' || (a.empName && a.empName.includes('Monu'))) return false;
       if (branchFilter === 'all') return true;
-      if (branchFilter === 'branch_kannauj') {
-        return a.branchId === 'branch_kannauj' || a.empId === 'emp_105' || (a.empName && a.empName.includes('Vikas'));
+      if (branchFilter === 'branch_unnao') {
+        return a.branchId === 'branch_unnao' || a.empId === 'emp_105' || (a.empName && a.empName.includes('Vikas'));
       }
       return a.branchId === branchFilter;
     });
@@ -5811,7 +5831,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="punch-branch-select" ${isEmployee ? 'disabled' : ''} onchange="window.MMS_APP.filterPunchEmployees(this.value); window.MMS_APP.checkGeofenceSecurity();" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj" ${targetBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (Head Lab)</option>
                 <option value="branch_naka" ${targetBranch === 'branch_naka' || targetBranch === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला शाखा (लखनऊ)</option>
-                <option value="branch_kannauj" ${targetBranch === 'branch_kannauj' || targetBranch === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज शाखा (सरायमीरा)</option>
+                <option value="branch_unnao" ${targetBranch === 'branch_unnao' || targetBranch === 'branch_unnao' ? 'selected' : ''}>📍 उन्नाव शाखा (रियलमी केयर) (सरायमीरा)</option>
               </select>
             </div>
           </div>
@@ -6050,7 +6070,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     if (isEmployee) {
       emp = state.staff.find(s => curUser && (s.phone === curUser.phone || s.id === curUser.id)) || curUser;
-      branchId = emp.branchId || 'branch_kannauj';
+      branchId = emp.branchId || 'branch_unnao';
     } else {
       const empSelect = document.getElementById('punch-emp-select');
       const branchSelect = document.getElementById('punch-branch-select');
@@ -6364,7 +6384,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         directMap: "https://maps.google.com/?q=26.8370,80.9241"
       },
       kannauj: {
-        badge: "कन्नौज शाखा (सरायमीरा)",
+        badge: "उन्नाव शाखा (रियलमी केयर) (सरायमीरा)",
         title: "सरायमीरा, कन्नौज",
         address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
         landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
@@ -6751,7 +6771,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="staff-branch-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj" ${emp && emp.branchId === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (श्रीराम टावर)</option>
                 <option value="branch_naka" ${emp && (emp.branchId === 'branch_naka' || emp.branchId === 'branch_naka') ? 'selected' : ''}>📍 नाका हिंडोला (लखनऊ)</option>
-                <option value="branch_kannauj" ${emp && (emp.branchId === 'branch_kannauj' || emp.branchId === 'branch_kannauj') ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
+                <option value="branch_unnao" ${emp && (emp.branchId === 'branch_unnao' || emp.branchId === 'branch_unnao') ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
                 <option value="all" ${emp && emp.branchId === 'all' ? 'selected' : ''}>🏢 सभी शाखाएं</option>
               </select>
             </div>
@@ -7458,7 +7478,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="exp-branch-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj">📍 हजरतगंज (Head Lab)</option>
                 <option value="branch_naka">📍 नाका हिंडोला शाखा</option>
-                <option value="branch_kannauj">📍 कन्नौज शाखा</option>
+                <option value="branch_unnao">📍 उन्नाव शाखा (रियलमी केयर)</option>
               </select>
             </div>
             <div>
@@ -8058,6 +8078,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   window.MMS_APP = {
     openWorkAssignmentModal,
+    renderMyWorkModule,
+    filterAssignEmployees,
     closeWorkAssignmentModal,
     filterAssignEmployees,
     selectAssignEmployee,
@@ -8227,6 +8249,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   let currentAssignScheduleType = 'immediate';
 
   function openWorkAssignmentModal(tokenNo, record) {
+    // Ensure invoice print modal is closed or tucked behind so it doesn't block the assignment popup
+    if (dom.invoiceModal) {
+      closeModal(dom.invoiceModal);
+    }
+
     currentAssignToken = tokenNo;
     currentAssignRecord = record || (state.jobs || []).find(j => j.token === tokenNo) || (state.invoices || []).find(i => i.invoiceNo === tokenNo);
 
@@ -8241,8 +8268,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (trackingDisplay) trackingDisplay.textContent = tokenNo;
     
     const curUser = state.currentUser || { name: 'मोनू जी (Monu)', role: 'admin' };
-    const receiverName = (currentAssignRecord && currentAssignRecord.receivedByName) || `${curUser.role === 'admin' ? 'Admin' : 'Staff'} (${curUser.name})`;
-    const receiverTime = (currentAssignRecord && currentAssignRecord.receivedAt) || `आज, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const receiverName = (currentAssignRecord && currentAssignRecord.receivedByName) || (curUser.role === 'admin' ? 'Admin (मोनू जी)' : 'Staff (' + curUser.name + ')');
+    const receiverTime = (currentAssignRecord && currentAssignRecord.receivedAt) || ('आज, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
     if (receivedByDisplay) receivedByDisplay.textContent = receiverName;
     if (receivedAtDisplay) receivedAtDisplay.textContent = receiverTime;
@@ -8271,7 +8298,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       }
     }
 
-    // Populate 5-point timeline inside modal
+    // Populate timeline inside modal
     const timelineContainer = document.getElementById('assign-modal-timeline');
     if (timelineContainer && currentAssignRecord) {
       timelineContainer.innerHTML = `
@@ -8310,18 +8337,30 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const estMinsInput = document.getElementById('assign-est-mins-input');
 
     if (instructionsInput) {
-      const defaultInstr = currentAssignRecord ? (currentAssignRecord.device ? `${currentAssignRecord.device} - ${currentAssignRecord.issue || 'रिपेयरिंग सर्विस'}` : (currentAssignRecord.items ? currentAssignRecord.items.map(it=>it.name).join(', ') : 'मोबाइल रिपेयर व पार्ट्स चेंज')) : 'मोबाइल रिपेयर सर्विस';
+      let defaultInstr = '';
+      if (currentAssignRecord) {
+        if (currentAssignRecord.device) {
+          defaultInstr = currentAssignRecord.device + ' - ' + (currentAssignRecord.issue || 'रिपेयरिंग सर्विस');
+        } else if (currentAssignRecord.items && currentAssignRecord.items.length > 0) {
+          defaultInstr = currentAssignRecord.items.map(it => it.name).join(', ');
+        } else {
+          defaultInstr = 'मोबाइल रिपेयर व पार्ट्स चेंज सर्विस';
+        }
+      } else {
+        defaultInstr = 'मोबाइल रिपेयर सर्विस';
+      }
       instructionsInput.value = defaultInstr;
     }
     if (estMinsInput) estMinsInput.value = 45;
 
-    // 3. Render Employee List with Pending Jobs Count
+    // 3. Render Employee List with Pending Jobs Count (allow selecting any active staff)
     filterAssignEmployees('');
 
     // 4. Default to Immediate
     setAssignScheduleType('immediate');
 
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
   }
 
   function closeWorkAssignmentModal() {
@@ -8444,11 +8483,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     waBtn.href = `https://wa.me/91${empPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg)}`;
   }
 
-  function confirmWorkAssignment() {
+    function confirmWorkAssignment() {
     if (!currentAssignToken) return;
 
     const empId = document.getElementById('assign-selected-emp-id')?.value;
     const empName = document.getElementById('assign-selected-emp-name')?.value;
+    const empPhone = document.getElementById('assign-selected-emp-phone')?.value || '7905859701';
     const instructions = document.getElementById('assign-instructions-input')?.value || 'रिपेयरिंग सर्विस';
     const estMins = Number(document.getElementById('assign-est-mins-input')?.value) || 45;
     const scheduleTime = currentAssignScheduleType === 'scheduled' ? document.getElementById('assign-schedule-datetime')?.value : null;
@@ -8468,7 +8508,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       targetJob = {
         token: currentAssignToken,
         tokenNo: currentAssignToken,
-        customerName: currentAssignRecord?.customerName || 'Walk-in',
+        customerName: currentAssignRecord?.customerName || 'Walk-in Customer',
         customerPhone: currentAssignRecord?.customerPhone || '',
         device: instructions,
         issue: instructions,
@@ -8481,6 +8521,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     targetJob.assignedTo = empName;
     targetJob.assignedToId = empId;
+    targetJob.assignedToPhone = empPhone;
     targetJob.assignedByName = curUser.name;
     targetJob.assignedAt = nowFormatted;
     targetJob.scheduledAt = scheduleTime || nowFormatted;
@@ -8493,6 +8534,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const targetInv = (state.invoices || []).find(i => i.invoiceNo === currentAssignToken || i.billNo === currentAssignToken);
     if (targetInv) {
       targetInv.assignedTo = empName;
+      targetInv.assignedToPhone = empPhone;
       targetInv.workInstructions = instructions;
       targetInv.estimatedMins = estMins;
       targetInv.receivedByName = targetInv.receivedByName || curUser.name;
@@ -8518,7 +8560,29 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     closeWorkAssignmentModal();
     renderJobCardsManager();
-    alert(`✅ काम सफलतापूर्वक [${empName}] को सौंप दिया गया!`);
+    if (typeof renderPOS === 'function') renderPOS();
+    if (typeof renderDailySales === 'function') renderDailySales();
+
+    // 4. AUTOMATICALLY POP OPEN WHATSAPP TO EMPLOYEE SO NOTHING IS MISSED!
+    const cleanPhone = empPhone.replace(/[^0-9]/g, '');
+    const timing = currentAssignScheduleType === 'immediate' ? 'तुरंत (Immediately)' : ('शेड्यूल: ' + (scheduleTime || 'तय समय'));
+    const waMsg = '*Monu Mobile Solution - नया वर्क असाइनमेंट*' +
+      '\n\nनमस्ते *' + empName + '*! आपके लिए नया रिपेयर जॉब असाइन किया गया है:' +
+      '\n\n📋 *टोकन / इनवॉइस:* ' + currentAssignToken +
+      '\n👤 *ग्राहक:* ' + (targetJob.customerName || 'Walk-in') +
+      '\n🔧 *काम का विवरण:* ' + instructions +
+      '\n⏰ *समय / शेड्यूल:* ' + timing +
+      '\n⌛ *अनुमानित समय:* ' + estMins + ' मिनट' +
+      '\n\n👉 *काम शुरू करने के लिए पोर्टल खोलें:*\nhttps://monumobile.in\n\n(पोर्टल पर जाकर \'Start Work\' और कार्य पूर्ण होने पर \'Finish / Done\' बटन अवश्य दबाएं।)';
+
+    const waUrl = 'https://wa.me/91' + cleanPhone + '?text=' + encodeURIComponent(waMsg);
+    try {
+      window.open(waUrl, '_blank');
+    } catch (e) {
+      console.warn('Could not auto-open WhatsApp:', e);
+    }
+
+    alert('✅ काम सफलतापूर्वक [' + empName + '] को सौंपा गया और व्हाट्सएप संदेश भी तैयार कर दिया गया है!');
   }
 
   // =========================================================================
@@ -8699,4 +8763,165 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // =========================================================================
+  // EMPLOYEE DAILY WORK MODULE (Assigned Jobs, Action Buttons & WhatsApp)
+  // =========================================================================
+  function renderMyWorkModule() {
+    const container = document.getElementById('tab-view-mywork');
+    if (!container) return;
+
+    const curUser = state.currentUser || { name: 'रवि कुमार (Ravi)', role: 'technician', phone: '9955443311' };
+    const curName = curUser.name || '';
+    const firstName = curName.split(' ')[0] || curName;
+    const curPhone = (curUser.phone || '').replace(/[^0-9]/g, '');
+
+    // Filter jobs assigned to this employee
+    const assignedJobs = (state.jobs || []).filter(j => {
+      if (!j.assignedTo) return false;
+      if (j.assignedToId && curUser.id && j.assignedToId === curUser.id) return true;
+      if (j.assignedTo === curName || j.assignedTo.includes(firstName)) return true;
+      if (j.assignedToPhone && curPhone && j.assignedToPhone.replace(/[^0-9]/g, '') === curPhone) return true;
+      return false;
+    });
+
+    const pendingCount = assignedJobs.filter(j => j.status !== 'ready' && j.status !== 'delivered').length;
+    const inProgressCount = assignedJobs.filter(j => j.status === 'in-progress' || (j.startedAt && !j.completedAt)).length;
+    const completedTodayCount = assignedJobs.filter(j => j.status === 'ready' || j.status === 'delivered' || j.completedAt).length;
+
+    container.innerHTML = `
+      <div class="space-y-5">
+        <!-- Top Greeting & KPI Cards -->
+        <div class="p-5 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-200 border border-blue-400/30">
+              🛠️ डेली वर्क ट्रैकर (Daily Assigned Jobs)
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black">नमस्ते, ${curName}</h2>
+            <p class="text-xs text-blue-200/80">यहाँ आपके लिए असाइन किए गए रिपेयरिंग कार्य और लाइव स्टेटस उपलब्ध हैं।</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="window.MMS_APP.switchTab('attendance')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>📷</span> <span>हाजिरी (Attendance)</span>
+            </button>
+            <button onclick="window.MMS_APP.renderMyWorkModule()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+              <span>🔄</span> <span>रिफ्रेश</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 KPI Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-500 block">कुल असाइन कार्य</span>
+              <span class="text-2xl font-black text-slate-900 font-mono">${assignedJobs.length}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-black">📋</div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-500 block">वर्तमान में चालू (In Progress)</span>
+              <span class="text-2xl font-black text-amber-600 font-mono">${inProgressCount}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-black">⚡</div>
+          </div>
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-500 block">पूर्ण कार्य (Completed)</span>
+              <span class="text-2xl font-black text-emerald-600 font-mono">${completedTodayCount}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-black">✅</div>
+          </div>
+        </div>
+
+        <!-- Jobs List Section -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+              <span>🔧</span> <span>मेरे असाइन जॉब्स (My Assigned Work List)</span>
+            </h3>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800">
+              ${pendingCount} कार्य बाकी
+            </span>
+          </div>
+
+          ${assignedJobs.length === 0 ? `
+            <div class="p-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <div class="text-3xl">🎉</div>
+              <h4 class="text-sm font-black text-slate-800">वर्तमान में आपके लिए कोई नया कार्य असाइन नहीं है</h4>
+              <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                जैसे ही काउंटर या सुपर एडमिन से कोई नया रिपेयर जॉब आपके नाम असाइन होगा, वह तुरंत यहाँ दिखाई देगा और आपको व्हाट्सएप नोटिफिकेशन भी मिल जाएगा।
+              </p>
+            </div>
+          ` : `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${assignedJobs.map(job => {
+                const token = job.token || job.tokenNo || job.id;
+                const isStarted = !!job.startedAt || job.status === 'in-progress';
+                const isFinished = !!job.completedAt || job.status === 'ready' || job.status === 'delivered';
+                const statusBadge = isFinished 
+                  ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">✅ कार्य पूर्ण (Completed)</span>'
+                  : isStarted 
+                    ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-200">⚡ चालू है (In Progress)</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200">⏳ नया असाइन (Pending)</span>';
+
+                const customerPhone = job.customerPhone ? job.customerPhone.replace(/[^0-9]/g, '') : '';
+                const customerWaText = encodeURIComponent(`नमस्ते ${job.customerName || 'सर'}! Monu Mobile Solution से आपके डिवाइस (${job.device || 'फोन'}) की रिपेयरिंग पर काम चल रहा है। टोकन: ${token}`);
+
+                return `
+                  <div class="p-4 rounded-2xl border ${isStarted ? 'border-amber-300 bg-amber-50/20 ring-1 ring-amber-200' : isFinished ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200 bg-white'} shadow-sm space-y-3">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <span class="text-xs font-mono font-black text-blue-600 block">${token}</span>
+                        <h4 class="text-sm font-black text-slate-900 leading-snug">${job.device || job.workInstructions || 'मोबाइल रिपेयर कार्य'}</h4>
+                      </div>
+                      ${statusBadge}
+                    </div>
+
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1 text-xs">
+                      <div class="flex justify-between text-[11px] text-slate-600">
+                        <span><strong>ग्राहक:</strong> ${job.customerName || 'Walk-in Customer'}</span>
+                        <span>${job.customerPhone ? '📞 ' + job.customerPhone : ''}</span>
+                      </div>
+                      <div class="text-[11px] text-slate-700">
+                        <strong>निर्देश / समस्या:</strong> ${job.workInstructions || job.issue || 'पार्ट्स चेंज व रिपेयर सर्विस'}
+                      </div>
+                      <div class="flex justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-200">
+                        <span>⏰ ${job.scheduledAt ? 'शेड्यूल: ' + job.scheduledAt : 'असाइन समय: ' + (job.assignedAt || 'आज')}</span>
+                        <span>⌛ अनुमानित: ${job.estimatedMins || 45} मिनट</span>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 pt-1 flex-wrap">
+                      ${!isStarted ? `
+                        <button onclick="window.MMS_APP.startEmployeeJob('${token}')" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                          <span>▶️</span> <span>कार्य शुरू करें (Start Work)</span>
+                        </button>
+                      ` : !isFinished ? `
+                        <button onclick="window.MMS_APP.finishEmployeeJob('${token}')" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                          <span>✅</span> <span>कार्य पूर्ण हुआ (Mark Done)</span>
+                        </button>
+                      ` : `
+                        <div class="flex-1 py-2 px-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-black text-center">
+                          ✨ सफलतापूर्वक पूर्ण हुआ (${job.completedAt || 'आज'})
+                        </div>
+                      `}
+
+                      ${customerPhone ? `
+                        <a href="https://wa.me/91${customerPhone}?text=${customerWaText}" target="_blank" class="py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1 transition cursor-pointer">
+                          <span>💬</span> <span>कस्टमर</span>
+                        </a>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+      </div>
+    `;
   }
