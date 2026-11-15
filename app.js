@@ -233,6 +233,7 @@
     CONTACTS: 'mms_contacts_v10',
     SHOP_STATUS: 'mms_shop_status_v10',
     ACTIVE_VIEW: 'mms_active_view_v10',
+    ACTIVE_TAB: 'mms_active_tab_v10',
     BRANCHES: 'mms_branches_v10',
     ACTIVE_BRANCH: 'mms_active_branch_v10',
     STAFF: 'mms_staff_v10',
@@ -700,7 +701,10 @@
   function handleLogout() {
     state.currentUser = null;
     localStorage.removeItem(STORAGE_KEYS.AUTH);
+    localStorage.removeItem(STORAGE_KEYS.ACTIVE_TAB);
     localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'public');
+    const cloak = document.getElementById('instant-auth-cloak');
+    if (cloak) cloak.remove();
     renderAuthPill();
     showPublicSite();
   }
@@ -725,7 +729,14 @@
     dom.publicSection.classList.add('hidden');
     
     // Show dedicated staff portal
-    dom.portalSection.classList.remove('hidden');
+    if (dom.publicSection) {
+      dom.publicSection.classList.add('hidden');
+      dom.publicSection.style.display = 'none';
+    }
+    if (dom.portalSection) {
+      dom.portalSection.classList.remove('hidden');
+      dom.portalSection.style.display = 'flex';
+    }
     document.body.classList.add('h-screen', 'overflow-hidden');
     document.documentElement.classList.add('h-screen', 'overflow-hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -737,8 +748,17 @@
     localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'public');
     state.activeView = 'public';
 
-    dom.portalSection.classList.add('hidden');
-    dom.publicSection.classList.remove('hidden');
+    const cloak = document.getElementById('instant-auth-cloak');
+    if (cloak) cloak.remove();
+
+    if (dom.portalSection) {
+      dom.portalSection.classList.add('hidden');
+      dom.portalSection.style.display = 'none';
+    }
+    if (dom.publicSection) {
+      dom.publicSection.classList.remove('hidden');
+      dom.publicSection.style.display = 'block';
+    }
     document.querySelectorAll('.public-shell-element').forEach(el => el.classList.remove('hidden'));
     document.body.classList.remove('h-screen', 'overflow-hidden');
     document.documentElement.classList.remove('h-screen', 'overflow-hidden');
@@ -1496,10 +1516,12 @@
       if (settingsLabel) settingsLabel.textContent = 'सिस्टम व शाखा सेटिंग्स';
     }
 
-    // Set active tab:
-    // If employee: strictly default to 'attendance'
-    if (isEmployee) {
-      state.activeAdminTab = allowedTabs.includes(state.activeAdminTab) ? state.activeAdminTab : 'attendance';
+        // Restore exact saved tab on refresh so user stays on the same page!
+    const savedTab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB);
+    if (savedTab && allowedTabs.includes(savedTab)) {
+      state.activeAdminTab = savedTab;
+    } else if (isEmployee) {
+      state.activeAdminTab = allowedTabs.includes(state.activeAdminTab) ? state.activeAdminTab : 'mywork';
     } else {
       if (isOwner && (!state.activeBranch || state.activeBranch === '')) {
         state.activeBranch = 'all';
@@ -1613,10 +1635,12 @@
       tab = isEmployee ? 'mywork' : 'dashboard';
     }
     state.activeAdminTab = tab || (isEmployee ? 'mywork' : 'dashboard');
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, state.activeAdminTab);
     if (window.innerWidth < 1024) closeMobileSidebar();
 
     // Update Sidebar Navigation button active classes & STRICT VISIBILITY
-    dom.portalTabs.forEach(b => {
+    const pTabs = (dom.portalTabs && dom.portalTabs.length) ? dom.portalTabs : document.querySelectorAll(".portal-tab-btn");
+    pTabs.forEach(b => {
       const bTab = b.getAttribute('data-tab');
       if (allowedTabs.includes(bTab)) {
         b.style.display = 'flex';
@@ -7796,26 +7820,20 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   }
 
   // --- DOM Initialization & Persistent View Check ---
-  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     if (typeof CloudSync !== "undefined") CloudSync.init();
     cacheDom();
     bindEvents();
-    renderAll();
 
-    // Persistent login check: restore Staff Portal across page reloads & hard refreshes
+    // Check Persistent Auth & View FIRST to completely eliminate page flash
     const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH);
     const savedView = localStorage.getItem(STORAGE_KEYS.ACTIVE_VIEW);
 
-    if (savedUser && savedUser !== 'null') {
+    if (savedUser && savedUser !== 'null' && savedView !== 'public') {
       try {
         state.currentUser = JSON.parse(savedUser);
         renderAuthPill();
-        // If user is authenticated, keep them in portal view on reload unless explicitly clicked public site
-        if (savedView === 'public') {
-          showPublicSite();
-        } else {
-          showPortal();
-        }
+        showPortal();
       } catch (err) {
         console.error('Auth parse error:', err);
         showPublicSite();
@@ -7823,6 +7841,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     } else {
       showPublicSite();
     }
+
+    renderAll();
   });
 
   // Public Controller API
