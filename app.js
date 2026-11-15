@@ -327,6 +327,9 @@
       branch_unnao: { isOpen: true, openedBy: 'विकास पाल (Vikas)', time: '10:00 AM', distance: 0 }
     },
     salesFilter: { type: 'today', customDate: '' },
+    myWorkFilter: 'active', // 'active' | 'completed' | 'all'
+    myWorkDate: 'today', // 'today' | 'yesterday' | 'week' | 'all' | 'custom'
+    myWorkCustomDate: '',
 
     // Customer & Shopkeeper Directory Database
     contacts: JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTACTS) || 'null') || [
@@ -1320,7 +1323,9 @@
     applyPortalLanguageUI();
     // Re-render active tab view
     if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
-      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
+      if (state.activeAdminTab === 'mywork') renderMyWorkModule,
+    setMyWorkStatusFilter,
+    setMyWorkDateFilter();
       else if (state.activeAdminTab === 'dashboard') renderDashboard();
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
@@ -8450,7 +8455,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     renderEmployeeJobAlerts();
     renderJobCardsManager();
-    alert(`▶️ कार्य शुरू हो गया! कस्टमर ट्रैकिंग स्टेटस 'In Progress' में बदल गया है।`);
+    if (typeof renderMyWorkModule === 'function') renderMyWorkModule();
+    alert('▶️ कार्य शुरू हो गया! कस्टमर ट्रैकिंग स्टेटस In Progress में बदल गया है।');
   }
 
   function finishEmployeeJob(token) {
@@ -8480,7 +8486,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     renderEmployeeJobAlerts();
     renderJobCardsManager();
-    alert(`✅ बधाई! कार्य पूर्ण हुआ (${durationMins} मिनट लगे)। कस्टमर ट्रैकिंग स्टेटस 'Ready for Pickup' अपडेट हो गया है।`);
+    if (typeof renderMyWorkModule === 'function') renderMyWorkModule();
+    alert('✅ बधाई! कार्य पूर्ण हुआ (' + durationMins + ' मिनट लगे)। कस्टमर ट्रैकिंग स्टेटस Ready for Pickup अपडेट हो गया है।');
   }
 
   function resetEmployeeDevice(empId) {
@@ -8608,9 +8615,20 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     document.body.removeChild(link);
   }
 
+    // =========================================================================
+  // EMPLOYEE DAILY WORK MODULE (Date Filters, Status Tabs & No Customer WhatsApp)
   // =========================================================================
-  // EMPLOYEE DAILY WORK MODULE (Assigned Jobs, Action Buttons & WhatsApp)
-  // =========================================================================
+  function setMyWorkStatusFilter(filter) {
+    state.myWorkFilter = filter;
+    renderMyWorkModule();
+  }
+
+  function setMyWorkDateFilter(type, customDate) {
+    state.myWorkDate = type;
+    if (customDate !== undefined) state.myWorkCustomDate = customDate;
+    renderMyWorkModule();
+  }
+
   function renderMyWorkModule() {
     const container = document.getElementById('tab-view-mywork');
     if (!container) return;
@@ -8620,8 +8638,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const firstName = curName.split(' ')[0] || curName;
     const curPhone = (curUser.phone || '').replace(/[^0-9]/g, '');
 
-    // Filter jobs assigned to this employee
-    const assignedJobs = (state.jobs || []).filter(j => {
+    // 1. Filter jobs strictly assigned to this technician
+    const allMyJobs = (state.jobs || []).filter(j => {
       if (!j.assignedTo) return false;
       if (j.assignedToId && curUser.id && j.assignedToId === curUser.id) return true;
       if (j.assignedTo === curName || j.assignedTo.includes(firstName)) return true;
@@ -8629,23 +8647,72 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       return false;
     });
 
-    const pendingCount = assignedJobs.filter(j => j.status !== 'ready' && j.status !== 'delivered').length;
-    const inProgressCount = assignedJobs.filter(j => j.status === 'in-progress' || (j.startedAt && !j.completedAt)).length;
-    const completedTodayCount = assignedJobs.filter(j => j.status === 'ready' || j.status === 'delivered' || j.completedAt).length;
+    // Calculate overall stats for technician
+    const totalAssignedCount = allMyJobs.length;
+    const inProgressCount = allMyJobs.filter(j => j.status === 'in-progress' || (j.startedAt && !j.completedAt)).length;
+    const activeCount = allMyJobs.filter(j => j.status !== 'ready' && j.status !== 'delivered' && !j.completedAt).length;
+    const completedCount = allMyJobs.filter(j => j.status === 'ready' || j.status === 'delivered' || !!j.completedAt).length;
+
+    // 2. Apply Date Filter
+    const todayStr = new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const currentFilter = state.myWorkFilter || 'active'; // 'active' | 'completed' | 'all'
+    const currentDateFilter = state.myWorkDate || 'today'; // 'today' | 'yesterday' | 'week' | 'all' | 'custom'
+    const customDateVal = state.myWorkCustomDate || '';
+
+    let dateFilteredJobs = allMyJobs.filter(j => {
+      if (currentDateFilter === 'all') return true;
+
+      // Check dates in job: createdAt, assignedAt, startedAt, completedAt
+      const jobDates = [j.createdAt, j.assignedAt, j.startedAt, j.completedAt].filter(Boolean).map(d => {
+        if (typeof d === 'string') {
+          if (d.includes('आज') || d.includes('Today')) return todayStr;
+          if (d.includes('कल') || d.includes('Yesterday')) return yesterdayStr;
+          const match = d.match(/\d{4}-\d{2}-\d{2}/);
+          if (match) return match[0];
+        }
+        return todayStr; // default fallback
+      });
+
+      if (currentDateFilter === 'today') {
+        return jobDates.includes(todayStr);
+      } else if (currentDateFilter === 'yesterday') {
+        return jobDates.includes(yesterdayStr);
+      } else if (currentDateFilter === 'week') {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekAgoStr = weekAgo.toISOString().split('T')[0];
+        return jobDates.some(d => d >= weekAgoStr);
+      } else if (currentDateFilter === 'custom' && customDateVal) {
+        return jobDates.includes(customDateVal);
+      }
+      return true;
+    });
+
+    // 3. Apply Status Filter
+    let displayedJobs = dateFilteredJobs.filter(j => {
+      const isFinished = !!j.completedAt || j.status === 'ready' || j.status === 'delivered';
+      if (currentFilter === 'active') return !isFinished;
+      if (currentFilter === 'completed') return isFinished;
+      return true; // 'all'
+    });
 
     container.innerHTML = `
       <div class="space-y-5">
-        <!-- Top Greeting & KPI Cards -->
+        <!-- Top Greeting Header -->
         <div class="p-5 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
           <div class="space-y-1">
             <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-200 border border-blue-400/30">
               🛠️ डेली वर्क ट्रैकर (Daily Assigned Jobs)
             </span>
             <h2 class="text-xl sm:text-2xl font-black">नमस्ते, ${curName}</h2>
-            <p class="text-xs text-blue-200/80">यहाँ आपके लिए असाइन किए गए रिपेयरिंग कार्य और लाइव स्टेटस उपलब्ध हैं।</p>
+            <p class="text-xs text-blue-200/80">दुकान काउंटर व एडमिन द्वारा सौंपे गए सभी रिपेयर कार्य, समय और स्थिति।</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="window.MMS_APP.switchTab('attendance')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
               <span>📷</span> <span>हाजिरी (Attendance)</span>
             </button>
             <button onclick="window.MMS_APP.renderMyWorkModule()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
@@ -8656,65 +8723,108 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
         <!-- 3 KPI Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div onclick="window.MMS_APP.setMyWorkStatusFilter('all')" class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-blue-300 transition">
             <div>
-              <span class="text-xs font-bold text-slate-500 block">कुल असाइन कार्य</span>
-              <span class="text-2xl font-black text-slate-900 font-mono">${assignedJobs.length}</span>
+              <span class="text-xs font-bold text-slate-500 block">कुल कार्य (Total Jobs)</span>
+              <span class="text-2xl font-black text-slate-900 font-mono">${totalAssignedCount}</span>
             </div>
             <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-black">📋</div>
           </div>
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div onclick="window.MMS_APP.setMyWorkStatusFilter('active')" class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-amber-300 transition">
             <div>
-              <span class="text-xs font-bold text-slate-500 block">वर्तमान में चालू (In Progress)</span>
-              <span class="text-2xl font-black text-amber-600 font-mono">${inProgressCount}</span>
+              <span class="text-xs font-bold text-slate-500 block">वर्तमान में चालू / बाकी (Active)</span>
+              <span class="text-2xl font-black text-amber-600 font-mono">${activeCount}</span>
             </div>
             <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg font-black">⚡</div>
           </div>
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div onclick="window.MMS_APP.setMyWorkStatusFilter('completed')" class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-emerald-300 transition">
             <div>
               <span class="text-xs font-bold text-slate-500 block">पूर्ण कार्य (Completed)</span>
-              <span class="text-2xl font-black text-emerald-600 font-mono">${completedTodayCount}</span>
+              <span class="text-2xl font-black text-emerald-600 font-mono">${completedCount}</span>
             </div>
             <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-black">✅</div>
           </div>
         </div>
 
-        <!-- Jobs List Section -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-              <span>🔧</span> <span>मेरे असाइन जॉब्स (My Assigned Work List)</span>
-            </h3>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800">
-              ${pendingCount} कार्य बाकी
-            </span>
+        <!-- Filter Controls Bar: Status Sub-Tabs + Date Filter -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <!-- Status Tabs: Active, Completed, All -->
+            <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+              <button onclick="window.MMS_APP.setMyWorkStatusFilter('active')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentFilter === 'active' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                ⚡ सक्रिय कार्य (${activeCount})
+              </button>
+              <button onclick="window.MMS_APP.setMyWorkStatusFilter('completed')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentFilter === 'completed' ? 'bg-white text-emerald-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                ✅ पूर्ण कार्य (${completedCount})
+              </button>
+              <button onclick="window.MMS_APP.setMyWorkStatusFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${currentFilter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                📋 सभी कार्य (${totalAssignedCount})
+              </button>
+            </div>
+
+            <!-- Date Filter Selector -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold text-slate-500">📅 तारीख फ़िल्टर:</span>
+              <div class="flex items-center gap-1">
+                <button onclick="window.MMS_APP.setMyWorkDateFilter('today')" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ${currentDateFilter === 'today' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                  आज
+                </button>
+                <button onclick="window.MMS_APP.setMyWorkDateFilter('yesterday')" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ${currentDateFilter === 'yesterday' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                  कल
+                </button>
+                <button onclick="window.MMS_APP.setMyWorkDateFilter('week')" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ${currentDateFilter === 'week' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                  7 दिन
+                </button>
+                <button onclick="window.MMS_APP.setMyWorkDateFilter('all')" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ${currentDateFilter === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">
+                  सभी (इतिहास)
+                </button>
+              </div>
+              <input type="date" value="${customDateVal}" onchange="window.MMS_APP.setMyWorkDateFilter('custom', this.value)" class="text-xs px-2 py-1 border border-slate-200 rounded-lg text-slate-700 bg-slate-50 focus:bg-white" title="विशिष्ट तारीख चुनें">
+            </div>
           </div>
 
-          ${assignedJobs.length === 0 ? `
-            <div class="p-10 text-center space-y-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          <!-- Active Filter Notice -->
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>
+              दिखाया जा रहा है: <strong>${currentFilter === 'active' ? 'सक्रिय / बाकी कार्य' : currentFilter === 'completed' ? 'सफलतापूर्वक पूर्ण हुए कार्य' : 'सभी कार्य'}</strong>
+              • ${currentDateFilter === 'today' ? 'आज का रिकॉर्ड' : currentDateFilter === 'yesterday' ? 'कल का रिकॉर्ड' : currentDateFilter === 'week' ? 'पिछले 7 दिन' : currentDateFilter === 'custom' && customDateVal ? 'तारीख ' + customDateVal : 'सभी तारीखें (पुराना इतिहास)'}
+            </span>
+            <span class="font-bold text-slate-700 font-mono">${displayedJobs.length} कार्य सूची में</span>
+          </div>
+        </div>
+
+        <!-- Jobs Cards List -->
+        <div class="space-y-4">
+          ${displayedJobs.length === 0 ? `
+            <div class="p-10 text-center space-y-3 bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm">
               <div class="text-3xl">🎉</div>
-              <h4 class="text-sm font-black text-slate-800">वर्तमान में आपके लिए कोई नया कार्य असाइन नहीं है</h4>
+              <h4 class="text-sm font-black text-slate-800">
+                ${currentFilter === 'completed' ? 'चयनित अवधि में कोई पूर्ण कार्य नहीं है' : currentFilter === 'active' ? 'इस समय आपके लिए कोई पेंडिंग कार्य नहीं है' : 'कोई कार्य नहीं मिला'}
+              </h4>
               <p class="text-xs text-slate-500 max-w-sm mx-auto">
-                जैसे ही काउंटर या सुपर एडमिन से कोई नया रिपेयर जॉब आपके नाम असाइन होगा, वह तुरंत यहाँ दिखाई देगा और आपको व्हाट्सएप नोटिफिकेशन भी मिल जाएगा।
+                ${currentFilter === 'active' ? 'जैसे ही काउंटर से नया रिपेयर जॉब आपके नाम असाइन होगा, वह तुरंत यहाँ दिखाई देगा।' : 'फ़िल्टर बदलकर "सभी कार्य" या "इतिहास" चुनें।'}
               </p>
+              ${currentFilter !== 'all' || currentDateFilter !== 'all' ? `
+                <button onclick="window.MMS_APP.setMyWorkStatusFilter('all'); window.MMS_APP.setMyWorkDateFilter('all');" class="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-bold transition">
+                  🔄 सभी कार्य व पुराना इतिहास देखें
+                </button>
+              ` : ''}
             </div>
           ` : `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${assignedJobs.map(job => {
+              ${displayedJobs.map(job => {
                 const token = job.token || job.tokenNo || job.id;
                 const isStarted = !!job.startedAt || job.status === 'in-progress';
                 const isFinished = !!job.completedAt || job.status === 'ready' || job.status === 'delivered';
-                const statusBadge = isFinished 
-                  ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">✅ कार्य पूर्ण (Completed)</span>'
-                  : isStarted 
-                    ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-200">⚡ चालू है (In Progress)</span>'
-                    : '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200">⏳ नया असाइन (Pending)</span>';
 
-                const customerPhone = job.customerPhone ? job.customerPhone.replace(/[^0-9]/g, '') : '';
-                const customerWaText = encodeURIComponent(`नमस्ते ${job.customerName || 'सर'}! Monu Mobile Solution से आपके डिवाइस (${job.device || 'फोन'}) की रिपेयरिंग पर काम चल रहा है। टोकन: ${token}`);
+                const statusBadge = isFinished 
+                  ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">✅ पूर्ण (Ready)</span>'
+                  : isStarted 
+                    ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">⚡ चालू है (In Progress)</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">⏳ नया असाइन (Pending)</span>';
 
                 return `
-                  <div class="p-4 rounded-2xl border ${isStarted ? 'border-amber-300 bg-amber-50/20 ring-1 ring-amber-200' : isFinished ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200 bg-white'} shadow-sm space-y-3">
+                  <div class="p-4 rounded-2xl border ${isFinished ? 'border-emerald-200 bg-emerald-50/20 shadow-sm' : isStarted ? 'border-amber-300 bg-amber-50/20 ring-1 ring-amber-200 shadow-md' : 'border-slate-200 bg-white shadow-sm'} space-y-3 transition">
                     <div class="flex items-start justify-between gap-2">
                       <div>
                         <span class="text-xs font-mono font-black text-blue-600 block">${token}</span>
@@ -8723,10 +8833,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                       ${statusBadge}
                     </div>
 
-                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1 text-xs">
-                      <div class="flex justify-between text-[11px] text-slate-600">
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-xs">
+                      <div class="flex justify-between text-[11px] text-slate-600 pb-1 border-b border-slate-200">
                         <span><strong>ग्राहक:</strong> ${job.customerName || 'Walk-in Customer'}</span>
-                        <span>${job.customerPhone ? '📞 ' + job.customerPhone : ''}</span>
+                        <span class="text-slate-500">${job.customerPhone ? 'फ़ोन: ' + job.customerPhone : ''}</span>
                       </div>
                       <div class="text-[11px] text-slate-700">
                         <strong>निर्देश / समस्या:</strong> ${job.workInstructions || job.issue || 'पार्ट्स चेंज व रिपेयर सर्विस'}
@@ -8735,29 +8845,34 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                         <span>⏰ ${job.scheduledAt ? 'शेड्यूल: ' + job.scheduledAt : 'असाइन समय: ' + (job.assignedAt || 'आज')}</span>
                         <span>⌛ अनुमानित: ${job.estimatedMins || 45} मिनट</span>
                       </div>
+                      ${isFinished ? `
+                        <div class="flex justify-between items-center text-[11px] font-bold text-emerald-800 bg-emerald-100/70 p-1.5 rounded-lg border border-emerald-200 mt-1">
+                          <span>✨ पूरा हुआ: ${job.completedAt || 'आज'}</span>
+                          <span>कुल समय: ${job.actualDurationMins ? job.actualDurationMins + ' मिनट' : 'समय पर'}</span>
+                        </div>
+                      ` : isStarted ? `
+                        <div class="flex justify-between items-center text-[10px] font-bold text-amber-800 bg-amber-100/70 p-1 rounded-lg border border-amber-200 mt-1">
+                          <span>▶️ काम शुरू समय: ${job.startedAt || 'चालू'}</span>
+                          <span>प्रगति पर...</span>
+                        </div>
+                      ` : ''}
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex items-center gap-2 pt-1 flex-wrap">
+                    <!-- Action Buttons for Technician (No WhatsApp Button - Admin/Manager only) -->
+                    <div class="flex items-center gap-2 pt-1">
                       ${!isStarted ? `
-                        <button onclick="window.MMS_APP.startEmployeeJob('${token}')" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                        <button onclick="window.MMS_APP.startEmployeeJob('${token}')" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
                           <span>▶️</span> <span>कार्य शुरू करें (Start Work)</span>
                         </button>
                       ` : !isFinished ? `
-                        <button onclick="window.MMS_APP.finishEmployeeJob('${token}')" class="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                        <button onclick="window.MMS_APP.finishEmployeeJob('${token}')" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
                           <span>✅</span> <span>कार्य पूर्ण हुआ (Mark Done)</span>
                         </button>
                       ` : `
-                        <div class="flex-1 py-2 px-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-black text-center">
-                          ✨ सफलतापूर्वक पूर्ण हुआ (${job.completedAt || 'आज'})
+                        <div class="w-full py-2 px-3 bg-emerald-100 text-emerald-900 border border-emerald-200 rounded-xl text-xs font-black text-center flex items-center justify-center gap-1.5">
+                          <span>✅</span> <span>कार्य पूर्ण हो चुका है (Ready for Pickup)</span>
                         </div>
                       `}
-
-                      ${customerPhone ? `
-                        <a href="https://wa.me/91${customerPhone}?text=${customerWaText}" target="_blank" class="py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1 transition cursor-pointer">
-                          <span>💬</span> <span>कस्टमर</span>
-                        </a>
-                      ` : ''}
                     </div>
                   </div>
                 `;
@@ -8768,6 +8883,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       </div>
     `;
   }
+
 
   window.MMS_APP = {
     openWorkAssignmentModal,
@@ -8941,7 +9057,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     confirmWorkAssignment,
     startEmployeeJob,
     finishEmployeeJob,
-    renderMyWorkModule
+    renderMyWorkModule,
+    setMyWorkStatusFilter,
+    setMyWorkDateFilter
 
   };
 
