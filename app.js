@@ -2372,15 +2372,8 @@
                     <input id="qsku-name" type="text" value="${state.quickSkuPrefill || ''}" placeholder="उदा. Vivo Y20 Combo Folder (OEM)" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold">
                   </div>
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">कैटेगरी</label>
-                    <select id="qsku-category" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-semibold">
-                      <option value="Display">Display / Combo</option>
-                      <option value="Battery">Battery</option>
-                      <option value="IC & Motherboard">IC & Motherboard</option>
-                      <option value="Charging & Port">Charging & Port</option>
-                      <option value="Accessories">Accessories & Spares</option>
-                      <option value="Tools">Lab Tools</option>
-                    </select>
+                    <label class="block font-bold text-slate-700 mb-1">कैटेगरी (सर्च करने के लिए टाइप करें) *</label>
+                    ${renderCategoryDropdownHTML('qsku-category', 'Display - Copy')}
                   </div>
                 </div>
 
@@ -3525,8 +3518,30 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (!container) return;
 
     const branchFilter = state.activeBranch || 'all';
+    const catFilter = state.invCatFilter || 'all';
+    const searchQuery = (state.invSearchQuery || '').toLowerCase().trim();
+
     const filteredInventory = (state.inventory || []).filter(item => {
-      return branchFilter === 'all' || item.branchId === branchFilter || (!item.branchId && branchFilter === 'branch_hazratganj');
+      const matchBranch = branchFilter === 'all' || item.branchId === branchFilter || (!item.branchId && branchFilter === 'branch_hazratganj');
+      if (!matchBranch) return false;
+
+      // Category filter matching
+      if (catFilter !== 'all') {
+        const itemCat = (item.category || '').toLowerCase();
+        const targetCat = catFilter.toLowerCase();
+        const meta = getCategoryMeta(catFilter);
+        const matchCat = itemCat.includes(targetCat) || 
+                         (meta && meta.keywords && meta.keywords.split(' ').some(k => k.length > 2 && itemCat.includes(k)));
+        if (!matchCat) return false;
+      }
+
+      // Search query matching
+      if (searchQuery) {
+        const text = ((item.sku || '') + ' ' + (item.name || '') + ' ' + (item.category || '')).toLowerCase();
+        if (!text.includes(searchQuery)) return false;
+      }
+
+      return true;
     });
 
     let totalStockCount = 0;
@@ -3565,13 +3580,30 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                   ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
                 </span>
               </div>
-              <p class="text-xs text-slate-500">सभी पार्ट्स का स्टॉक, खरीद रेट और बिक्री रेट</p>
+              <p class="text-xs text-slate-500">20+ कैटेगरीज में सभी स्पेयर पार्ट्स का लाइव स्टॉक, खरीद व बिक्री दर</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               ${renderBranchFilterBar(branchFilter)}
-              <button onclick="window.MMS_APP.openNewSKUModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5 shrink-0">
+              <button onclick="window.MMS_APP.openNewSKUModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer">
                 <span>➕ नया पार्ट / SKU जोड़ें</span>
               </button>
+            </div>
+          </div>
+
+          <!-- Category Quick Filter & Search Bar -->
+          <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+              <span class="text-slate-400 font-bold">🔍</span>
+              <input type="text" id="inv-search-query" value="${state.invSearchQuery || ''}" oninput="window.MMS_APP.setInventorySearch(this.value)" placeholder="पार्ट, SKU या मॉडल सर्च करें (उदा. iPhone 13, Realme 12, OLED, Battery...)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-slate-500 shrink-0">📂 कैटेगरी:</span>
+              <select id="inv-category-filter" onchange="window.MMS_APP.setInventoryCategoryFilter(this.value)" class="p-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="all" ${(!state.invCatFilter || state.invCatFilter === 'all') ? 'selected' : ''}>🏢 सभी कैटेगरी (All Categories)</option>
+                ${MMS_SPARE_CATEGORIES.map(c => `
+                  <option value="${c.id}" ${state.invCatFilter === c.id ? 'selected' : ''}>${c.icon} ${c.name}</option>
+                `).join('')}
+              </select>
             </div>
           </div>
 
@@ -3614,6 +3646,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
       </div>
     `;
+  }
+
+
+  function setInventoryCategoryFilter(catId) {
+    state.invCatFilter = catId;
+    renderInventory();
+  }
+
+  function setInventorySearch(query) {
+    state.invSearchQuery = query;
+    renderInventory();
   }
 
   function openRestockModal(sku) {
@@ -7779,9 +7822,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         const code = (document.getElementById('sku-code')?.value || '').trim();
         const name = (document.getElementById('sku-name')?.value || '').trim();
         const cat = document.getElementById('sku-category')?.value || 'General';
-        const cost = Number(document.getElementById('sku-cost')?.value || 0);
-        const sell = Number(document.getElementById('sku-sell')?.value || 0);
-        const stock = Number(document.getElementById('sku-stock')?.value || 0);
+        const cost = Number(document.getElementById('sku-cp')?.value || document.getElementById('sku-cost')?.value || 0);
+        const sell = Number(document.getElementById('sku-sp')?.value || document.getElementById('sku-sell')?.value || 0);
+        const stock = Number(document.getElementById('sku-qty')?.value || document.getElementById('sku-stock')?.value || 5);
         const branchId = state.activeBranch !== 'all' ? state.activeBranch : 'branch_hazratganj';
 
         if (!code || !name) {
@@ -8032,6 +8075,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   function openNewSKUModal() {
     const modal = document.getElementById('new-sku-modal');
+    const container = document.getElementById('sku-category-container');
+    if (container) {
+      container.innerHTML = renderCategoryDropdownHTML('sku-category', 'Display - Copy');
+    }
     if (modal) openModal(modal);
   }
 
@@ -8974,6 +9021,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
 
   window.MMS_APP = {
+    toggleCategoryDropdown,
+    closeCategoryDropdown,
+    selectCategory,
+    filterCategoryDropdown,
+    setInventoryCategoryFilter,
+    setInventorySearch,
     openWorkAssignmentModal,
     renderMyWorkModule,
     filterAssignEmployees,

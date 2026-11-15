@@ -1081,7 +1081,7 @@
           <div class="sidebar-text-label transition-opacity duration-200">
             <div class="flex items-center gap-1.5">
               <span class="text-xs uppercase tracking-wider font-extrabold text-blue-400">Control Panel</span>
-              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v7.1</span>
+              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v7.2</span>
             </div>
             <h2 class="text-sm font-black text-white tracking-tight truncate">Monu Mobile ERP</h2>
           </div>
@@ -1284,7 +1284,7 @@
             <!-- Real-Time Duty Alert Bell -->
             <div id="portal-alert-container" class="relative">
               <button id="alert-bell-btn" type="button" onclick="window.MMS_APP.toggleAlertDropdown()" title="स्टाफ ड्यूटी अलर्ट्स" class="relative p-1.5 sm:p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center cursor-pointer">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v7.1c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v7.2c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span id="alert-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-600 text-white animate-pulse">0</span>
               </button>
               
@@ -1679,53 +1679,58 @@
   </div>
 
   <!-- NEW SKU MODAL -->
-  <div id="new-sku-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
-      <h3 class="text-base font-black text-slate-900 mb-3">नया SKU प्रोडक्ट दर्ज करें</h3>
+  <div id="new-sku-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col border border-slate-200 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+      <!-- Sticky Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+        <div>
+          <span class="text-[10px] uppercase font-black text-blue-600 block">इन्वेंट्री कैटलॉग प्रबंधन</span>
+          <h3 class="text-base sm:text-lg font-black text-slate-900">➕ नया SKU प्रोडक्ट दर्ज करें</h3>
+          <p class="text-xs text-slate-500">20+ सर्च-सक्षम स्पेयर पार्ट्स व रिपेयरिंग कैटेगरी</p>
+        </div>
+        <button class="close-modal-btn w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
+      </div>
       
-      <form id="new-sku-form" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">SKU कोड (उदा. BAT-IP14-ORG)</label>
-          <input id="sku-code" type="text" required placeholder="BAT-IP14-ORG" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold uppercase">
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">प्रोडक्ट का नाम</label>
-          <input id="sku-name" type="text" required placeholder="iPhone 14 Battery Original" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold">
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">कैटेगरी</label>
-          <select id="sku-category" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold">
-            <option value="Glass">Glass (केवल टच / ग्लास OCA)</option>
-            <option value="Screen">Screen (पूरा कॉम्बो / फोल्डर)</option>
-            <option value="Battery">Battery (ओरिजिनल बैटरी)</option>
-            <option value="Charging">Charging (चार्जिंग बोर्ड / जैक)</option>
-            <option value="Back Glass & Housing">Back Glass & Housing (बैक ग्लास / बॉडी)</option>
-            <option value="Audio">Audio (माइक / लाउडस्पीकर / ईयरपीस)</option>
-            <option value="Motherboard IC">Motherboard IC (पावर IC / CPU / ऑडियो IC)</option>
-            <option value="Camera & Sensors">Camera & Sensors (कैमरा / लेंस)</option>
-            <option value="Accessories">Accessories (चार्जर / केबल / टेम्पर्ड ग्लास)</option>
-            <option value="Tools & Consumables">Tools & Consumables (OCA / UV ग्लू / सोल्डर)</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
+      <!-- Scrollable Form Body -->
+      <form id="new-sku-form" class="flex-1 flex flex-col overflow-hidden">
+        <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-3.5 text-xs">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">खरीद दर (CP ₹)</label>
-            <input id="sku-cp" type="number" required placeholder="1200" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold">
+            <label class="block font-bold text-slate-700 mb-1">SKU कोड (उदा. SCR-IP13-OLED / BAT-SAM-S21) *</label>
+            <input id="sku-code" type="text" required placeholder="उदा. SCR-IP13-OLED" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">बिक्री दर (SP ₹)</label>
-            <input id="sku-sp" type="number" required placeholder="1999" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold">
+            <label class="block font-bold text-slate-700 mb-1">प्रोडक्ट का नाम व मॉडल विवरण *</label>
+            <input id="sku-name" type="text" required placeholder="उदा. iPhone 13 OLED Super Retina Display Combo" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">शुरुआती स्टॉक</label>
-            <input id="sku-qty" type="number" required placeholder="5" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold">
+            <label class="block font-bold text-slate-700 mb-1">कैटेगरी (सर्च करने के लिए ड्रॉपडाउन में टाइप करें) *</label>
+            <div id="sku-category-container"></div>
+          </div>
+          <div class="grid grid-cols-3 gap-2.5">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">खरीद दर (CP ₹) *</label>
+              <input id="sku-cp" type="number" required placeholder="1200" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">बिक्री दर (SP ₹) *</label>
+              <input id="sku-sp" type="number" required placeholder="1999" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">शुरुआती स्टॉक *</label>
+              <input id="sku-qty" type="number" required placeholder="5" value="5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow mt-2">
-          + SKU सेव करें
-        </button>
+        <!-- Sticky Footer -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+          <button type="button" class="close-modal-btn px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+            रद्द करें
+          </button>
+          <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-500/30 transition cursor-pointer flex items-center gap-1.5">
+            <span>💾</span> <span>+ SKU इन्वेंट्री में सेव करें</span>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -1804,7 +1809,7 @@
 
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js?v=20261115_71"></script>
-  <script src="app.js?v=20261115_71"></script>
+  <script src="data.js?v=20261115_72"></script>
+  <script src="app.js?v=20261115_72"></script>
 </body>
 </html>
