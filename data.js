@@ -1,6 +1,6 @@
 
 // 20 Standardized Repair & Spare Categories with 4 Display Variants, Flex, Ring, Glass, Frame, Camera, Buttons, OCA, Touch, Back Panel, Software, Hardware, Tab
-const MMS_SPARE_CATEGORIES = [
+var MMS_SPARE_CATEGORIES = [
   { id: 'display_copy', name: 'डिस्प्ले - कॉपी (Display - Copy)', shortName: 'Display - Copy', icon: '📱', keywords: 'display copy duplicate combo folder screen' },
   { id: 'display_original', name: 'डिस्प्ले - ओरिजिनल (Display - Original)', shortName: 'Display - Original', icon: '💎', keywords: 'display original oem combo folder screen' },
   { id: 'display_tft', name: 'डिस्प्ले - TFT (Display - TFT)', shortName: 'Display - TFT', icon: '📟', keywords: 'display tft combo folder screen' },
@@ -44,8 +44,12 @@ window.MMS_DATA = {
   },
 
   // Role Credentials (Real Working Accounts - 3 Accounts Only)
-  users: [
+    users: [
     { phone: "7905859701", pass: "Mms@859701", role: "admin", name: "मोनू जी (Monu - Owner)", branchId: "all" },
+    { phone: "9044115178", pass: "Mms@115178", role: "technician", name: "Mini tiwari", branchId: "branch_hazratganj" },
+    { phone: "8707641628", pass: "Mms@641628", role: "manager", name: "Soniya Kashyap", branchId: "branch_hazratganj" },
+    { phone: "9026445293", pass: "Mms@445293", role: "technician", name: "Sourab Yadav", branchId: "branch_hazratganj" },
+    { phone: "9839988776", pass: "Mms@988776", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" },
     { phone: "9988772211", pass: "Mms@772211", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_hazratganj" },
     { phone: "9955443311", pass: "Mms@443311", role: "technician", name: "रवि कुमार (Ravi - Tech Staff)", branchId: "branch_hazratganj" }
   ],
