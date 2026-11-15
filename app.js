@@ -2597,8 +2597,10 @@ function filterCategoryDropdown(inputId, query) {
                 id="pos-sku-search-input" 
                 type="text" 
                 placeholder="पार्ट, मॉडल या SKU नाम टाइप करें (उदा. Battery, iPhone, OnePlus, Screen, Combo, Redmi...)" 
-                class="w-full text-xs font-bold p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 shadow-sm" 
+                class="w-full text-xs font-bold p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer" 
                 oninput="window.MMS_APP.filterSkuSearch(this.value)"
+                onclick="window.MMS_APP.filterSkuSearch(this.value)"
+                onfocus="window.MMS_APP.filterSkuSearch(this.value)"
                 autocomplete="off"
               >
               <div id="pos-sku-search-results" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-xl shadow-2xl z-30 max-h-60 overflow-y-auto divide-y divide-slate-100">
@@ -3216,34 +3218,48 @@ function filterCategoryDropdown(inputId, query) {
     const resultsContainer = document.getElementById('pos-sku-search-results');
     if (!resultsContainer) return;
     const q = (query || '').trim().toLowerCase();
+    
+    let matches = [];
     if (!q) {
-      resultsContainer.classList.add('hidden');
-      resultsContainer.innerHTML = '';
-      return;
+      matches = (state.inventory || [])
+        .filter(item => {
+          const matchBranch = state.activeBranch === 'all' || item.branchId === state.activeBranch || (!item.branchId && state.activeBranch === 'branch_hazratganj');
+          return matchBranch;
+        })
+        .slice(0, 20);
+    } else {
+      const cleanQ = q.replace(/[^a-z0-9]/gi, '');
+      matches = (state.inventory || []).filter(item => {
+        const name = (item.name || '').toLowerCase();
+        const sku = (item.sku || '').toLowerCase();
+        const cat = (item.category || '').toLowerCase();
+        const nameClean = name.replace(/[^a-z0-9]/gi, '');
+        return name.includes(q) || sku.includes(q) || cat.includes(q) || (cleanQ.length >= 2 && nameClean.includes(cleanQ));
+      });
     }
 
-    const cleanQ = q.replace(/[^a-z0-9]/gi, '');
-    const matches = state.inventory.filter(item => {
-      const name = (item.name || '').toLowerCase();
-      const sku = (item.sku || '').toLowerCase();
-      const cat = (item.category || '').toLowerCase();
-      const nameClean = name.replace(/[^a-z0-9]/gi, '');
-      return name.includes(q) || sku.includes(q) || cat.includes(q) || (cleanQ.length >= 2 && nameClean.includes(cleanQ));
-    });
-
     let html = '';
-    if (matches.length === 0) {
+    if (!q) {
       html = `
+        <div class="p-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-[11px] font-black text-slate-700 sticky top-0 z-10">
+          <span>📦 उपलब्ध पार्ट्स सूची (क्लिक करके कार्ट में जोड़ें):</span>
+          <span class="text-[10px] text-blue-600 font-bold">या नाम टाइप करें</span>
+        </div>
+      `;
+    }
+
+    if (matches.length === 0) {
+      html += `
         <div class="p-3.5 text-center bg-amber-50">
           <p class="text-xs font-bold text-slate-800">⚠️ "${query.trim()}" इन्वेंट्री में उपलब्ध नहीं है।</p>
-          <button type="button" onclick="window.MMS_APP.openQuickSkuAdd('${encodeURIComponent(query.trim())}')" class="mt-2.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md inline-flex items-center gap-1.5 transition">
+          <button type="button" onclick="window.MMS_APP.openQuickSkuAdd('${encodeURIComponent(query.trim())}')" class="mt-2.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md inline-flex items-center gap-1.5 transition cursor-pointer">
             ➕ इसे नया SKU बनाकर इन्वेंट्री में जोड़ें
           </button>
         </div>
       `;
     } else {
-      html = matches.map(item => `
-        <div onclick="window.MMS_APP.selectSearchedSku('${item.sku}')" class="p-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-xs transition">
+      html += matches.map(item => `
+        <div onclick="window.MMS_APP.selectSearchedSku('${item.sku}')" class="p-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-xs transition border-b border-slate-100">
           <div>
             <p class="font-bold text-slate-900">${item.name}</p>
             <div class="flex items-center gap-2 mt-0.5">
@@ -3254,7 +3270,7 @@ function filterCategoryDropdown(inputId, query) {
           <div class="text-right">
             <p class="font-black text-slate-900">${formatCurrency(item.sellPrice)}</p>
             <span class="text-[10px] ${item.stock > 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}">
-              स्टॉक: ${item.stock}
+              स्टॉक: ${item.stock} पीस
             </span>
           </div>
         </div>
@@ -3263,6 +3279,7 @@ function filterCategoryDropdown(inputId, query) {
 
     resultsContainer.innerHTML = html;
     resultsContainer.classList.remove('hidden');
+    resultsContainer.style.display = 'block';
   }
 
   function selectSearchedSku(sku) {
@@ -3800,15 +3817,15 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">कुल उपलब्ध पार्ट्स (Items in Stock)</span>
-            <span class="text-xl font-black text-slate-900 font-mono">${totalStockCount} पीस</span>
+            <span id="inv-stat-count" class="text-xl font-black text-slate-900 font-mono">${totalStockCount} पीस</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">इन्वेंट्री लागत वैल्यू (At Cost Price)</span>
-            <span class="text-xl font-black text-blue-700 font-mono">${formatCurrency(totalStockValuation)}</span>
+            <span id="inv-stat-valuation" class="text-xl font-black text-blue-700 font-mono">${formatCurrency(totalStockValuation)}</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">कम स्टॉक अलर्ट (Low Stock)</span>
-            <span class="text-xl font-black text-amber-600 font-mono">${lowStockCount} आइटम्स</span>
+            <span id="inv-stat-low" class="text-xl font-black text-amber-600 font-mono">${lowStockCount} आइटम्स</span>
           </div>
         </div>
 
@@ -3875,9 +3892,14 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                       </span>
                     </td>
                     <td class="p-2.5 text-center">
-                      <button onclick="window.MMS_APP.restockSKU('${item.sku}')" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-slate-100 hover:bg-blue-50 text-blue-700 transition">
-                        + रीस्टॉक
-                      </button>
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="window.MMS_APP.openEditSKUModal('${item.sku}')" class="px-2 py-1 text-[11px] font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1 cursor-pointer" title="पार्ट विवरण, रेट व स्टॉक ठीक करें">
+                          <span>✏️</span> <span>एडिट</span>
+                        </button>
+                        <button type="button" onclick="window.MMS_APP.restockSKU('${item.sku}')" class="px-2 py-1 text-[11px] font-bold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition flex items-center gap-1 cursor-pointer" title="स्टॉक रीस्टॉक करें">
+                          <span>+</span> <span>रीस्टॉक</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 `).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400">इस शाखा में कोई स्पेयर पार्ट दर्ज नहीं है।</td></tr>'}
@@ -3897,7 +3919,230 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   function setInventorySearch(query) {
     state.invSearchQuery = query;
+    const tbody = document.getElementById('inventory-table-body');
+    if (tbody) {
+      updateInventoryTableOnly();
+    } else {
+      renderInventory();
+    }
+  }
+
+  function updateInventoryTableOnly() {
+    const branchFilter = state.activeBranch || 'all';
+    const catFilter = state.invCatFilter || 'all';
+    const searchQuery = (state.invSearchQuery || '').toLowerCase().trim();
+
+    const filteredInventory = (state.inventory || []).filter(item => {
+      const matchBranch = branchFilter === 'all' || item.branchId === branchFilter || (!item.branchId && branchFilter === 'branch_hazratganj');
+      if (!matchBranch) return false;
+
+      if (catFilter !== 'all') {
+        const itemCat = (item.category || '').toLowerCase();
+        const targetCat = catFilter.toLowerCase();
+        const meta = getCategoryMeta(catFilter);
+        const matchCat = itemCat.includes(targetCat) || 
+                         (meta && meta.keywords && meta.keywords.split(' ').some(k => k.length > 2 && itemCat.includes(k)));
+        if (!matchCat) return false;
+      }
+
+      if (searchQuery) {
+        const text = ((item.sku || '') + ' ' + (item.name || '') + ' ' + (item.category || '')).toLowerCase();
+        if (!text.includes(searchQuery)) return false;
+      }
+
+      return true;
+    });
+
+    let totalStockCount = 0;
+    let totalStockValuation = 0;
+    let lowStockCount = 0;
+
+    filteredInventory.forEach(item => {
+      totalStockCount += Number(item.stock || 0);
+      totalStockValuation += (Number(item.stock || 0) * Number(item.costPrice || 0));
+      if (Number(item.stock || 0) <= Number(item.minAlert || 2)) lowStockCount++;
+    });
+
+    const statCount = document.getElementById('inv-stat-count');
+    const statValuation = document.getElementById('inv-stat-valuation');
+    const statLow = document.getElementById('inv-stat-low');
+    if (statCount) statCount.textContent = totalStockCount + ' पीस';
+    if (statValuation) statValuation.textContent = formatCurrency(totalStockValuation);
+    if (statLow) statLow.textContent = lowStockCount + ' आइटम्स';
+
+    const tbody = document.getElementById('inventory-table-body');
+    if (tbody) {
+      tbody.innerHTML = filteredInventory.map(item => `
+        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+          <td class="p-2.5 font-mono font-bold text-blue-700">${item.sku}</td>
+          <td class="p-2.5 font-bold text-slate-900">${item.name}</td>
+          <td class="p-2.5 text-slate-600">${item.category}</td>
+          <td class="p-2.5 text-right font-mono text-slate-500">${formatCurrency(item.costPrice)}</td>
+          <td class="p-2.5 text-right font-mono font-bold text-slate-900">${formatCurrency(item.sellPrice)}</td>
+          <td class="p-2.5 text-center font-mono font-bold">
+            <span class="px-2 py-0.5 rounded-full text-xs ${item.stock <= item.minAlert ? 'bg-amber-100 text-amber-800 font-black' : 'bg-emerald-50 text-emerald-700'}">
+              ${item.stock}
+            </span>
+          </td>
+          <td class="p-2.5 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button type="button" onclick="window.MMS_APP.openEditSKUModal('${item.sku}')" class="px-2 py-1 text-[11px] font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1 cursor-pointer" title="पार्ट विवरण, रेट व स्टॉक ठीक करें">
+                <span>✏️</span> <span>एडिट</span>
+              </button>
+              <button type="button" onclick="window.MMS_APP.restockSKU('${item.sku}')" class="px-2 py-1 text-[11px] font-bold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition flex items-center gap-1 cursor-pointer" title="स्टॉक रीस्टॉक करें">
+                <span>+</span> <span>रीस्टॉक</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400 font-bold">🔍 कोई पार्ट नहीं मिला। दूसरा नाम टाइप करें या ऊपर नया SKU जोड़ें।</td></tr>';
+    }
+  }
+
+  
+  // --- Edit SKU / Product Modal (Direct Stock & Rate Correction) ---
+  function openEditSKUModal(sku) {
+    const item = state.inventory.find(i => i.sku === sku);
+    if (!item) return;
+
+    const existing = document.getElementById('edit-sku-modal-backdrop');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'edit-sku-modal-backdrop';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden';
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+        <!-- Sticky Header with Close Button -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+          <div>
+            <span class="text-[10px] uppercase font-black text-blue-600 block">इन्वेंट्री मैनेजमेंट व स्टॉक सुधार</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">✏️ पार्ट / प्रॉडक्ट विवरण व स्टॉक एडिट करें</h3>
+            <p class="text-xs text-slate-500 font-mono text-blue-700 font-bold">${item.sku}</p>
+          </div>
+          <button type="button" onclick="document.getElementById('edit-sku-modal-backdrop').remove()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-lg font-black transition cursor-pointer" title="बंद करें (Close)">
+            ✕
+          </button>
+        </div>
+
+        <!-- Form Body -->
+        <form onsubmit="window.MMS_APP.saveEditSKU(event, '${item.sku}')" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">पार्ट / प्रॉडक्ट का नाम व मॉडल *</label>
+              <input type="text" id="esku-name" value="${item.name || ''}" required placeholder="उदा. iPhone 13 OLED Display Folder" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">कैटेगरी *</label>
+              ${renderCategoryDropdownHTML('esku-category', item.category || 'Display - Copy')}
+            </div>
+
+            <!-- Live Stock Fix (Highlighted in Emerald) -->
+            <div class="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200">
+              <label class="block text-xs font-black text-emerald-900 mb-1">📦 वर्तमान लाइव स्टॉक क्वांटिटी (Stock Quantity) *</label>
+              <input type="number" id="esku-stock" min="0" value="${item.stock ?? 0}" required class="w-full p-2.5 bg-white border border-emerald-300 rounded-xl font-mono font-black text-emerald-800 text-base focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <span class="text-[10px] font-bold text-emerald-700 mt-1 block">💡 यदि गिनती गलत है तो वास्तविक स्टॉक की सही संख्या यहाँ दर्ज करें।</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">खरीद लागत ₹ (Cost Price) *</label>
+                <input type="number" id="esku-cost" min="0" value="${item.costPrice ?? 0}" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">बिक्री रेट ₹ (Sell Price) *</label>
+                <input type="number" id="esku-sell" min="0" value="${item.sellPrice ?? 0}" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">कम स्टॉक अलर्ट सीमा (Min Alert)</label>
+                <input type="number" id="esku-alert" min="0" value="${item.minAlert ?? 2}" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">शाखा (Branch)</label>
+                <select id="esku-branch" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <option value="branch_hazratganj" ${item.branchId === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (श्रीराम टावर)</option>
+                  <option value="branch_naka" ${item.branchId === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला (लखनऊ)</option>
+                  <option value="branch_kannauj" ${item.branchId === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky Footer -->
+          <div class="p-4 sm:p-5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50 shrink-0">
+            <button type="button" onclick="window.MMS_APP.deleteSKU('${item.sku}')" class="text-rose-600 hover:text-rose-700 font-bold text-xs flex items-center gap-1 transition cursor-pointer">
+              <span>🗑️</span> <span>पार्ट हटाएं (Delete)</span>
+            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="document.getElementById('edit-sku-modal-backdrop').remove()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer">
+                रद्द करें
+              </button>
+              <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md transition active:scale-95 cursor-pointer">
+                💾 बदलाव सुरक्षित करें (Save)
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  function saveEditSKU(e, sku) {
+    if (e && e.preventDefault) e.preventDefault();
+    const item = state.inventory.find(i => i.sku === sku);
+    if (!item) return;
+
+    const name = (document.getElementById('esku-name')?.value || '').trim();
+    const category = (document.getElementById('esku-category')?.value || item.category).trim();
+    const stock = Number(document.getElementById('esku-stock')?.value ?? item.stock);
+    const costPrice = Number(document.getElementById('esku-cost')?.value ?? item.costPrice);
+    const sellPrice = Number(document.getElementById('esku-sell')?.value ?? item.sellPrice);
+    const minAlert = Number(document.getElementById('esku-alert')?.value ?? item.minAlert);
+    const branchId = document.getElementById('esku-branch')?.value || item.branchId;
+
+    if (!name) {
+      alert('कृपया पार्ट का नाम भरें!');
+      return;
+    }
+
+    item.name = name;
+    item.category = category;
+    item.stock = stock;
+    item.costPrice = costPrice;
+    item.sellPrice = sellPrice;
+    item.minAlert = minAlert;
+    item.branchId = branchId;
+
+    persistData();
+    localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
+
+    const backdrop = document.getElementById('edit-sku-modal-backdrop');
+    if (backdrop) backdrop.remove();
+
     renderInventory();
+    alert(`✅ पार्ट "${name}" का विवरण व स्टॉक (${stock} पीस) सफलतापूर्वक सुरक्षित हो गया!`);
+  }
+
+  function deleteSKU(sku) {
+    const item = state.inventory.find(i => i.sku === sku);
+    if (!item) return;
+    if (!confirm(`⚠️ क्या आप वाकई पार्ट "${item.name} (${item.sku})" को इन्वेंट्री से हटाना चाहते हैं?`)) {
+      return;
+    }
+    state.inventory = state.inventory.filter(i => i.sku !== sku);
+    persistData();
+    localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
+    const backdrop = document.getElementById('edit-sku-modal-backdrop');
+    if (backdrop) backdrop.remove();
+    renderInventory();
+    alert(`✅ पार्ट "${item.name}" को इन्वेंट्री से सफलतापूर्वक हटा दिया गया!`);
   }
 
   function openRestockModal(sku) {
@@ -9360,6 +9605,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     CloudSync: CloudSync,
     searchJobStatus,
     openNewSKUModal,
+    openEditSKUModal,
+    saveEditSKU,
+    deleteSKU,
     restockSKU,
     clearKhataUdhar,
     printJobToken,
