@@ -4,6 +4,8 @@ import { useApp } from '@/context/AppContext';
 import { TopBar } from '@/components/public/TopBar';
 import { Navbar } from '@/components/public/Navbar';
 import { Hero } from '@/components/public/Hero';
+import { Services } from '@/components/public/Services';
+import { PriceEstimator } from '@/components/public/PriceEstimator';
 import { LiveTracker } from '@/components/public/LiveTracker';
 import { BranchCards } from '@/components/public/BranchCards';
 import { LoginModal } from '@/components/public/LoginModal';
@@ -15,12 +17,17 @@ import { DashboardTab } from '@/components/portal/tabs/DashboardTab';
 import { PosTab } from '@/components/portal/tabs/PosTab';
 import { JobsTab } from '@/components/portal/tabs/JobsTab';
 import { InventoryTab } from '@/components/portal/tabs/InventoryTab';
-import { AttendanceTab } from '@/components/portal/tabs/AttendanceTab';
+import { DirectoryTab } from '@/components/portal/tabs/DirectoryTab';
+import { SalesTab } from '@/components/portal/tabs/SalesTab';
+import { KhataTab } from '@/components/portal/tabs/KhataTab';
+import { ExpensesTab } from '@/components/portal/tabs/ExpensesTab';
 import { BalanceTab } from '@/components/portal/tabs/BalanceTab';
+import { AttendanceTab } from '@/components/portal/tabs/AttendanceTab';
+import { StaffTab } from '@/components/portal/tabs/StaffTab';
 import { SettingsTab } from '@/components/portal/tabs/SettingsTab';
 
 export default function Home() {
-  const { currentView, activeTab, isOwner, isManager } = useApp();
+  const { currentView, activeTab } = useApp();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // Render Portal Active Tab
@@ -34,10 +41,20 @@ export default function Home() {
         return <JobsTab />;
       case 'inventory':
         return <InventoryTab />;
-      case 'attendance':
-        return <AttendanceTab />;
+      case 'directory':
+        return <DirectoryTab />;
+      case 'sales':
+        return <SalesTab />;
+      case 'khata':
+        return <KhataTab />;
+      case 'expenses':
+        return <ExpensesTab />;
       case 'balance':
         return <BalanceTab />;
+      case 'attendance':
+        return <AttendanceTab />;
+      case 'staff':
+        return <StaffTab />;
       case 'settings':
         return <SettingsTab />;
       default:
@@ -60,6 +77,8 @@ export default function Home() {
           <Navbar onOpenLogin={() => setIsLoginOpen(true)} />
           <main className="flex-1">
             <Hero />
+            <Services />
+            <PriceEstimator />
             <LiveTracker />
             <BranchCards />
           </main>
