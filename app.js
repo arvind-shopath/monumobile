@@ -356,6 +356,24 @@ function filterCategoryDropdown(inputId, query) {
       }
     },
 
+    async syncStaff(staffList) {
+      if (typeof fetch === 'undefined' || !Array.isArray(staffList)) return;
+      try {
+        console.log('⚡ [CloudSync] Syncing staff to Cloudflare KV...', staffList.length);
+        const res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sync_staff', staff: staffList })
+        });
+        const d = await res.json();
+        console.log('⚡ [CloudSync] Staff sync response:', d);
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('staff');
+      } catch(e) {
+        console.warn('Failed syncing staff to cloud:', e);
+      }
+    },
+
     async syncWorkAssignment(assignment) {
       if (typeof fetch === 'undefined' || !assignment) return;
       try {
@@ -942,7 +960,7 @@ function filterCategoryDropdown(inputId, query) {
       state.currentUser = matched;
       localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(matched));
       localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
-      if (modal) closeModal(modal);
+      if (modal) { closeModal(modal); modal.style.display = 'none'; modal.classList.add('hidden'); }
       if (errEl) errEl.classList.add('hidden');
       if (formEl) formEl.reset();
       renderAuthPill();
@@ -7264,17 +7282,16 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       frontdesk: 'फ्रंट डेस्क व बिलिंग'
     };
 
-    if (editEmpId) {
-      const idx = state.staff.findIndex(s => s.id === editEmpId);
-      if (idx !== -1) {
-        state.staff[idx] = {
-          ...state.staff[idx],
-          name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass,
-          shiftHours, allowedLeaves, baseSalary, targetHours, hourlyRate,
-          shiftInTime, shiftOutTime, shiftInTime24: inTime24, shiftOutTime24: outTime24,
-          photo: photo || state.staff[idx].photo
-        };
-      }
+    const existingIdx = state.staff.findIndex(s => (editEmpId && s.id === editEmpId) || (phone && s.phone === phone));
+    if (existingIdx !== -1) {
+      state.staff[existingIdx] = {
+        ...state.staff[existingIdx],
+        name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass,
+        shiftHours, allowedLeaves, baseSalary, targetHours, hourlyRate,
+        shiftInTime, shiftOutTime, shiftInTime24: inTime24, shiftOutTime24: outTime24,
+        photo: photo || state.staff[existingIdx].photo
+      };
+      console.log('⚡ [Staff Update] Updated employee role & details:', state.staff[existingIdx]);
     } else {
       const newStaff = {
         id: 'emp_' + Date.now(),
@@ -7286,6 +7303,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         photo: photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'
       };
       state.staff.push(newStaff);
+      console.log('⚡ [Staff Update] Added new employee:', newStaff);
     }
 
     // If currently logged-in user was updated, immediately sync auth session & header
@@ -8040,11 +8058,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   // --- Modal Helpers ---
   function openModal(el) {
-    if (el) el.classList.remove('hidden');
+    if (el) {
+      el.classList.remove('hidden');
+      el.style.display = 'flex';
+    }
   }
 
   function closeModal(el) {
-    if (el) el.classList.add('hidden');
+    if (el) {
+      el.classList.add('hidden');
+      el.style.display = 'none';
+    }
   }
 
   // --- Event Binding ---
@@ -9310,6 +9334,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     renderEmployeeJobAlerts,
     exportAttendanceCSV,
     handleLogin: (e) => handleLogin(e),
+    closeLoginModal: () => {
+      const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    },
     openLoginModal: () => {
       const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
       if (modal) {
