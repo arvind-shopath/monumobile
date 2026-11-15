@@ -3,19 +3,72 @@
   'use strict';
 
 
-  // --- Cloudflare D1 Real-Time Sync Engine ---
+  // --- Cloudflare D1 Real-Time Instant Live Engine ---
   const CloudSync = {
     isOnline: true,
     lastSyncTime: null,
+    broadcastChannel: null,
+    isPulling: false,
 
-    async init() {
-      console.log('⚡ Cloudflare D1 Cloud Sync: Initializing...');
-      await this.pullFromCloud();
-      // Multi-branch background polling every 20 seconds
+    init() {
+      console.log('⚡ MMS Instant Live Cloud Engine: Initializing...');
+      
+      // 1. Setup 0ms Cross-tab Broadcast Channel
+      try {
+        if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+          this.broadcastChannel = new BroadcastChannel('mms_instant_live_stream');
+          this.broadcastChannel.onmessage = (event) => {
+            if (event.data && event.data.type === 'data_changed') {
+              console.log('⚡ [Instant Live] Cross-tab signal received:', event.data.action);
+              this.reRenderActiveTab();
+            }
+          };
+        }
+      } catch(e) { console.warn('BroadcastChannel notice:', e); }
+
+      // 2. Initial instant pull
+      this.pullFromCloud();
+
+      // 3. Ultra-fast 2.5-second reactive polling for multi-device sync
       if (typeof window !== 'undefined') {
         setInterval(() => {
           this.pullFromCloud(true);
-        }, 20000);
+        }, 2500);
+
+        // 4. Instant Wakeup Triggers: Trigger immediately on tab focus, click, or visibility change
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            this.pullFromCloud(false);
+          }
+        });
+        window.addEventListener('focus', () => this.pullFromCloud(false));
+      }
+    },
+
+    broadcastLocalChange(action = 'update') {
+      try {
+        if (this.broadcastChannel) {
+          this.broadcastChannel.postMessage({ type: 'data_changed', action, timestamp: Date.now() });
+        }
+      } catch(e) {}
+    },
+
+    reRenderActiveTab() {
+      if (typeof state === 'undefined') return;
+      const tab = state.activeAdminTab;
+      try {
+        if (tab === 'staff' && typeof renderStaffHRModule === 'function') renderStaffHRModule();
+        else if (tab === 'jobs' && typeof renderJobCardsManager === 'function') renderJobCardsManager();
+        else if (tab === 'mywork' && typeof renderMyWorkModule === 'function') renderMyWorkModule();
+        else if (tab === 'pos' && typeof renderPOS === 'function') renderPOS();
+        else if (tab === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+        else if (tab === 'attendance' && typeof renderAttendanceModule === 'function') renderAttendanceModule();
+        else if (tab === 'sales' && typeof renderDailySales === 'function') renderDailySales();
+        else if (tab === 'khata' && typeof renderKhata === 'function') renderKhata();
+        else if (tab === 'expenses' && typeof renderExpensesModule === 'function') renderExpensesModule();
+        else if (tab === 'inventory' && typeof renderInventory === 'function') renderInventory();
+      } catch(e) {
+        console.warn('Re-render active tab notice:', e);
       }
     },
 
@@ -98,15 +151,17 @@
           this.lastSyncTime = new Date();
           this.updateSyncBadge('connected');
 
-          if (changed && !silent) {
-            if (typeof renderDashboard === 'function' && state.activeAdminTab === 'dashboard') {
-              renderDashboard();
-            }
+          // INSTANT LIVE RE-RENDER: If any new data arrived from server, immediately refresh active UI!
+          if (changed) {
+            console.log('⚡ [Instant Live] Server updates detected! Auto-refreshing active tab UI...');
+            this.reRenderActiveTab();
+            this.broadcastLocalChange('server_sync');
           }
         }
       } catch (err) {
-        console.warn('D1 Cloud Sync standby:', err.message);
         this.updateSyncBadge('standby');
+      } finally {
+        this.isPulling = false;
       }
     },
 
@@ -119,6 +174,7 @@
           body: JSON.stringify({ action: 'save_attendance', record })
         });
         this.updateSyncBadge('saved');
+        this.broadcastLocalChange('attendance');
       } catch(e) {
         console.warn('Failed pushing attendance to D1:', e);
       }
@@ -133,6 +189,7 @@
           body: JSON.stringify({ action: 'save_invoice', invoice })
         });
         this.updateSyncBadge('saved');
+        this.broadcastLocalChange('invoice');
       } catch(e) {
         console.warn('Failed pushing invoice to D1:', e);
       }
@@ -147,6 +204,7 @@
           body: JSON.stringify({ action: 'save_job', job })
         });
         this.updateSyncBadge('saved');
+        this.broadcastLocalChange('job');
       } catch(e) {
         console.warn('Failed pushing job to D1:', e);
       }
@@ -161,6 +219,7 @@
           body: JSON.stringify({ action: 'save_expense', expense })
         });
         this.updateSyncBadge('saved');
+        this.broadcastLocalChange('expense');
       } catch(e) {
         console.warn('Failed pushing expense to D1:', e);
       }
@@ -227,14 +286,14 @@
       const el = document.getElementById('cloud-sync-status-badge');
       if (!el) return;
       if (status === 'connected') {
-        el.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">प्राइवेट सर्वर:</span> सिंक सक्रिय';
-        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs';
+        el.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ लाइव ऐप:</span> सिंक सक्रिय';
+        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs';
       } else if (status === 'saved') {
-        el.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span> <span class="hidden sm:inline">प्राइवेट सर्वर:</span> डेटा सुरक्षित';
-        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs';
+        el.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> <span>डेटा सेव व लाइव सिंक</span>';
+        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 text-blue-800 border border-blue-300 shadow-2xs';
       } else {
         el.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> <span class="hidden sm:inline">सर्वर:</span> लोकल मोड';
-        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs';
+        el.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs';
       }
     }
   };
