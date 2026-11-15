@@ -15,7 +15,7 @@
         if (u && u !== 'null' && v !== 'public') {
           var s = document.createElement('style');
           s.id = 'instant-auth-cloak';
-          s.textContent = '#public-section, .public-shell-element, header, footer { display: none !important; } #portal-section { display: flex !important; }';
+          s.textContent = '#public-section, .public-shell-element, #public-footer { display: none !important; } #portal-section { display: flex !important; } #portal-section header { display: flex !important; }';
           document.head.appendChild(s);
         }
       } catch(e) {}
@@ -1081,7 +1081,7 @@
           <div class="sidebar-text-label transition-opacity duration-200">
             <div class="flex items-center gap-1.5">
               <span class="text-xs uppercase tracking-wider font-extrabold text-blue-400">Control Panel</span>
-              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v7.0</span>
+              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v7.1</span>
             </div>
             <h2 class="text-sm font-black text-white tracking-tight truncate">Monu Mobile ERP</h2>
           </div>
@@ -1284,7 +1284,7 @@
             <!-- Real-Time Duty Alert Bell -->
             <div id="portal-alert-container" class="relative">
               <button id="alert-bell-btn" type="button" onclick="window.MMS_APP.toggleAlertDropdown()" title="स्टाफ ड्यूटी अलर्ट्स" class="relative p-1.5 sm:p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center cursor-pointer">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v7.0c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v7.1c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span id="alert-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-600 text-white animate-pulse">0</span>
               </button>
               
@@ -1471,7 +1471,7 @@
   <!-- LOGIN MODAL -->
   <div id="login-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       
       <div class="text-center mb-6">
         <div class="h-16 mx-auto mb-2 flex items-center justify-center">
@@ -1505,7 +1505,7 @@
   <!-- LEAD INQUIRY MODAL -->
   <div id="lead-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       
       <div class="text-center mb-6">
         <h3 class="text-xl font-black text-slate-900" data-i18n="leadModalTitle">त्वरित रिपेयर पूछताछ (Quick Repair Inquiry)</h3>
@@ -1540,9 +1540,9 @@
 
   
   <!-- WORK ASSIGNMENT MODAL -->
-  <div id="work-assignment-modal" class="modal-backdrop fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl relative max-h-[95vh] overflow-y-auto">
-      <button class="close-modal-btn absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-lg" onclick="window.MMS_APP.closeWorkAssignmentModal()">✕</button>
+  <div id="work-assignment-modal" class="modal-backdrop fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden my-auto">
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" onclick="window.MMS_APP.closeWorkAssignmentModal()" title="बंद करें">✕</button>
       
       <div class="flex items-center gap-2.5 pb-3 border-b border-slate-200">
         <span class="p-2 rounded-xl bg-blue-100 text-blue-700 text-lg">⚡</span>
@@ -1643,9 +1643,9 @@
   </div>
 
   <!-- INVOICE PRINT & SHARE MODAL -->
-  <div id="invoice-print-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div id="invoice-print-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto hidden">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <button class="close-modal-btn absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       <div id="invoice-render-area"></div>
     </div>
   </div>
@@ -1653,7 +1653,7 @@
   <!-- RESTOCK MODAL -->
   <div id="restock-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       <h3 class="text-base font-black text-slate-900 mb-1">नया माल जोड़ें (Restock)</h3>
       <p id="restock-item-name" class="text-xs font-bold text-blue-700 mb-4"></p>
       
@@ -1681,7 +1681,7 @@
   <!-- NEW SKU MODAL -->
   <div id="new-sku-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       <h3 class="text-base font-black text-slate-900 mb-3">नया SKU प्रोडक्ट दर्ज करें</h3>
       
       <form id="new-sku-form" class="space-y-3 text-xs">
@@ -1733,7 +1733,7 @@
   <!-- RECEIVE KHATA PAYMENT MODAL -->
   <div id="receive-payment-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       <h3 class="text-base font-black text-slate-900 mb-1">उधार पेमेंट प्राप्त करें</h3>
       <p id="rcv-customer-name" class="text-xs font-bold text-blue-700"></p>
       <p class="text-[11px] text-slate-500 mb-4">इनवॉइस: <span id="rcv-invoice-no" class="font-mono font-bold"></span></p>
@@ -1758,7 +1758,7 @@
   <!-- NEW REPAIR TOKEN / JOB CARD MODAL -->
   <div id="new-job-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 border border-slate-200 shadow-2xl relative">
-      <button class="close-modal-btn absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      <button class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       <h3 class="text-base font-black text-slate-900 mb-3">नया रिपेयर टोकन बनाएं</h3>
       
       <form id="new-job-form" class="space-y-3 text-xs">
@@ -1804,7 +1804,7 @@
 
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js?v=20261115_70"></script>
-  <script src="app.js?v=20261115_70"></script>
+  <script src="data.js?v=20261115_71"></script>
+  <script src="app.js?v=20261115_71"></script>
 </body>
 </html>

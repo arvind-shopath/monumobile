@@ -354,7 +354,7 @@ export default {
             }
           }
 
-          if (store && (store.attendance || store.invoices || store.jobs || store.expenses)) {
+          if (store && (store.attendance || store.invoices || store.jobs || store.expenses || store.staff)) {
             if (Array.isArray(store.invoices)) {
               store.invoices = store.invoices.map(inv => {
                 const bNo = inv.billNo || inv.invoiceNo || inv.id;
@@ -796,6 +796,18 @@ export default {
             }
 
             return jsonResponse({ success: true, id, message: "Saved to Enterprise Cloud" });
+          }
+
+          if (action === 'sync_staff') {
+            const staffList = payload.staff || payload.data;
+            if (Array.isArray(staffList) && staffList.length > 0) {
+              if (env.KV) {
+                currentKv.staff = staffList;
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+              return jsonResponse({ success: true, count: staffList.length, message: "Staff synchronized to Enterprise Cloud" });
+            }
+            return jsonResponse({ success: false, error: "Invalid staff payload" }, 400);
           }
 
           return jsonResponse({ success: false, error: "Unknown action: " + action }, 400);

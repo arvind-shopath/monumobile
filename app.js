@@ -70,6 +70,19 @@
             changed = true;
           }
 
+          if (resData.data.staff && Array.isArray(resData.data.staff) && resData.data.staff.length > 0) {
+            state.staff = resData.data.staff;
+            localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff));
+            if (state.currentUser) {
+              const matchedEmp = state.staff.find(s => s.id === state.currentUser.id || s.phone === state.currentUser.phone || (s.role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin'));
+              if (matchedEmp) {
+                state.currentUser = { ...state.currentUser, ...matchedEmp };
+                localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
+              }
+            }
+            changed = true;
+          }
+
           if (expenses && expenses.length > 0) {
             const map = new Map();
             (state.expenses || []).forEach(e => map.set(e.id, e));
@@ -300,7 +313,11 @@
       }
       return b;
     })(),
-    staff: window.MMS_DATA.staff,
+    staff: (() => {
+      let s = JSON.parse(localStorage.getItem(STORAGE_KEYS.STAFF) || 'null');
+      if (Array.isArray(s) && s.length > 0) return s;
+      return (window.MMS_DATA && window.MMS_DATA.staff) || [];
+    })(),
     attendance: JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || 'null') || window.MMS_DATA.initialAttendance || [],
     advances: JSON.parse(localStorage.getItem(STORAGE_KEYS.ADVANCES) || 'null') || window.MMS_DATA.initialAdvances || [],
     expenses: JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || 'null') || window.MMS_DATA.initialExpenses || [],
@@ -1363,9 +1380,7 @@
     applyPortalLanguageUI();
     // Re-render active tab view
     if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
-      if (state.activeAdminTab === 'mywork') renderMyWorkModule,
-    setMyWorkStatusFilter,
-    setMyWorkDateFilter();
+      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
       else if (state.activeAdminTab === 'dashboard') renderDashboard();
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
@@ -1604,7 +1619,7 @@
     } else if (roleType === 'manager') {
       target = { phone: "9988772211", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_hazratganj" };
     } else {
-      target = { phone: "9839988776", role: "technician", name: "विकास पाल (Vikas Pal - Tech Kannauj)", branchId: "branch_unnao" };
+      target = { phone: "9839988776", role: "technician", name: "विकास पाल (Vikas Pal - Realme Unnao)", branchId: "branch_unnao" };
     }
     state.currentUser = target;
     localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(target));
@@ -2306,7 +2321,7 @@
                   <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="ml-1 bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold rounded-lg px-2 py-0.5 border-none outline-none cursor-pointer">
                     <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">हजरतगंज (Head Lab)</option>
                     <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' || (state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''} class="text-slate-900">नाका हिंडोला (लखनऊ)</option>
-                    <option value="branch_unnao" ${(state.posBillingBranch || state.activeBranch) === 'branch_unnao' || (state.posBillingBranch || state.activeBranch) === 'branch_unnao' ? 'selected' : ''} class="text-slate-900">कन्नौज (सरायमीरा)</option>
+                    <option value="branch_unnao" ${(state.posBillingBranch || state.activeBranch) === 'branch_unnao' ? 'selected' : ''} class="text-slate-900">उन्नाव (रियलमी केयर)</option>
                   </select>
                 </div>
               </div>
@@ -5181,7 +5196,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBar(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isKannauj = cur === 'branch_unnao' || cur === 'branch_unnao';
+    const isUnnao = cur === 'branch_unnao';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-slate-500 px-2 flex items-center gap-1">
@@ -5196,8 +5211,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
-          <span>📍</span> कन्नौज
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isUnnao ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
+          <span>📍</span> उन्नाव (रियलमी केयर)
         </button>
       </div>
     `;
@@ -5206,7 +5221,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBarDark(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isKannauj = cur === 'branch_unnao' || cur === 'branch_unnao';
+    const isUnnao = cur === 'branch_unnao';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-blue-200 px-2 flex items-center gap-1">
@@ -5221,8 +5236,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
-          <span>📍</span> कन्नौज
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_unnao')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isUnnao ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
+          <span>📍</span> उन्नाव (रियलमी केयर)
         </button>
       </div>
     `;
@@ -5841,7 +5856,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     const modal = document.createElement('div');
     modal.id = 'punch-modal-backdrop';
-    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden';
 
     const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
     const isOwner = role === 'admin';
@@ -5858,18 +5873,21 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const targetBranch = (curEmp && curEmp.branchId) ? curEmp.branchId : (state.activeBranch !== 'all' ? state.activeBranch : 'branch_hazratganj');
 
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative my-8 animate-in fade-in zoom-in-95 duration-150">
-        <button type="button" onclick="window.MMS_APP.closePunchModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-black leading-none">
-          &times;
-        </button>
-
-        <div class="mb-4">
-          <span class="text-[10px] uppercase font-black text-blue-600 block">स्मार्ट अटेंडेंस पंच</span>
-          <h3 class="text-lg font-black text-slate-900">📸 लाइव सेल्फी व GPS पंच</h3>
-          <p class="text-xs text-slate-500">कैमरे से सेल्फी लें और GPS लोकेशन ऑटो-वेरिफाई करें</p>
+      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+        <!-- Sticky Header with Prominent Close Button -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+          <div>
+            <span class="text-[10px] uppercase font-black text-blue-600 block">स्मार्ट अटेंडेंस पंच</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">📸 लाइव सेल्फी व GPS पंच</h3>
+            <p class="text-xs text-slate-500">कैमरे से सेल्फी लें और GPS लोकेशन ऑटो-वेरिफाई करें</p>
+          </div>
+          <button type="button" onclick="window.MMS_APP.closePunchModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-lg font-black transition cursor-pointer" title="बंद करें">
+            ✕
+          </button>
         </div>
 
-        <form id="punch-in-out-form" onsubmit="window.MMS_APP.submitPunch(event)" class="space-y-4">
+        <form id="punch-in-out-form" onsubmit="window.MMS_APP.submitPunch(event)" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
               <label class="block font-bold text-slate-700 mb-1">कर्मचारी चुनें *</label>
@@ -5956,11 +5974,14 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <input type="text" id="punch-notes-input" placeholder="उदा. समय पर पहुंचे, लैब ड्यूटी शुरू" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
           </div>
 
-          <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button type="button" onclick="window.MMS_APP.closePunchModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+          </div>
+
+          <!-- Sticky Footer -->
+          <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+            <button type="button" onclick="window.MMS_APP.closePunchModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
               रद्द करें
             </button>
-            <button type="submit" id="punch-submit-btn" disabled class="px-5 py-2.5 bg-slate-400 text-white rounded-xl text-xs font-bold cursor-not-allowed opacity-60 shadow-md transition flex items-center gap-1.5">
+            <button type="submit" id="punch-submit-btn" disabled class="px-5 py-2.5 bg-slate-400 text-white rounded-xl text-xs font-bold cursor-not-allowed opacity-60 shadow-md transition flex items-center gap-1.5 cursor-pointer">
               <span>✅ पंच दर्ज करें</span>
             </button>
           </div>
@@ -6438,23 +6459,23 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         mapUrl: "https://maps.google.com/maps?q=26.8370,80.9241&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=26.8370,80.9241"
       },
-      kannauj: {
-        badge: "उन्नाव शाखा (रियलमी केयर) (सरायमीरा)",
-        title: "सरायमीरा, कन्नौज",
-        address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
-        landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
-        timings: "10:00 AM - 06:00 PM (सोमवार - शनिवार)",
+      unnao: {
+        badge: "उन्नाव शाखा (रियलमी ऑथराइज्ड सर्विस सेंटर)",
+        title: "लखनऊ-कानपुर रोड, उन्नाव",
+        address: "निकट रेलवे स्टेशन / गांधी नगर तिराहा, लखनऊ-कानपुर रोड, उन्नाव, उत्तर प्रदेश 209801",
+        landmark: "(रियलमी ऑथराइज्ड सर्विस सेंटर, उन्नाव)",
+        timings: "10:00 AM - 07:00 PM (सोमवार - शनिवार)",
         phone: "9839988776",
-        gps: "Lat 27.0283°N, Long 79.926383°E",
-        mapUrl: "https://maps.google.com/maps?q=27.0283,79.926383&t=&z=16&ie=UTF8&iwloc=&output=embed",
-        directMap: "https://maps.google.com/?q=27.0283,79.926383"
+        gps: "Lat 26.5450°N, Long 80.4870°E",
+        mapUrl: "https://maps.google.com/maps?q=26.5450,80.4870&t=&z=16&ie=UTF8&iwloc=&output=embed",
+        directMap: "https://maps.google.com/?q=26.5450,80.4870"
       }
     };
 
     const sel = bData[branchKey] || bData.hazratganj;
     
     // Update active tab buttons
-    ['hazratganj', 'naka', 'kannauj'].forEach(k => {
+    ['hazratganj', 'naka', 'unnao'].forEach(k => {
       const btn = document.getElementById('contact-tab-' + k);
       if (btn) {
         if (k === branchKey) {
@@ -6769,14 +6790,6 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       return;
     }
 
-    // Security check: Admin profile cannot be edited or modified via employee modal
-    if (editEmpId) {
-      const targetEmp = state.staff.find(s => s.id === editEmpId);
-      if (targetEmp && (targetEmp.role || '').toLowerCase() === 'admin') {
-        alert('🔒 सुपर एडमिन (मालिक) का खाता सुरक्षित है। इसे कर्मचारी लिस्ट से एडिट नहीं किया जा सकता।');
-        return;
-      }
-    }
     const existing = document.getElementById('staff-modal-backdrop');
     if (existing) existing.remove();
 
@@ -6785,21 +6798,25 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     const modal = document.createElement('div');
     modal.id = 'staff-modal-backdrop';
-    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative my-8 animate-in fade-in zoom-in-95 duration-150">
-        <button type="button" onclick="window.MMS_APP.closeAddStaffModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-black leading-none">
-          &times;
-        </button>
-
-        <div class="mb-4">
-          <span class="text-[10px] uppercase font-black text-blue-600 block">HR प्रोफाइल व शिफ्ट सेटअप</span>
-          <h3 class="text-lg font-black text-slate-900">${isEdit ? '✏️ कर्मचारी विवरण व शिफ्ट एडिट करें' : '➕ नया कर्मचारी जोड़ें'}</h3>
-          <p class="text-xs text-slate-500">दैनिक शिफ्ट घंटे व मासिक छुट्टियां तय करें, सिस्टम ऑटो-घंटे व दर कैल्कुलेट करेगा</p>
+      <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+        <!-- Sticky Header with Prominent Close Button -->
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+          <div>
+            <span class="text-[10px] uppercase font-black text-blue-600 block">HR प्रोफाइल व शिफ्ट सेटअप</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">${isEdit ? '✏️ कर्मचारी विवरण व शिफ्ट एडिट करें' : '➕ नया कर्मचारी जोड़ें'}</h3>
+            <p class="text-xs text-slate-500">दैनिक शिफ्ट घंटे तय करें, सिस्टम ऑटो-घंटे व दर कैल्कुलेट करेगा</p>
+          </div>
+          <button type="button" onclick="window.MMS_APP.closeAddStaffModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-lg font-black transition cursor-pointer" title="बंद करें (Close)">
+            ✕
+          </button>
         </div>
 
-        <form id="add-staff-form" onsubmit="window.MMS_APP.saveStaff(event, '${editEmpId || ''}')" class="space-y-4">
+        <!-- Scrollable Form Body -->
+        <form id="add-staff-form" onsubmit="window.MMS_APP.saveStaff(event, '${editEmpId || ''}')" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
               <label class="block font-bold text-slate-700 mb-1">कर्मचारी का नाम *</label>
@@ -6826,7 +6843,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="staff-branch-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj" ${emp && emp.branchId === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (श्रीराम टावर)</option>
                 <option value="branch_naka" ${emp && (emp.branchId === 'branch_naka' || emp.branchId === 'branch_naka') ? 'selected' : ''}>📍 नाका हिंडोला (लखनऊ)</option>
-                <option value="branch_unnao" ${emp && (emp.branchId === 'branch_unnao' || emp.branchId === 'branch_unnao') ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
+                <option value="branch_unnao" ${emp && emp.branchId === 'branch_unnao' ? 'selected' : ''}>📍 उन्नाव (रियलमी केयर)</option>
                 <option value="all" ${emp && emp.branchId === 'all' ? 'selected' : ''}>🏢 सभी शाखाएं</option>
               </select>
             </div>
@@ -6999,10 +7016,27 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       state.staff.push(newStaff);
     }
 
+    // If currently logged-in user was updated, immediately sync auth session & header
+    if (state.currentUser) {
+      const isSelf = (editEmpId && (state.currentUser.id === editEmpId || state.currentUser.phone === phone)) ||
+                     (role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin');
+      if (isSelf) {
+        state.currentUser = { ...state.currentUser, name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass, photo: photo || state.currentUser.photo };
+        localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
+        const userNameEl = document.getElementById('header-user-name');
+        const userRoleEl = document.getElementById('header-user-role');
+        if (userNameEl) userNameEl.textContent = name;
+        if (userRoleEl) userRoleEl.textContent = roleLabels[role] || role;
+      }
+    }
+
     localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff));
+    if (typeof CloudSync !== 'undefined' && CloudSync.syncStaff) {
+      CloudSync.syncStaff(state.staff);
+    }
     closeAddStaffModal();
     renderStaffHRModule();
-    alert('✅ कर्मचारी रिकॉर्ड सफलतापूर्वक सेव हो गया!');
+    alert('✅ कर्मचारी रिकॉर्ड सफलतापूर्वक सुरक्षित हो गया!');
   }
 
   function openIssueAdvanceModal(preselectedEmpId) {
@@ -7011,21 +7045,23 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     const modal = document.createElement('div');
     modal.id = 'advance-modal-backdrop';
-    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative my-8 animate-in fade-in zoom-in-95 duration-150">
-        <button type="button" onclick="window.MMS_APP.closeIssueAdvanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-black leading-none">
-          &times;
-        </button>
-
-        <div class="mb-4">
-          <span class="text-[10px] uppercase font-black text-amber-600 block">स्टाफ लोन / एडवांस</span>
-          <h3 class="text-lg font-black text-slate-900">💸 नया स्टाफ एडवांस दर्ज करें</h3>
-          <p class="text-xs text-slate-500">मासिक सैलरी स्लिप बनने पर यह किस्त स्वतः कट जाएगी</p>
+      <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+          <div>
+            <span class="text-[10px] uppercase font-black text-amber-600 block">स्टाफ लोन / एडवांस</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">💸 नया स्टाफ एडवांस दर्ज करें</h3>
+            <p class="text-xs text-slate-500">मासिक सैलरी स्लिप बनने पर यह किस्त स्वतः कटेगी</p>
+          </div>
+          <button type="button" onclick="window.MMS_APP.closeIssueAdvanceModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-lg font-black transition cursor-pointer" title="बंद करें">
+            ✕
+          </button>
         </div>
 
-        <form id="issue-advance-form" onsubmit="window.MMS_APP.saveAdvance(event)" class="space-y-4">
+        <form id="issue-advance-form" onsubmit="window.MMS_APP.saveAdvance(event)" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           <div class="text-xs">
             <label class="block font-bold text-slate-700 mb-1">कर्मचारी चुनें *</label>
             <select id="adv-emp-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -7512,21 +7548,23 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     const modal = document.createElement('div');
     modal.id = 'expense-modal-backdrop';
-    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative my-8 animate-in fade-in zoom-in-95 duration-150">
-        <button type="button" onclick="window.MMS_APP.closeAddExpenseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-black leading-none">
-          &times;
-        </button>
-
-        <div class="mb-4">
-          <span class="text-[10px] uppercase font-black text-rose-600 block">दुकान खर्च प्रविष्टि</span>
-          <h3 class="text-lg font-black text-slate-900">➕ नया दुकान खर्च जोड़ें</h3>
-          <p class="text-xs text-slate-500">यह राशि बैलेंस शीट और P&L में स्वतः कट जाएगी</p>
+      <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-150">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
+          <div>
+            <span class="text-[10px] uppercase font-black text-rose-600 block">दुकान खर्च प्रविष्टि</span>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">➕ नया दुकान खर्च जोड़ें</h3>
+            <p class="text-xs text-slate-500">यह राशि बैलेंस शीट और P&L में स्वतः कट जाएगी</p>
+          </div>
+          <button type="button" onclick="window.MMS_APP.closeAddExpenseModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-lg font-black transition cursor-pointer" title="बंद करें">
+            ✕
+          </button>
         </div>
 
-        <form id="add-expense-form" onsubmit="window.MMS_APP.saveExpense(event)" class="space-y-4">
+        <form id="add-expense-form" onsubmit="window.MMS_APP.saveExpense(event)" class="flex-1 flex flex-col overflow-hidden">
+          <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
               <label class="block font-bold text-slate-700 mb-1">शाखा (Branch) *</label>
@@ -7832,6 +7870,16 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (savedUser && savedUser !== 'null' && savedView !== 'public') {
       try {
         state.currentUser = JSON.parse(savedUser);
+        // Merge with latest saved staff record to ensure live name, phone, password, photo are active
+        const matchedEmp = (state.staff || []).find(s => 
+          (state.currentUser.id && s.id === state.currentUser.id) ||
+          (state.currentUser.phone && s.phone === state.currentUser.phone) ||
+          (s.role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin')
+        );
+        if (matchedEmp) {
+          state.currentUser = { ...state.currentUser, ...matchedEmp };
+          localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
+        }
         renderAuthPill();
         showPortal();
       } catch (err) {
