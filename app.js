@@ -4114,6 +4114,20 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         '</td>' +
         '<td class="p-2.5 font-bold text-slate-800">' + job.device + '</td>' +
         '<td class="p-2.5 text-slate-600 max-w-xs truncate">' + job.issue + '</td>' +
+        '<td class="p-2.5 text-center">' +
+          (job.assignedTo ? (
+            '<div class="inline-flex flex-col items-center">' +
+              '<span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-blue-100 text-blue-900 border border-blue-200 flex items-center gap-1 shadow-2xs">' +
+                '<span>👤</span> ' + job.assignedTo +
+              '</span>' +
+              '<span class="text-[9px] text-blue-700 font-bold mt-0.5">' + (job.estimatedMins || 45) + 'm • ' + (job.scheduledAt ? 'शेड्यूल' : 'तुरंत') + '</span>' +
+            '</div>'
+          ) : (
+            '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer">' +
+              '⚠️ अभी असाइन नहीं' +
+            '</button>'
+          )) +
+        '</td>' +
         '<td class="p-2.5 font-mono text-slate-500">' + (job.passcode || 'N/A') + '</td>' +
         '<td class="p-2.5 text-right font-mono font-bold">' + formatCurrency(job.estimatedCost) + '</td>' +
         '<td class="p-2.5 text-right font-mono text-emerald-700 font-bold">' + formatCurrency(job.advancePaid) + '</td>' +
@@ -4164,6 +4178,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 <th class="p-2.5">ग्राहक व मोबाइल</th>
                 <th class="p-2.5">डिवाइस / मॉडल</th>
                 <th class="p-2.5">समस्या</th>
+                <th class="p-2.5 text-center">असाइन कर्मचारी (Assigned To)</th>
                 <th class="p-2.5">लॉक</th>
                 <th class="p-2.5 text-right">कुल अनुमान</th>
                 <th class="p-2.5 text-right">एडवांस</th>
@@ -4172,7 +4187,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              ${rowsHtml || '<tr><td colspan="9" class="p-4 text-center text-slate-400">इस शाखा में कोई रिपेयर टोकन उपलब्ध नहीं है।</td></tr>'}
+              ${rowsHtml || '<tr><td colspan="10" class="p-4 text-center text-slate-400">इस शाखा में कोई रिपेयर टोकन उपलब्ध नहीं है।</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -8059,7 +8074,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       } else {
         const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
         if (modal) {
-          modal.classList.remove('hidden');
+          modal.classList.remove('hidden'); modal.style.display = 'flex'; modal.style.zIndex = '99999';
           modal.classList.add('flex');
         }
       }
@@ -8232,6 +8247,64 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (receivedByDisplay) receivedByDisplay.textContent = receiverName;
     if (receivedAtDisplay) receivedAtDisplay.textContent = receiverTime;
 
+    // Show existing assignment banner if already assigned
+    const statusBanner = document.getElementById('assign-current-status-banner');
+    if (statusBanner) {
+      if (currentAssignRecord && currentAssignRecord.assignedTo) {
+        statusBanner.classList.remove('hidden');
+        statusBanner.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-base">👤</span>
+            <div>
+              <span class="text-[10px] font-bold text-emerald-800 uppercase block">वर्तमान में काम सौंपा गया है:</span>
+              <strong class="text-xs font-black text-emerald-950">${currentAssignRecord.assignedTo}</strong>
+              <span class="text-[9px] text-slate-500 block">असाइन समय: ${currentAssignRecord.assignedAt || 'आज'}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-200 text-emerald-900">${currentAssignRecord.status || 'स्वीकार'}</span>
+            <span class="block text-[9px] text-slate-500 mt-0.5">अनुमानित: ${currentAssignRecord.estimatedMins || 45} min</span>
+          </div>
+        `;
+      } else {
+        statusBanner.classList.add('hidden');
+      }
+    }
+
+    // Populate 5-point timeline inside modal
+    const timelineContainer = document.getElementById('assign-modal-timeline');
+    if (timelineContainer && currentAssignRecord) {
+      timelineContainer.innerHTML = `
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+          <h4 class="font-black text-slate-900 text-xs flex items-center gap-1.5">
+            <span>📋</span> पूरी टाइमलाइन (Audit Trail Timeline):
+          </h4>
+          <div class="space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200">
+              <span><strong>1. रिसीव्ड (Received By):</strong> ${currentAssignRecord.receivedByName || receiverName}</span>
+              <span class="text-slate-500">${currentAssignRecord.receivedAt || receiverTime}</span>
+            </div>
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200 ${currentAssignRecord.assignedTo ? 'text-blue-900 font-bold' : 'text-slate-400'}">
+              <span><strong>2. असाइन (Assigned To):</strong> ${currentAssignRecord.assignedTo || 'प्रतीक्षारत (Not Assigned)'}</span>
+              <span class="text-slate-500">${currentAssignRecord.assignedAt || '—'}</span>
+            </div>
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200 ${currentAssignRecord.startedAt ? 'text-amber-900 font-bold' : 'text-slate-400'}">
+              <span><strong>3. काम शुरू (Work Started):</strong> ${currentAssignRecord.startedAt || 'अभी शुरू नहीं'}</span>
+              <span class="text-slate-500">${currentAssignRecord.startedAt ? 'चालू' : '—'}</span>
+            </div>
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200 ${currentAssignRecord.completedAt ? 'text-emerald-900 font-bold' : 'text-slate-400'}">
+              <span><strong>4. काम पूरा (Work Completed):</strong> ${currentAssignRecord.completedAt || 'बाकी'}</span>
+              <span class="text-slate-500">${currentAssignRecord.completedAt ? 'पूर्ण' : '—'}</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 bg-white p-1.5 rounded-lg border border-slate-200">
+              <span><strong>5. समय हिसाब (Time Analysis):</strong></span>
+              <span>अनुमानित: ${currentAssignRecord.estimatedMins || 45}m | असल: ${currentAssignRecord.actualDurationMins ? currentAssignRecord.actualDurationMins + 'm' : 'चालू'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     // 2. Pre-fill Work Instructions & Estimated Minutes
     const instructionsInput = document.getElementById('assign-instructions-input');
     const estMinsInput = document.getElementById('assign-est-mins-input');
@@ -8253,7 +8326,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   function closeWorkAssignmentModal() {
     const modal = document.getElementById('work-assignment-modal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
   }
 
   function setAssignScheduleType(type) {
