@@ -1,3 +1,134 @@
+
+
+// 20 Standardized Repair & Spare Categories with 4 Display Variants, Flex, Ring, Glass, Frame, Camera, Buttons, OCA, Touch, Back Panel, Software, Hardware, Tab
+const MMS_SPARE_CATEGORIES = [
+  { id: 'display_copy', name: 'डिस्प्ले - कॉपी (Display - Copy)', shortName: 'Display - Copy', icon: '📱', keywords: 'display copy duplicate combo folder screen' },
+  { id: 'display_original', name: 'डिस्प्ले - ओरिजिनल (Display - Original)', shortName: 'Display - Original', icon: '💎', keywords: 'display original oem combo folder screen' },
+  { id: 'display_tft', name: 'डिस्प्ले - TFT (Display - TFT)', shortName: 'Display - TFT', icon: '📟', keywords: 'display tft combo folder screen' },
+  { id: 'display_oled', name: 'डिस्प्ले - OLED (Display - OLED)', shortName: 'Display - OLED', icon: '✨', keywords: 'display oled amoled combo folder screen' },
+  { id: 'flex', name: 'फ्लैक्स केबल (Flex Cable)', shortName: 'Flex Cable', icon: '🎗️', keywords: 'flex cable main sub ribbon' },
+  { id: 'ring', name: 'रिंगर / स्पीकर / ईयरपीस (Ring / Speaker)', shortName: 'Ring / Speaker', icon: '🔔', keywords: 'ring ringer speaker loudspeaker earpiece buzzer' },
+  { id: 'glass', name: 'ग्लास (Front Glass)', shortName: 'Glass', icon: '🔍', keywords: 'glass front lens' },
+  { id: 'frame', name: 'मिडिल फ्रेम / हाउसिंग (Frame)', shortName: 'Frame', icon: '🖼️', keywords: 'frame middle body housing bezel' },
+  { id: 'camera', name: 'कैमरा - फ्रंट / बैक (Camera)', shortName: 'Camera', icon: '📷', keywords: 'camera lens selfie back front' },
+  { id: 'buttons', name: 'बटन्स - पावर / वॉल्यूम (Buttons)', shortName: 'Buttons', icon: '🔘', keywords: 'buttons button power volume key switch' },
+  { id: 'oca', name: 'ओसीए (OCA Sheet / Glue)', shortName: 'OCA', icon: '📑', keywords: 'oca sheet glue lamination roll' },
+  { id: 'touch', name: 'टच स्क्रीन / डिजिटाइज़र (Touch)', shortName: 'Touch', icon: '👆', keywords: 'touch screen digitizer' },
+  { id: 'back_panel', name: 'बैक पैनल / बैक डोर (Back Panel)', shortName: 'Back Panel', icon: '🛡️', keywords: 'back panel door glass housing body' },
+  { id: 'software', name: 'सॉफ्टवेयर व अनलॉकिंग (Software)', shortName: 'Software', icon: '💻', keywords: 'software flashing unlocking frp pattern rom' },
+  { id: 'hardware', name: 'हार्डवेयर व मदरबोर्ड IC (Hardware)', shortName: 'Hardware', icon: '🔧', keywords: 'hardware ic power cpu emmc motherboard' },
+  { id: 'tab', name: 'टैबलेट / टैब पार्ट्स (Tab)', shortName: 'Tab', icon: '📟', keywords: 'tab tablet ipad screen touch' },
+  { id: 'battery', name: 'बैटरी (Battery)', shortName: 'Battery', icon: '🔋', keywords: 'battery cell mah' },
+  { id: 'charging', name: 'चार्जिंग जैक व सीसी बोर्ड (Charging)', shortName: 'Charging', icon: '⚡', keywords: 'charging port cc board jack connector' },
+  { id: 'accessories', name: 'एक्सेसरीज (Accessories)', shortName: 'Accessories', icon: '🎧', keywords: 'accessories charger cable tempered guard' },
+  { id: 'tools', name: 'लैब टूल्स व कंज्यूमेबल्स (Tools)', shortName: 'Tools', icon: '🧰', keywords: 'tools separator soldering flux paste wire iron' }
+];
+
+if (typeof window !== 'undefined') {
+  window.MMS_SPARE_CATEGORIES = MMS_SPARE_CATEGORIES;
+}
+
+
+function getCategoryMeta(catFilter) {
+  if (!catFilter || catFilter === 'all') return null;
+  const target = String(catFilter).toLowerCase().trim();
+  return MMS_SPARE_CATEGORIES.find(c => 
+    c.id.toLowerCase() === target || 
+    c.shortName.toLowerCase() === target ||
+    c.name.toLowerCase().includes(target) ||
+    (c.keywords && c.keywords.split(' ').some(k => k === target))
+  ) || null;
+}
+
+function renderCategoryDropdownHTML(inputId, defaultValue = 'Display - Copy') {
+  const meta = getCategoryMeta(defaultValue) || MMS_SPARE_CATEGORIES[0];
+  const selectedLabel = meta ? `${meta.icon} ${meta.shortName}` : defaultValue;
+  const selectedVal = meta ? meta.shortName : defaultValue;
+
+  return `
+    <div class="relative w-full text-left" id="cat-dropdown-wrapper-${inputId}">
+      <input type="hidden" id="${inputId}" value="${selectedVal}">
+      <button type="button" 
+              id="cat-btn-${inputId}" 
+              onclick="window.MMS_APP.toggleCategoryDropdown('${inputId}')" 
+              class="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-800 text-left flex items-center justify-between shadow-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+        <span id="cat-label-${inputId}" class="truncate flex items-center gap-1.5">
+          ${selectedLabel}
+        </span>
+        <span class="text-slate-400 text-xs">▼</span>
+      </button>
+      <div id="cat-menu-${inputId}" 
+           class="hidden absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden text-xs">
+        <div class="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-1.5">
+          <span class="text-slate-400">🔍</span>
+          <input type="text" 
+                 id="cat-search-${inputId}" 
+                 placeholder="कैटेगरी खोजें (Search category)..." 
+                 oninput="window.MMS_APP.filterCategoryDropdown('${inputId}', this.value)"
+                 class="w-full bg-white border border-slate-200 rounded-md px-2 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        </div>
+        <div id="cat-list-${inputId}" class="max-h-52 overflow-y-auto divide-y divide-slate-100">
+          ${MMS_SPARE_CATEGORIES.map(c => `
+            <button type="button" 
+                    onclick="window.MMS_APP.selectCategory('${inputId}', '${c.shortName}', '${c.icon} ${c.shortName}')" 
+                    data-search="${(c.name + ' ' + c.shortName + ' ' + c.keywords).toLowerCase()}"
+                    class="cat-opt-${inputId} w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-between font-bold text-slate-700 transition cursor-pointer">
+              <span class="flex items-center gap-2"><span>${c.icon}</span> <span>${c.name}</span></span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleCategoryDropdown(inputId) {
+  const menu = document.getElementById('cat-menu-' + inputId);
+  if (!menu) return;
+  const isHidden = menu.classList.contains('hidden');
+  document.querySelectorAll('[id^="cat-menu-"]').forEach(m => m.classList.add('hidden'));
+  if (isHidden) {
+    menu.classList.remove('hidden');
+    const searchInput = document.getElementById('cat-search-' + inputId);
+    if (searchInput) {
+      searchInput.value = '';
+      filterCategoryDropdown(inputId, '');
+      setTimeout(() => searchInput.focus(), 50);
+    }
+  } else {
+    menu.classList.add('hidden');
+  }
+}
+
+function closeCategoryDropdown(inputId) {
+  const menu = document.getElementById('cat-menu-' + inputId);
+  if (menu) menu.classList.add('hidden');
+}
+
+function selectCategory(inputId, val, displayLabel) {
+  const hiddenInput = document.getElementById(inputId);
+  if (hiddenInput) {
+    hiddenInput.value = val;
+    hiddenInput.dispatchEvent(new Event('change'));
+  }
+  const label = document.getElementById('cat-label-' + inputId);
+  if (label) label.innerHTML = displayLabel;
+  closeCategoryDropdown(inputId);
+}
+
+function filterCategoryDropdown(inputId, query) {
+  const q = (query || '').toLowerCase().trim();
+  const items = document.querySelectorAll('.cat-opt-' + inputId);
+  items.forEach(el => {
+    const text = el.getAttribute('data-search') || el.textContent.toLowerCase();
+    if (!q || text.includes(q)) {
+      el.style.display = 'flex';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+
 // Monu Mobile Solution - Master Application Controller
 (function() {
   'use strict';
@@ -3052,10 +3183,6 @@
 
     renderPOS();
     showInvoiceModal(invoiceRecord);
-    // Automatic Work Assignment Popup directly linked to existing invoiceNo
-    setTimeout(() => {
-      openWorkAssignmentModal(invoiceRecord.invoiceNo, invoiceRecord);
-    }, 600);
   }
 
   // --- Search / Filter SKU Autocomplete ---
@@ -3594,11 +3721,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <span>रसीद प्रिंट करें</span>
           </button>
         </div>
-        <div class="max-w-sm mx-auto pt-2 border-t border-slate-200">
-          <button type="button" onclick="window.MMS_APP.openWorkAssignmentModal('${inv.invoiceNo}')" class="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
-            <span>⚡ एम्प्लॉई को काम असाइन करें (Work Assignment)</span>
-          </button>
-        </div>
+
       </div>
     `;
     openModal(dom.invoiceModal);
@@ -3641,9 +3764,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     let lowStockCount = 0;
 
     filteredInventory.forEach(item => {
-      totalStockCount += item.stock;
-      totalStockValuation += (item.stock * item.costPrice);
-      if (item.stock <= item.minAlert) lowStockCount++;
+      totalStockCount += Number(item.stock || 0);
+      totalStockValuation += (Number(item.stock || 0) * Number(item.costPrice || 0));
+      if (Number(item.stock || 0) <= Number(item.minAlert || 2)) lowStockCount++;
     });
 
     container.innerHTML = `

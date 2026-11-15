@@ -1,3 +1,32 @@
+
+// 20 Standardized Repair & Spare Categories with 4 Display Variants, Flex, Ring, Glass, Frame, Camera, Buttons, OCA, Touch, Back Panel, Software, Hardware, Tab
+const MMS_SPARE_CATEGORIES = [
+  { id: 'display_copy', name: 'डिस्प्ले - कॉपी (Display - Copy)', shortName: 'Display - Copy', icon: '📱', keywords: 'display copy duplicate combo folder screen' },
+  { id: 'display_original', name: 'डिस्प्ले - ओरिजिनल (Display - Original)', shortName: 'Display - Original', icon: '💎', keywords: 'display original oem combo folder screen' },
+  { id: 'display_tft', name: 'डिस्प्ले - TFT (Display - TFT)', shortName: 'Display - TFT', icon: '📟', keywords: 'display tft combo folder screen' },
+  { id: 'display_oled', name: 'डिस्प्ले - OLED (Display - OLED)', shortName: 'Display - OLED', icon: '✨', keywords: 'display oled amoled combo folder screen' },
+  { id: 'flex', name: 'फ्लैक्स केबल (Flex Cable)', shortName: 'Flex Cable', icon: '🎗️', keywords: 'flex cable main sub ribbon' },
+  { id: 'ring', name: 'रिंगर / स्पीकर / ईयरपीस (Ring / Speaker)', shortName: 'Ring / Speaker', icon: '🔔', keywords: 'ring ringer speaker loudspeaker earpiece buzzer' },
+  { id: 'glass', name: 'ग्लास (Front Glass)', shortName: 'Glass', icon: '🔍', keywords: 'glass front lens' },
+  { id: 'frame', name: 'मिडिल फ्रेम / हाउसिंग (Frame)', shortName: 'Frame', icon: '🖼️', keywords: 'frame middle body housing bezel' },
+  { id: 'camera', name: 'कैमरा - फ्रंट / बैक (Camera)', shortName: 'Camera', icon: '📷', keywords: 'camera lens selfie back front' },
+  { id: 'buttons', name: 'बटन्स - पावर / वॉल्यूम (Buttons)', shortName: 'Buttons', icon: '🔘', keywords: 'buttons button power volume key switch' },
+  { id: 'oca', name: 'ओसीए (OCA Sheet / Glue)', shortName: 'OCA', icon: '📑', keywords: 'oca sheet glue lamination roll' },
+  { id: 'touch', name: 'टच स्क्रीन / डिजिटाइज़र (Touch)', shortName: 'Touch', icon: '👆', keywords: 'touch screen digitizer' },
+  { id: 'back_panel', name: 'बैक पैनल / बैक डोर (Back Panel)', shortName: 'Back Panel', icon: '🛡️', keywords: 'back panel door glass housing body' },
+  { id: 'software', name: 'सॉफ्टवेयर व अनलॉकिंग (Software)', shortName: 'Software', icon: '💻', keywords: 'software flashing unlocking frp pattern rom' },
+  { id: 'hardware', name: 'हार्डवेयर व मदरबोर्ड IC (Hardware)', shortName: 'Hardware', icon: '🔧', keywords: 'hardware ic power cpu emmc motherboard' },
+  { id: 'tab', name: 'टैबलेट / टैब पार्ट्स (Tab)', shortName: 'Tab', icon: '📟', keywords: 'tab tablet ipad screen touch' },
+  { id: 'battery', name: 'बैटरी (Battery)', shortName: 'Battery', icon: '🔋', keywords: 'battery cell mah' },
+  { id: 'charging', name: 'चार्जिंग जैक व सीसी बोर्ड (Charging)', shortName: 'Charging', icon: '⚡', keywords: 'charging port cc board jack connector' },
+  { id: 'accessories', name: 'एक्सेसरीज (Accessories)', shortName: 'Accessories', icon: '🎧', keywords: 'accessories charger cable tempered guard' },
+  { id: 'tools', name: 'लैब टूल्स व कंज्यूमेबल्स (Tools)', shortName: 'Tools', icon: '🧰', keywords: 'tools separator soldering flux paste wire iron' }
+];
+
+if (typeof window !== 'undefined') {
+  window.MMS_SPARE_CATEGORIES = MMS_SPARE_CATEGORIES;
+}
+
 // Monu Mobile Solution - Database, Translations & Default Seeds
 window.MMS_DATA = {
   storeInfo: {
