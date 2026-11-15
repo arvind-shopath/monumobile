@@ -6713,12 +6713,15 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                     </div>
                   </div>
 
-                  <div class="flex items-center gap-2 pt-1">
-                    <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-xs flex items-center justify-center gap-1 transition">
-                      📄 सैलरी स्लिप
+                  <div class="flex items-center gap-1.5 pt-1">
+                    <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" class="flex-1 py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-xs flex items-center justify-center gap-1 transition cursor-pointer">
+                      📄 स्लिप
                     </button>
-                    <button onclick="window.MMS_APP.openEditStaffModal('${s.id}')" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                    <button onclick="window.MMS_APP.openEditStaffModal('${s.id}')" class="py-2 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
                       ✏️ एडिट
+                    </button>
+                    <button onclick="window.MMS_APP.deleteStaff('${s.id}')" class="py-2 px-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition cursor-pointer" title="कर्मचारी हटाएं">
+                      🗑️ हटाएं
                     </button>
                   </div>
                 </div>
@@ -6788,11 +6791,14 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                         ${advDue > 0 ? formatCurrency(advDue) : '₹0'}
                       </td>
                       <td class="p-3.5 text-right whitespace-nowrap space-x-1.5">
-                        <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" title="मासिक सैलरी स्लिप देखें व बनाएं" class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold transition shadow-2xs">
+                        <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" title="मासिक सैलरी स्लिप देखें व बनाएं" class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold transition shadow-2xs cursor-pointer">
                           📄 सैलरी स्लिप
                         </button>
-                        <button onclick="window.MMS_APP.openEditStaffModal('${s.id}')" title="घंटे या वेतन एडिट करें" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition">
+                        <button onclick="window.MMS_APP.openEditStaffModal('${s.id}')" title="घंटे या वेतन एडिट करें" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition cursor-pointer">
                           ✏️ एडिट
+                        </button>
+                        <button onclick="window.MMS_APP.deleteStaff('${s.id}')" title="कर्मचारी को हटाएं" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-bold transition cursor-pointer">
+                          🗑️ हटाएं
                         </button>
                       </td>
                     </tr>
@@ -7113,6 +7119,45 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     closeAddStaffModal();
     renderStaffHRModule();
     alert('✅ कर्मचारी रिकॉर्ड सफलतापूर्वक सुरक्षित हो गया!');
+  }
+
+
+  function deleteStaff(empId) {
+    const targetEmp = (state.staff || []).find(s => s.id === empId);
+    if (!targetEmp) return;
+
+    // Security check: Only Admin can delete staff
+    if (state.currentUser && (state.currentUser.role || '').toLowerCase() !== 'admin') {
+      alert('❌ केवल सुपर एडमिन ही कर्मचारियों को हटा सकते हैं!');
+      return;
+    }
+
+    // Security: Protect primary Super Admin account
+    if ((targetEmp.role || '').toLowerCase() === 'admin') {
+      alert('🔒 सुपर एडमिन (मालिक) का मुख्य खाता सुरक्षित है और इसे हटाया नहीं जा सकता।');
+      return;
+    }
+
+    const cleanName = (targetEmp.name || '').replace(/\s*\([^)]*\)/g, '').trim();
+    const confirmMsg = `⚠️ क्या आप वाकई कर्मचारी "${cleanName}" (${targetEmp.phone}) को हटाना चाहते हैं?\n\nयह कर्मचारी सूची से हमेशा के लिए हट जाएगा और पोर्टल लॉगिन नहीं कर सकेगा।`;
+    if (!confirm(confirmMsg)) return;
+
+    // 1. Remove from state.staff
+    state.staff = (state.staff || []).filter(s => s.id !== empId);
+    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff));
+
+    // 2. Close edit modal if open
+    closeAddStaffModal();
+
+    // 3. Re-render Staff HR module
+    renderStaffHRModule();
+
+    // 4. Synchronize deletion to Cloudflare KV and Backend
+    if (typeof CloudSync !== 'undefined' && CloudSync.syncStaff) {
+      CloudSync.syncStaff(state.staff);
+    }
+
+    alert(`✅ कर्मचारी "${cleanName}" को सफलतापूर्वक हटा दिया गया है!`);
   }
 
   function openIssueAdvanceModal(preselectedEmpId) {
@@ -9197,6 +9242,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     openAddStaffModal,
     openEditStaffModal: (id) => openAddStaffModal(id),
     closeAddStaffModal,
+    deleteStaff,
     updateStaffMathPreview,
     saveStaff,
     openIssueAdvanceModal,
