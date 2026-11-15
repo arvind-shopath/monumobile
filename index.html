@@ -1066,7 +1066,7 @@
           <div class="sidebar-text-label transition-opacity duration-200">
             <div class="flex items-center gap-1.5">
               <span class="text-xs uppercase tracking-wider font-extrabold text-blue-400">Control Panel</span>
-              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v6.3</span>
+              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v6.4</span>
             </div>
             <h2 class="text-sm font-black text-white tracking-tight truncate">Monu Mobile ERP</h2>
           </div>
@@ -1265,7 +1265,7 @@
             <!-- Real-Time Duty Alert Bell -->
             <div id="portal-alert-container" class="relative">
               <button id="alert-bell-btn" type="button" onclick="window.MMS_APP.toggleAlertDropdown()" title="स्टाफ ड्यूटी अलर्ट्स" class="relative p-1.5 sm:p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center cursor-pointer">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v6.3c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v6.4c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span id="alert-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-600 text-white animate-pulse">0</span>
               </button>
               
@@ -1307,6 +1307,8 @@
 
       <!-- Content Views Workspace -->
       <div class="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <!-- Employee Live Assigned Jobs Alert Banner -->
+        <div id="portal-employee-jobs-banner"></div>
         <!-- New Default: KPI Master Dashboard -->
         <div id="tab-view-dashboard" class="portal-tab-view"></div>
 
@@ -1516,6 +1518,104 @@
     </div>
   </div>
 
+  
+  <!-- WORK ASSIGNMENT MODAL -->
+  <div id="work-assignment-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl relative max-h-[95vh] overflow-y-auto">
+      <button class="close-modal-btn absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-lg" onclick="window.MMS_APP.closeWorkAssignmentModal()">✕</button>
+      
+      <div class="flex items-center gap-2.5 pb-3 border-b border-slate-200">
+        <span class="p-2 rounded-xl bg-blue-100 text-blue-700 text-lg">⚡</span>
+        <div>
+          <h3 class="text-base font-black text-slate-900 leading-tight">एम्प्लॉई वर्क असाइनमेंट (Work Assignment)</h3>
+          <p class="text-xs text-slate-500 font-medium">इनवॉइस व कस्टमर ट्रैकिंग से सीधे जुड़ा हुआ</p>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <!-- Linked Job / Invoice Badge -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-500">ट्रैकिंग / इनवॉइस नंबर:</span>
+            <div id="assign-tracking-display" class="font-black text-sm text-blue-700">MMS-INV-201</div>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-500">रिसीव्ड बाय:</span>
+            <div id="assign-received-by-display" class="font-bold text-slate-800">Admin (मोनू जी)</div>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-500">समय:</span>
+            <div id="assign-received-at-display" class="font-bold text-slate-600">आज, 04:30 PM</div>
+          </div>
+        </div>
+
+        <!-- Employee Search & Select -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">एम्प्लॉई / टेक्नीशियन चुनें *</label>
+          <div class="relative">
+            <input type="text" id="assign-emp-search" placeholder="नाम या मोबाइल नंबर से खोजें..." oninput="window.MMS_APP.filterAssignEmployees(this.value)" class="w-full p-2.5 pl-8 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div id="assign-emp-list" class="mt-1.5 max-h-36 overflow-y-auto space-y-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <!-- Dynamically populated with pending job counts -->
+          </div>
+          <input type="hidden" id="assign-selected-emp-id">
+          <input type="hidden" id="assign-selected-emp-name">
+          <input type="hidden" id="assign-selected-emp-phone">
+        </div>
+
+        <!-- Immediate vs Scheduled Option -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">असाइनमेंट का समय (Timing) *</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="assign-type-imm" onclick="window.MMS_APP.setAssignScheduleType('immediate')" class="p-2.5 rounded-xl border font-bold text-center transition bg-blue-600 text-white border-blue-600 cursor-pointer">
+              ⚡ तुरंत (Immediately)
+            </button>
+            <button type="button" id="assign-type-sch" onclick="window.MMS_APP.setAssignScheduleType('scheduled')" class="p-2.5 rounded-xl border font-bold text-center transition bg-white text-slate-700 border-slate-300 hover:bg-slate-50 cursor-pointer">
+              📅 शेड्यूल करें (Schedule)
+            </button>
+          </div>
+          <div id="assign-schedule-container" class="mt-2 hidden">
+            <label class="block font-semibold text-slate-600 mb-0.5">तारीख व समय चुनें:</label>
+            <input type="datetime-local" id="assign-schedule-datetime" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-medium">
+          </div>
+        </div>
+
+        <!-- Work Instructions & Estimated Minutes -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-700 mb-1">काम का विवरण (Work Instructions)</label>
+            <input type="text" id="assign-instructions-input" placeholder="उदा. स्क्रीन कॉम्बो चेंज, बैटरी टेस्टिंग" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">अनुमानित समय</label>
+            <div class="relative">
+              <input type="number" id="assign-est-mins-input" value="45" min="5" step="5" class="w-full p-2.5 pr-10 bg-slate-50 border border-slate-300 rounded-xl font-bold">
+              <span class="absolute right-3 top-3 text-[11px] font-bold text-slate-400">मिनट</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <a id="assign-whatsapp-btn" href="#" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1.5 shadow-sm">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.861.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086.159.058 1.011.477 1.184.564.173.087.289.13.332.203.043.072.043.419-.101.824z"/></svg>
+            <span>📱 WhatsApp पर एम्प्लॉई को भेजें</span>
+          </a>
+
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="window.MMS_APP.closeWorkAssignmentModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
+              बाद में करें
+            </button>
+            <button type="button" onclick="window.MMS_APP.confirmWorkAssignment()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-md flex items-center gap-1.5 cursor-pointer">
+              <span>✅ काम पक्का असाइन करें</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- INVOICE PRINT & SHARE MODAL -->
   <div id="invoice-print-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -1678,7 +1778,7 @@
 
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js?v=20261115_63"></script>
-  <script src="app.js?v=20261115_63"></script>
+  <script src="data.js?v=20261115_64"></script>
+  <script src="app.js?v=20261115_64"></script>
 </body>
 </html>

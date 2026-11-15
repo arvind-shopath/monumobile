@@ -150,6 +150,62 @@
       }
     },
 
+    async syncWorkAssignment(assignment) {
+      if (typeof fetch === 'undefined' || !assignment) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'assign_work', assignment })
+        });
+        this.updateSyncBadge('saved');
+      } catch(e) {
+        console.warn('Failed syncing work assignment:', e);
+      }
+    },
+
+    async updateJobStep(token, step, extra = {}) {
+      if (typeof fetch === 'undefined' || !token || !step) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_job_step', token, step, ...extra })
+        });
+        this.updateSyncBadge('saved');
+      } catch(e) {
+        console.warn('Failed updating job step:', e);
+      }
+    },
+
+    async bindDevice(empId, deviceToken, deviceModel) {
+      if (typeof fetch === 'undefined') return { success: true };
+      try {
+        const res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'bind_device', empId, deviceToken, deviceModel })
+        });
+        return await res.json();
+      } catch(e) {
+        return { success: true };
+      }
+    },
+
+    async resetDeviceLock(empId) {
+      if (typeof fetch === 'undefined') return { success: true };
+      try {
+        const res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reset_device_lock', empId })
+        });
+        return await res.json();
+      } catch(e) {
+        return { success: true };
+      }
+    },
+
     updateSyncBadge(status) {
       if (typeof document === 'undefined') return;
       const el = document.getElementById('cloud-sync-status-badge');
@@ -263,6 +319,17 @@
     quickSkuVisible: false,
     quickSkuPrefill: ''
   };
+
+  
+  // --- Device Fingerprinting & Binding ---
+  function getOrCreateDeviceToken() {
+    let token = localStorage.getItem('mms_device_token');
+    if (!token) {
+      token = 'dev_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now();
+      localStorage.setItem('mms_device_token', token);
+    }
+    return token;
+  }
 
   function persistData() {
     localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
@@ -896,9 +963,47 @@
           </div>
         </div>
 
+        <!-- Live 4-Step Customer Tracking Timeline -->
+        <div class="pt-3 border-t border-slate-200 space-y-2">
+          <span class="text-[11px] font-black text-slate-700 uppercase tracking-wider block">लाइव रिपेयर टाइमलाइन (Live Tracking Progress):</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px]">
+            <!-- Step 1: Received -->
+            <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+              <span class="block text-base mb-0.5">📱</span>
+              <strong class="block font-black">1. रिसीव्ड / बिल</strong>
+              <span class="text-[9px] text-emerald-700 block mt-0.5">${job.receivedByName || 'MMS Front Desk'}</span>
+              <span class="text-[8px] text-slate-500 block">${job.receivedAt || job.createdAt || 'दर्ज हुआ'}</span>
+            </div>
+
+            <!-- Step 2: Assigned -->
+            <div class="p-2 rounded-xl ${job.assignedTo ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
+              <span class="block text-base mb-0.5">👤</span>
+              <strong class="block font-black">2. काम असाइन</strong>
+              <span class="text-[9px] font-bold block mt-0.5">${job.assignedTo || 'प्रक्रियाधीन'}</span>
+              <span class="text-[8px] text-slate-500 block">${job.assignedAt ? job.assignedAt.slice(0, 16) : 'लाइन में'}</span>
+            </div>
+
+            <!-- Step 3: In Progress -->
+            <div class="p-2 rounded-xl ${(job.status === 'in-progress' || job.status === 'in_progress' || job.status === 'ready' || job.status === 'delivered') ? 'bg-amber-50 border border-amber-200 text-amber-900 font-bold animate-pulse' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
+              <span class="block text-base mb-0.5">🔧</span>
+              <strong class="block font-black">3. रिपेयरिंग चालू</strong>
+              <span class="text-[9px] block mt-0.5">${job.startedAt ? job.startedAt.slice(0, 16) : ((job.status === 'in-progress' || job.status === 'in_progress') ? 'लैब में चालू' : 'प्रतीक्षारत')}</span>
+              <span class="text-[8px] text-slate-500 block">अनुमान: ${job.estimatedMins || 45} मिनट</span>
+            </div>
+
+            <!-- Step 4: Ready for Pickup -->
+            <div class="p-2 rounded-xl ${(job.status === 'ready' || job.status === 'delivered') ? 'bg-emerald-100 border border-emerald-300 text-emerald-950 font-black' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
+              <span class="block text-base mb-0.5">✅</span>
+              <strong class="block font-black">4. तैयार (Ready)</strong>
+              <span class="text-[9px] block mt-0.5">${job.status === 'delivered' ? 'कस्टमर को डिलीवर' : (job.status === 'ready' ? 'दुकान से प्राप्त करें' : 'काम बाकी')}</span>
+              <span class="text-[8px] text-slate-500 block">${job.actualDurationMins ? 'कुल: ' + job.actualDurationMins + ' min' : (job.completedAt ? job.completedAt.slice(0, 16) : '—')}</span>
+            </div>
+          </div>
+        </div>
+
         <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 font-bold">
           <span>अपडेट: ${job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : 'Just now'}</span>
-          <a href="https://wa.me/917905859701?text=${encodeURIComponent('नमस्ते MMS, मेरे रिपेयर टोकन ' + tokenDisplay + ' का क्या अपडेट है?')}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1">
+          <a href="https://wa.me/917905859701?text=${encodeURIComponent('नमस्ते MMS, मेरे रिपेयर टोकन ' + tokenDisplay + ' का क्या अपडेट है?')}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1 shadow-sm">
             <span>💬 व्हाट्सएप पर स्टेटस पूछें</span>
           </a>
         </div>
@@ -1190,7 +1295,8 @@
     localStorage.setItem('mms_portal_lang', lang);
     applyPortalLanguageUI();
     // Re-render active tab view
-    if (state.activeAdminTab === 'dashboard') renderDashboard();
+    if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
+      if (state.activeAdminTab === 'dashboard') renderDashboard();
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
     else if (state.activeAdminTab === 'inventory') renderInventory();
@@ -2771,6 +2877,10 @@
 
     renderPOS();
     showInvoiceModal(invoiceRecord);
+    // Automatic Work Assignment Popup directly linked to existing invoiceNo
+    setTimeout(() => {
+      openWorkAssignmentModal(invoiceRecord.invoiceNo, invoiceRecord);
+    }, 600);
   }
 
   // --- Search / Filter SKU Autocomplete ---
@@ -3298,8 +3408,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       </div>
 
       <!-- Actions (Thermal Print, WhatsApp Auto-Download, PDF, PNG, Copy) -->
-            <!-- Actions: ONLY 2 Clean, Large Buttons (WhatsApp & Print) -->
-      <div class="mt-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+      <div class="mt-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-sm mx-auto">
           <button type="button" onclick="window.MMS_APP.shareWhatsApp()" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-black shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
             <span class="text-lg">📲</span>
@@ -3308,6 +3417,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <button type="button" onclick="window.MMS_APP.printSlip()" class="w-full py-3 px-4 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-black shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
             <span class="text-lg">🖨️</span>
             <span>रसीद प्रिंट करें</span>
+          </button>
+        </div>
+        <div class="max-w-sm mx-auto pt-2 border-t border-slate-200">
+          <button type="button" onclick="window.MMS_APP.openWorkAssignmentModal('${inv.invoiceNo}')" class="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs sm:text-sm font-black shadow-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
+            <span>⚡ एम्प्लॉई को काम असाइन करें (Work Assignment)</span>
           </button>
         </div>
       </div>
@@ -4014,6 +4128,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         '<td class="p-2.5 text-right">' +
           '<div class="flex items-center justify-end gap-1.5">' +
             '<a href="https://wa.me/91' + job.customerPhone.replace(/[^0-9]/g, '') + '?text=' + waText + '" target="_blank" class="p-1 text-emerald-600 hover:text-emerald-700 font-bold" title="WhatsApp पर स्टेटस भेजें">💬 WA</a>' +
+            '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg text-[10px]" title="काम असाइन करें या टाइमलाइन देखें">⚡ असाइन</button>' + 
             '<button onclick="window.MMS_APP.printJobToken(\'' + job.token + '\')" class="p-1 text-blue-600 hover:text-blue-800 font-bold" title="टोकन पर्ची प्रिंट करें">🖨️ प्रिंट</button>' +
             '<button onclick="window.MMS_APP.deleteJobOrInvoice(\'' + job.token + '\')" class="p-1 text-rose-600 hover:text-rose-800 font-bold" title="टोकन हटाएं">🗑️</button>' +
           '</div>' +
@@ -4113,7 +4228,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     closeModal(dom.newJobModal);
     document.getElementById('new-job-form').reset();
     renderJobCardsManager();
-    alert(`✅ नया रिपेयर टोकन [${tokenNo}] जनरेट हो गया!`);
+    // Automatic Work Assignment Popup directly linked to existing tokenNo
+    setTimeout(() => {
+      openWorkAssignmentModal(tokenNo, {
+        customerName: name,
+        customerPhone: phone,
+        device: device,
+        issue: issue,
+        estimatedCost: cost,
+        advancePaid: advance
+      });
+    }, 500);
   }
 
   
@@ -5360,6 +5485,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <h3 class="text-xl sm:text-2xl font-black">दैनिक उपस्थिति रजिस्टर व स्वीकृति (Admin View)</h3>
             <p class="text-xs text-slate-300 mt-0.5">कर्मचारियों की सेल्फी, जीपीएस दूरी और इन/आउट समय की जांच व स्वीकृति करें</p>
           </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="window.MMS_APP.exportAttendanceCSV()" class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-md cursor-pointer">
+              <span>📥 CSV रिपोर्ट एक्सपोर्ट करें</span>
+            </button>
 
           <div class="flex flex-col gap-2.5 items-end">
             ${renderBranchFilterBarDark(branchFilter)}
@@ -5559,7 +5688,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const lat = attCurrentCoords.lat;
     const lng = attCurrentCoords.lng;
     const dist = Math.round(calculateDistanceMeters(lat, lng, branch.lat, branch.lng));
-    const maxRadius = branch.radiusMeters || 10;
+    const maxRadius = branch.radiusMeters || 100;
     
     const isOutOfRadius = dist > maxRadius;
     const distFormatted = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist + 'm';
@@ -5803,7 +5932,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       const branch = (state.branches || []).find(b => b.id === branchId) || state.branches[0];
       const dist = Math.round(calculateDistanceMeters(attCurrentCoords.lat, attCurrentCoords.lng, branch.lat, branch.lng));
       const distFormatted = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist + 'm';
-      alert(`🚫 सुरक्षा अलर्ट: स्थान सत्यापन विफल!\n\nआप ${branch.shortName || branch.name} से ${distFormatted} दूर हैं (अनुमति दायरा: ${branch.radiusMeters || 10} मीटर)।\n\nनियम: दुकान के 10 मीटर के दायरे में पहुंचे बिना सेल्फी नहीं ली जा सकती।`);
+      alert(`🚫 सुरक्षा अलर्ट: स्थान सत्यापन विफल!\n\nआप ${branch.shortName || branch.name} से ${distFormatted} दूर हैं (अनुमति दायरा: ${branch.radiusMeters || 100} मीटर)।\n\nनियम: दुकान के 100 मीटर के दायरे में पहुंचे बिना सेल्फी नहीं ली जा सकती।`);
       return;
     }
     const video = document.getElementById('punch-camera-video');
@@ -5838,7 +5967,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     ctx.font = 'bold 11px sans-serif';
     ctx.fillText(`📅 ${dateStr} ${timeStr} | Monu Mobile Solution GPS Verified`, 12, canvas.height - 12);
 
-    attCapturedPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+    attCapturedPhotoData = canvas.toDataURL('image/jpeg', 0.72);
     preview.src = attCapturedPhotoData;
     preview.classList.remove('hidden');
     stopCamera();
@@ -5931,7 +6060,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     }
 
     const distMeters = Math.round(calculateDistanceMeters(attCurrentCoords.lat, attCurrentCoords.lng, branch.lat, branch.lng));
-    const allowedRadius = branch.radiusMeters || 10;
+    const allowedRadius = branch.radiusMeters || 100;
     const isOutOfRadius = distMeters > allowedRadius;
 
     if (isOutOfRadius) {
@@ -7913,6 +8042,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   }
 
   window.MMS_APP = {
+    openWorkAssignmentModal,
+    closeWorkAssignmentModal,
+    filterAssignEmployees,
+    selectAssignEmployee,
+    setAssignScheduleType,
+    confirmWorkAssignment,
+    startEmployeeJob,
+    finishEmployeeJob,
+    resetEmployeeDevice,
+    renderEmployeeJobAlerts,
+    exportAttendanceCSV,
     openLoginModal: () => {
       if (state && state.currentUser) {
         showPortal();
@@ -8062,3 +8202,428 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   };
 
 })();
+
+
+  // =========================================================================
+  // WORK ASSIGNMENT & JOB TRACKING MODULE
+  // =========================================================================
+  let currentAssignToken = null;
+  let currentAssignRecord = null;
+  let currentAssignScheduleType = 'immediate';
+
+  function openWorkAssignmentModal(tokenNo, record) {
+    currentAssignToken = tokenNo;
+    currentAssignRecord = record || (state.jobs || []).find(j => j.token === tokenNo) || (state.invoices || []).find(i => i.invoiceNo === tokenNo);
+
+    const modal = document.getElementById('work-assignment-modal');
+    if (!modal) return;
+
+    // 1. Populate Header Meta
+    const trackingDisplay = document.getElementById('assign-tracking-display');
+    const receivedByDisplay = document.getElementById('assign-received-by-display');
+    const receivedAtDisplay = document.getElementById('assign-received-at-display');
+
+    if (trackingDisplay) trackingDisplay.textContent = tokenNo;
+    
+    const curUser = state.currentUser || { name: 'मोनू जी (Monu)', role: 'admin' };
+    const receiverName = (currentAssignRecord && currentAssignRecord.receivedByName) || `${curUser.role === 'admin' ? 'Admin' : 'Staff'} (${curUser.name})`;
+    const receiverTime = (currentAssignRecord && currentAssignRecord.receivedAt) || `आज, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    if (receivedByDisplay) receivedByDisplay.textContent = receiverName;
+    if (receivedAtDisplay) receivedAtDisplay.textContent = receiverTime;
+
+    // 2. Pre-fill Work Instructions & Estimated Minutes
+    const instructionsInput = document.getElementById('assign-instructions-input');
+    const estMinsInput = document.getElementById('assign-est-mins-input');
+
+    if (instructionsInput) {
+      const defaultInstr = currentAssignRecord ? (currentAssignRecord.device ? `${currentAssignRecord.device} - ${currentAssignRecord.issue || 'रिपेयरिंग सर्विस'}` : (currentAssignRecord.items ? currentAssignRecord.items.map(it=>it.name).join(', ') : 'मोबाइल रिपेयर व पार्ट्स चेंज')) : 'मोबाइल रिपेयर सर्विस';
+      instructionsInput.value = defaultInstr;
+    }
+    if (estMinsInput) estMinsInput.value = 45;
+
+    // 3. Render Employee List with Pending Jobs Count
+    filterAssignEmployees('');
+
+    // 4. Default to Immediate
+    setAssignScheduleType('immediate');
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeWorkAssignmentModal() {
+    const modal = document.getElementById('work-assignment-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function setAssignScheduleType(type) {
+    currentAssignScheduleType = type;
+    const immBtn = document.getElementById('assign-type-imm');
+    const schBtn = document.getElementById('assign-type-sch');
+    const container = document.getElementById('assign-schedule-container');
+    const dtInput = document.getElementById('assign-schedule-datetime');
+
+    if (type === 'immediate') {
+      if (immBtn) {
+        immBtn.className = 'p-2.5 rounded-xl border font-bold text-center transition bg-blue-600 text-white border-blue-600 cursor-pointer';
+      }
+      if (schBtn) {
+        schBtn.className = 'p-2.5 rounded-xl border font-bold text-center transition bg-white text-slate-700 border-slate-300 hover:bg-slate-50 cursor-pointer';
+      }
+      if (container) container.classList.add('hidden');
+    } else {
+      if (schBtn) {
+        schBtn.className = 'p-2.5 rounded-xl border font-bold text-center transition bg-blue-600 text-white border-blue-600 cursor-pointer';
+      }
+      if (immBtn) {
+        immBtn.className = 'p-2.5 rounded-xl border font-bold text-center transition bg-white text-slate-700 border-slate-300 hover:bg-slate-50 cursor-pointer';
+      }
+      if (container) container.classList.remove('hidden');
+      if (dtInput && !dtInput.value) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 30);
+        dtInput.value = now.toISOString().slice(0, 16);
+      }
+    }
+    updateAssignWhatsAppLink();
+  }
+
+  function filterAssignEmployees(query) {
+    const listContainer = document.getElementById('assign-emp-list');
+    if (!listContainer) return;
+
+    const q = (query || '').trim().toLowerCase();
+    const staffList = (state.staff || []).filter(s => s.active !== false);
+
+    const filtered = staffList.filter(s => 
+      !q || s.name.toLowerCase().includes(q) || (s.phone && s.phone.includes(q)) || (s.roleLabel && s.roleLabel.toLowerCase().includes(q))
+    );
+
+    listContainer.innerHTML = filtered.map(s => {
+      // Calculate pending jobs assigned to this employee
+      const pendingJobsCount = (state.jobs || []).filter(j => 
+        j.status !== 'ready' && j.status !== 'delivered' && 
+        (j.assignedTo === s.name || j.assignedTo === s.id || (j.assignedTo && j.assignedTo.includes(s.name.split(' ')[0])))
+      ).length;
+
+      const badgeColor = pendingJobsCount === 0 ? 'bg-emerald-100 text-emerald-800' : pendingJobsCount <= 2 ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800';
+
+      return `
+        <div onclick="window.MMS_APP.selectAssignEmployee('${s.id}', '${s.name}', '${s.phone}')" class="assign-emp-card p-2 rounded-lg bg-white hover:bg-blue-50 border border-slate-200 cursor-pointer flex items-center justify-between transition text-xs">
+          <div>
+            <span class="font-bold text-slate-900">${s.name}</span>
+            <span class="text-[10px] text-slate-500 ml-1">(${s.phone}) • ${s.roleLabel || s.role}</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${badgeColor}">
+            ${pendingJobsCount} काम पेंडिंग
+          </span>
+        </div>
+      `;
+    }).join('') || '<div class="p-3 text-center text-slate-400 text-xs">कोई कर्मचारी नहीं मिला</div>';
+
+    // Auto-select first if none selected
+    if (filtered.length > 0 && !document.getElementById('assign-selected-emp-id').value) {
+      selectAssignEmployee(filtered[0].id, filtered[0].name, filtered[0].phone);
+    }
+  }
+
+  function selectAssignEmployee(id, name, phone) {
+    const idInput = document.getElementById('assign-selected-emp-id');
+    const nameInput = document.getElementById('assign-selected-emp-name');
+    const phoneInput = document.getElementById('assign-selected-emp-phone');
+    const searchInput = document.getElementById('assign-emp-search');
+
+    if (idInput) idInput.value = id;
+    if (nameInput) nameInput.value = name;
+    if (phoneInput) phoneInput.value = phone;
+    if (searchInput) searchInput.value = name;
+
+    // Highlight active card
+    document.querySelectorAll('.assign-emp-card').forEach(el => {
+      if (el.textContent.includes(name)) {
+        el.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+      } else {
+        el.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50');
+      }
+    });
+
+    updateAssignWhatsAppLink();
+  }
+
+  function updateAssignWhatsAppLink() {
+    const waBtn = document.getElementById('assign-whatsapp-btn');
+    if (!waBtn) return;
+
+    const empName = document.getElementById('assign-selected-emp-name')?.value || 'स्टाफ';
+    const empPhone = document.getElementById('assign-selected-emp-phone')?.value || '7905859701';
+    const instructions = document.getElementById('assign-instructions-input')?.value || 'मोबाइल रिपेयरिंग कार्य';
+    const estMins = document.getElementById('assign-est-mins-input')?.value || '45';
+    const timing = currentAssignScheduleType === 'immediate' ? 'तुरंत (Immediately)' : (`शेड्यूल: ${document.getElementById('assign-schedule-datetime')?.value || 'तय समय पर'}`);
+
+    const waMsg = `*Monu Mobile Solution - नया वर्क असाइनमेंट*` +
+      `\n\nनमस्ते *${empName}*! आपके लिए नया रिपेयर जॉब असाइन किया गया है:` +
+      `\n\n📋 *टोकन / इनवॉइस:* ${currentAssignToken || 'MMS-JOB'}` +
+      `\n🔧 *काम का विवरण:* ${instructions}` +
+      `\n⏰ *शेड्यूल समय:* ${timing}` +
+      `\n⌛ *अनुमानित समय:* ${estMins} मिनट` +
+      `\n\n👉 *काम शुरू करने के लिए पोर्टल खोलें:*\nhttps://monumobile.in\n\n(काम शुरू होने पर 'Start Work' और समाप्त होने पर 'Finish / Done' बटन अवश्य दबाएं।)`;
+
+    waBtn.href = `https://wa.me/91${empPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg)}`;
+  }
+
+  function confirmWorkAssignment() {
+    if (!currentAssignToken) return;
+
+    const empId = document.getElementById('assign-selected-emp-id')?.value;
+    const empName = document.getElementById('assign-selected-emp-name')?.value;
+    const instructions = document.getElementById('assign-instructions-input')?.value || 'रिपेयरिंग सर्विस';
+    const estMins = Number(document.getElementById('assign-est-mins-input')?.value) || 45;
+    const scheduleTime = currentAssignScheduleType === 'scheduled' ? document.getElementById('assign-schedule-datetime')?.value : null;
+
+    if (!empName) {
+      alert('कृपया कार्य सौंपने के लिए कर्मचारी चुनें!');
+      return;
+    }
+
+    const curUser = state.currentUser || { name: 'मोनू जी (Monu)', role: 'admin' };
+    const nowIso = new Date().toISOString();
+    const nowFormatted = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 1. Update Job record in state.jobs
+    let targetJob = (state.jobs || []).find(j => j.token === currentAssignToken || j.tokenNo === currentAssignToken || j.id === currentAssignToken);
+    if (!targetJob) {
+      targetJob = {
+        token: currentAssignToken,
+        tokenNo: currentAssignToken,
+        customerName: currentAssignRecord?.customerName || 'Walk-in',
+        customerPhone: currentAssignRecord?.customerPhone || '',
+        device: instructions,
+        issue: instructions,
+        estimatedCost: currentAssignRecord?.totalAmount || currentAssignRecord?.estimatedCost || 0,
+        status: 'received',
+        createdAt: nowFormatted
+      };
+      state.jobs.unshift(targetJob);
+    }
+
+    targetJob.assignedTo = empName;
+    targetJob.assignedToId = empId;
+    targetJob.assignedByName = curUser.name;
+    targetJob.assignedAt = nowFormatted;
+    targetJob.scheduledAt = scheduleTime || nowFormatted;
+    targetJob.workInstructions = instructions;
+    targetJob.estimatedMins = estMins;
+    targetJob.receivedByName = targetJob.receivedByName || curUser.name;
+    targetJob.receivedAt = targetJob.receivedAt || nowFormatted;
+
+    // 2. Also link into state.invoices if matches
+    const targetInv = (state.invoices || []).find(i => i.invoiceNo === currentAssignToken || i.billNo === currentAssignToken);
+    if (targetInv) {
+      targetInv.assignedTo = empName;
+      targetInv.workInstructions = instructions;
+      targetInv.estimatedMins = estMins;
+      targetInv.receivedByName = targetInv.receivedByName || curUser.name;
+      targetInv.receivedAt = targetInv.receivedAt || nowFormatted;
+    }
+
+    persistData();
+
+    // 3. Sync to Cloudflare D1 & KV
+    if (typeof CloudSync !== 'undefined') {
+      CloudSync.syncWorkAssignment({
+        token: currentAssignToken,
+        assignedTo: empName,
+        assignedByName: curUser.name,
+        assignedAt: nowIso,
+        scheduledAt: scheduleTime,
+        workInstructions: instructions,
+        estimatedMins: estMins,
+        receivedByName: targetJob.receivedByName,
+        receivedAt: targetJob.receivedAt
+      });
+    }
+
+    closeWorkAssignmentModal();
+    renderJobCardsManager();
+    alert(`✅ काम सफलतापूर्वक [${empName}] को सौंप दिया गया!`);
+  }
+
+  // =========================================================================
+  // EMPLOYEE WORK ACTION BUTTONS (Start Work & Finish / Done)
+  // =========================================================================
+  function startEmployeeJob(token) {
+    const job = (state.jobs || []).find(j => j.token === token || j.tokenNo === token);
+    if (!job) return;
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    job.startedAt = `${getTodayDateStr()} ${timeStr}`;
+    job.startedAtIso = now.toISOString();
+    job.status = 'in-progress';
+    job.updatedAt = 'Just now';
+
+    persistData();
+
+    if (typeof CloudSync !== 'undefined') {
+      CloudSync.updateJobStep(token, 'start_work', { timestamp: job.startedAtIso });
+    }
+
+    renderEmployeeJobAlerts();
+    renderJobCardsManager();
+    alert(`▶️ कार्य शुरू हो गया! कस्टमर ट्रैकिंग स्टेटस 'In Progress' में बदल गया है।`);
+  }
+
+  function finishEmployeeJob(token) {
+    const job = (state.jobs || []).find(j => j.token === token || j.tokenNo === token);
+    if (!job) return;
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    job.completedAt = `${getTodayDateStr()} ${timeStr}`;
+    job.completedAtIso = now.toISOString();
+    job.status = 'ready';
+    job.updatedAt = 'Just now';
+
+    // Calculate actual duration in minutes
+    let startTimestamp = job.startedAtIso ? new Date(job.startedAtIso).getTime() : now.getTime() - (35 * 60000);
+    const durationMins = Math.max(1, Math.round((now.getTime() - startTimestamp) / 60000));
+    job.actualDurationMins = durationMins;
+
+    persistData();
+
+    if (typeof CloudSync !== 'undefined') {
+      CloudSync.updateJobStep(token, 'finish_work', { 
+        completedAt: job.completedAtIso,
+        actualDurationMins: durationMins
+      });
+    }
+
+    renderEmployeeJobAlerts();
+    renderJobCardsManager();
+    alert(`✅ बधाई! कार्य पूर्ण हुआ (${durationMins} मिनट लगे)। कस्टमर ट्रैकिंग स्टेटस 'Ready for Pickup' अपडेट हो गया है।`);
+  }
+
+  function resetEmployeeDevice(empId) {
+    if (!confirm('क्या आप सचमुच इस कर्मचारी का डिवाइस लॉक रीसेट करना चाहते हैं?\n\nरीसेट के बाद कर्मचारी नए फोन से लॉगिन कर सकेगा।')) return;
+    
+    const emp = (state.staff || []).find(s => s.id === empId);
+    if (emp) {
+      emp.deviceToken = null;
+      emp.deviceModel = null;
+      emp.deviceLockedAt = null;
+      persistData();
+    }
+
+    if (typeof CloudSync !== 'undefined') {
+      CloudSync.resetDeviceLock(empId);
+    }
+
+    renderSettingsModule();
+    renderAttendanceModule();
+    alert('✅ कर्मचारी का डिवाइस लॉक रीसेट कर दिया गया!');
+  }
+
+  function renderEmployeeJobAlerts() {
+    const container = document.getElementById('portal-employee-jobs-banner');
+    if (!container) return;
+
+    const curUser = state.currentUser;
+    if (!curUser) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const role = (curUser.role || '').toLowerCase();
+    const isEmployee = role === 'technician' || role === 'employee';
+
+    // Get active assigned jobs for this user
+    const myJobs = (state.jobs || []).filter(j => 
+      j.status !== 'delivered' && 
+      (j.assignedTo === curUser.name || j.assignedTo === curUser.id || (j.assignedTo && j.assignedTo.includes(curUser.name.split(' ')[0])))
+    );
+
+    if (myJobs.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-lg space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-white/20">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <h4 class="text-sm font-black tracking-wide">⚡ आपके असाइन किए गए कार्य (${myJobs.length} एक्टिव)</h4>
+          </div>
+          <span class="text-xs bg-white/10 px-2 py-0.5 rounded-full text-blue-200 font-bold">Live Task Panel</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          ${myJobs.map(job => {
+            const isStarted = job.status === 'in-progress' || job.startedAt;
+            const isDone = job.status === 'ready';
+
+            return `
+              <div class="p-3 rounded-xl bg-white/10 border border-white/15 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono font-black text-blue-300">${job.token}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${isDone ? 'bg-emerald-500/30 text-emerald-300' : isStarted ? 'bg-amber-500/30 text-amber-300' : 'bg-blue-500/30 text-blue-300'}">
+                    ${isDone ? '✅ कार्य पूर्ण (Ready)' : isStarted ? '🔧 कार्य चालू (In-Progress)' : '⏳ नया काम मिला'}
+                  </span>
+                </div>
+
+                <div>
+                  <p class="font-bold text-white">${job.device || 'मोबाइल रिपेयर'}</p>
+                  <p class="text-slate-300 text-[11px]">${job.workInstructions || job.issue || 'पार्ट्स व सर्विस'}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1 text-[11px] text-slate-300 pt-1 border-t border-white/10">
+                  <span>अनुमानित समय: <strong>${job.estimatedMins || 45} मिनट</strong></span>
+                  <span>शेड्यूल: <strong>${job.scheduledAt || 'तुरंत'}</strong></span>
+                </div>
+
+                <!-- Two Distinct Action Buttons -->
+                <div class="pt-1 flex items-center gap-2">
+                  ${!isStarted ? `
+                    <button onclick="window.MMS_APP.startEmployeeJob('${job.token}')" class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black shadow transition flex items-center justify-center gap-1 active:scale-95 cursor-pointer">
+                      <span>▶️ Start Work (काम शुरू करें)</span>
+                    </button>
+                  ` : !isDone ? `
+                    <button onclick="window.MMS_APP.finishEmployeeJob('${job.token}')" class="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-black shadow transition flex items-center justify-center gap-1 active:scale-95 cursor-pointer">
+                      <span>✅ Finish / Done (काम पूरा हुआ)</span>
+                    </button>
+                  ` : `
+                    <div class="w-full text-center py-1.5 bg-emerald-500/20 text-emerald-300 rounded-lg font-bold text-[11px]">
+                      🎉 आपने यह काम पूरा कर लिया है (${job.actualDurationMins || 38} मिनट में)!
+                    </div>
+                  `}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+
+  function exportAttendanceCSV() {
+    const list = state.attendance || [];
+    if (list.length === 0) {
+      alert('कोई अटेंडेंस डेटा उपलब्ध नहीं है!');
+      return;
+    }
+
+    let csv = "ID,Employee,Branch,Date,In Time,Out Time,Hours,Status,Late Mark,Distance,Device Locked\n";
+    list.forEach(a => {
+      csv += `"${a.id}","${a.empName || a.employeeName || 'Staff'}","${a.branchName || 'Lab'}","${a.date}","${a.inTime || ''}","${a.outTime || ''}",${a.hoursWorked || a.duration || 0},"${a.status}","${a.isLate ? 'YES (' + (a.lateMinutes || 0) + 'm)' : 'NO'}",${a.distance || 0},"${a.deviceToken ? 'YES' : 'NO'}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `MMS_Attendance_Report_${getTodayDateStr()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }

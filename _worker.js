@@ -43,6 +43,49 @@ export default {
 
     
     // 2. Public Live Token & Mobile Tracker API: /api/track?q=...
+    
+    // 2.1 R2 / Cloud Image Upload Endpoint: /api/attendance/selfie
+    if (url.pathname === "/api/attendance/selfie" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const { photo, empId, token } = body;
+        if (!photo) return jsonResponse({ success: false, error: "Photo data required" }, 400);
+
+        const photoId = `selfie_${empId || 'emp'}_${Date.now()}.jpg`;
+
+        // If Cloudflare R2 is bound as env.R2 or env.PHOTO_BUCKET
+        if (env.R2 || env.PHOTO_BUCKET) {
+          const bucket = env.R2 || env.PHOTO_BUCKET;
+          const base64Data = photo.replace(/^data:image\/\w+;base64,/, "");
+          const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+          await bucket.put(photoId, buffer, {
+            httpMetadata: { contentType: "image/jpeg" }
+          });
+          return jsonResponse({ success: true, photoUrl: `/api/attendance/selfie/${photoId}` });
+        }
+
+        // Resilient free-tier fallback: Return compressed image data directly
+        return jsonResponse({ success: true, photoUrl: photo });
+      } catch (e) {
+        return jsonResponse({ success: false, error: e.message }, 500);
+      }
+    }
+
+    if (url.pathname.startsWith("/api/attendance/selfie/") && request.method === "GET") {
+      const key = url.pathname.replace("/api/attendance/selfie/", "");
+      if ((env.R2 || env.PHOTO_BUCKET) && key) {
+        const bucket = env.R2 || env.PHOTO_BUCKET;
+        const object = await bucket.get(key);
+        if (object) {
+          const headers = new Headers();
+          object.writeHttpMetadata(headers);
+          headers.set("etag", object.httpEtag);
+          return new Response(object.body, { headers });
+        }
+      }
+      return jsonResponse({ error: "Photo not found" }, 404);
+    }
+
     if (url.pathname === "/api/track") {
       const q = (url.searchParams.get("q") || "").trim().toUpperCase();
       if (!q) {
@@ -122,7 +165,18 @@ export default {
               estCost: dbJob.est_cost,
               finalCost: dbJob.final_cost,
               status: dbJob.status,
-              branchName: dbJob.branch_name
+              branchName: dbJob.branch_name,
+              receivedByName: dbJob.received_by_name,
+              receivedAt: dbJob.received_at,
+              assignedTo: dbJob.assigned_to,
+              assignedByName: dbJob.assigned_by_name,
+              assignedAt: dbJob.assigned_at,
+              scheduledAt: dbJob.scheduled_at,
+              workInstructions: dbJob.work_instructions,
+              estimatedMins: dbJob.estimated_mins,
+              startedAt: dbJob.started_at,
+              completedAt: dbJob.completed_at,
+              actualDurationMins: dbJob.actual_duration_mins
             };
           } else {
             const dbInv = await env.DB.prepare(`
@@ -472,6 +526,158 @@ export default {
             if (raw) {
               try { currentKv = JSON.parse(raw); } catch(e) {}
             }
+          }
+
+          
+          if (action === 'bind_device') {
+            const { empId, deviceToken, deviceModel } = payload;
+            if (!empId || !deviceToken) return jsonResponse({ success: false, error: "empId and deviceToken required" }, 400);
+            
+            let boundSuccess = true;
+            let lockedToOther = false;
+            let existingToken = null;
+
+            if (env.DB) {
+              try {
+                const emp = await env.DB.prepare("SELECT * FROM employees WHERE id = ? OR phone = ?").bind(empId, empId).first();
+                if (emp) {
+                  if (emp.device_token && emp.device_token !== deviceToken) {
+                    lockedToOther = true;
+                    existingToken = emp.device_token;
+                  } else {
+                    await env.DB.prepare("UPDATE employees SET device_token = ?, device_model = ?, device_locked_at = CURRENT_TIMESTAMP WHERE id = ?").bind(deviceToken, deviceModel || 'Mobile Device', emp.id).run();
+                  }
+                }
+              } catch(e) { console.warn("bind_device db err:", e.message); }
+            }
+
+            if (lockedToOther) {
+              return jsonResponse({ success: false, locked: true, error: "🚫 यह अकाउंट पहले से दूसरे फोन से लॉक है। कृपया एडमिन से डिवाइस लॉक रीसेट करवाएं।" }, 403);
+            }
+
+            return jsonResponse({ success: true, bound: true, message: "डिवाइस सफलतापूर्वक लॉक हो गया।" });
+          }
+
+          if (action === 'reset_device_lock') {
+            const { empId, adminPhone } = payload;
+            if (!empId) return jsonResponse({ success: false, error: "empId required" }, 400);
+
+            if (env.DB) {
+              try {
+                await env.DB.prepare("UPDATE employees SET device_token = NULL, device_model = NULL, device_locked_at = NULL WHERE id = ? OR phone = ?").bind(empId, empId).run();
+              } catch(e) { console.warn("reset_device_lock db err:", e.message); }
+            }
+
+            return jsonResponse({ success: true, message: "डिवाइस लॉक सफलतापूर्वक रीसेट कर दिया गया।" });
+          }
+
+          if (action === 'assign_work') {
+            const assignment = payload.assignment || payload.data;
+            if (!assignment || !assignment.token) return jsonResponse({ success: false, error: "Missing assignment data" }, 400);
+
+            const token = assignment.token;
+            const assignedTo = assignment.assignedTo || '';
+            const assignedByName = assignment.assignedByName || 'Admin';
+            const assignedAt = assignment.assignedAt || new Date().toISOString();
+            const scheduledAt = assignment.scheduledAt || null;
+            const workInstructions = assignment.workInstructions || '';
+            const estimatedMins = Number(assignment.estimatedMins) || 45;
+            const receivedByName = assignment.receivedByName || assignedByName;
+            const receivedAt = assignment.receivedAt || assignedAt;
+
+            if (env.DB) {
+              try {
+                await env.DB.prepare(`
+                  UPDATE repair_jobs SET 
+                    assigned_to = ?,
+                    assigned_by_name = ?,
+                    assigned_at = ?,
+                    scheduled_at = ?,
+                    work_instructions = ?,
+                    estimated_mins = ?,
+                    received_by_name = COALESCE(received_by_name, ?),
+                    received_at = COALESCE(received_at, ?),
+                    updated_at = CURRENT_TIMESTAMP
+                  WHERE upper(token_no) = upper(?) OR upper(id) = upper(?)
+                `).bind(
+                  assignedTo, assignedByName, assignedAt, scheduledAt, workInstructions,
+                  estimatedMins, receivedByName, receivedAt, token, token
+                ).run();
+              } catch(e) { console.warn("assign_work db err:", e.message); }
+            }
+
+            if (env.KV) {
+              const jobList = currentKv.jobs || [];
+              const idx = jobList.findIndex(j => (j.token && j.token.toUpperCase() === token.toUpperCase()) || (j.tokenNo && j.tokenNo.toUpperCase() === token.toUpperCase()));
+              if (idx >= 0) {
+                jobList[idx] = {
+                  ...jobList[idx],
+                  assignedTo,
+                  assignedByName,
+                  assignedAt,
+                  scheduledAt,
+                  workInstructions,
+                  estimatedMins,
+                  receivedByName: jobList[idx].receivedByName || receivedByName,
+                  receivedAt: jobList[idx].receivedAt || receivedAt
+                };
+                currentKv.jobs = jobList;
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+            }
+
+            return jsonResponse({ success: true, message: "काम सफलतापूर्वक असाइन हो गया।" });
+          }
+
+          if (action === 'update_job_step') {
+            const { token, step, timestamp, completedAt, actualDurationMins } = payload;
+            if (!token || !step) return jsonResponse({ success: false, error: "token and step required" }, 400);
+
+            let newStatus = 'in-progress';
+            if (step === 'start_work') newStatus = 'in-progress';
+            if (step === 'finish_work') newStatus = 'ready';
+
+            if (env.DB) {
+              try {
+                if (step === 'start_work') {
+                  await env.DB.prepare(`
+                    UPDATE repair_jobs SET 
+                      started_at = ?,
+                      status = 'in-progress',
+                      updated_at = CURRENT_TIMESTAMP
+                    WHERE upper(token_no) = upper(?) OR upper(id) = upper(?)
+                  `).bind(timestamp || new Date().toISOString(), token, token).run();
+                } else if (step === 'finish_work') {
+                  await env.DB.prepare(`
+                    UPDATE repair_jobs SET 
+                      completed_at = ?,
+                      actual_duration_mins = ?,
+                      status = 'ready',
+                      updated_at = CURRENT_TIMESTAMP
+                    WHERE upper(token_no) = upper(?) OR upper(id) = upper(?)
+                  `).bind(completedAt || new Date().toISOString(), Number(actualDurationMins) || 0, token, token).run();
+                }
+              } catch(e) { console.warn("update_job_step db err:", e.message); }
+            }
+
+            if (env.KV) {
+              const jobList = currentKv.jobs || [];
+              const idx = jobList.findIndex(j => (j.token && j.token.toUpperCase() === token.toUpperCase()) || (j.tokenNo && j.tokenNo.toUpperCase() === token.toUpperCase()));
+              if (idx >= 0) {
+                if (step === 'start_work') {
+                  jobList[idx].startedAt = timestamp || new Date().toISOString();
+                  jobList[idx].status = 'in-progress';
+                } else if (step === 'finish_work') {
+                  jobList[idx].completedAt = completedAt || new Date().toISOString();
+                  jobList[idx].actualDurationMins = Number(actualDurationMins) || 0;
+                  jobList[idx].status = 'ready';
+                }
+                currentKv.jobs = jobList;
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+            }
+
+            return jsonResponse({ success: true, status: newStatus, message: "जॉब स्टेटस अपडेट हुआ।" });
           }
 
           if (action === 'save_attendance') {
