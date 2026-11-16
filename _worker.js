@@ -461,16 +461,23 @@ export default {
               paidTo: r.paid_to, paymentMode: r.payment_mode, date: r.date, createdAt: r.created_at
             }));
 
-            const fetchedData = { attendance, invoices, jobs, expenses };
+            let fullData = { attendance, invoices, jobs, expenses };
             if (env.KV) {
-              await env.KV.put("monu_master_sync", JSON.stringify(fetchedData));
+              const cached = await env.KV.get("monu_master_sync");
+              if (cached) {
+                try {
+                  const parsed = JSON.parse(cached);
+                  fullData = { ...parsed, ...fullData };
+                } catch(e) {}
+              }
+              await env.KV.put("monu_master_sync", JSON.stringify(fullData));
             }
 
             return jsonResponse({
               success: true,
               source: "enterprise_db",
               timestamp: new Date().toISOString(),
-              data: fetchedData
+              data: fullData
             });
           }
 
@@ -503,6 +510,107 @@ export default {
           }
 
           
+          if (action === 'sync_master_state') {
+            const data = payload.data || {};
+            if (env.KV) {
+              if (Array.isArray(data.inventory)) {
+                data.inventory.forEach(i => {
+                  if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
+                });
+                currentKv.inventory = data.inventory;
+              }
+              if (Array.isArray(data.invoices)) currentKv.invoices = data.invoices.slice(0, 200);
+              if (Array.isArray(data.jobs)) currentKv.jobs = data.jobs.slice(0, 200);
+              if (Array.isArray(data.expenses)) currentKv.expenses = data.expenses.slice(0, 200);
+              if (Array.isArray(data.attendance)) currentKv.attendance = data.attendance.slice(0, 200);
+              if (Array.isArray(data.advances)) currentKv.advances = data.advances.slice(0, 200);
+              if (Array.isArray(data.staff)) currentKv.staff = data.staff;
+              if (Array.isArray(data.contacts)) currentKv.contacts = data.contacts.slice(0, 300);
+              if (Array.isArray(data.stockTransfers)) currentKv.transfers = data.stockTransfers.slice(0, 100);
+
+              await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+            }
+            return jsonResponse({ success: true, message: "Master state synced directly to Enterprise Cloud" });
+          }
+
+          if (action === 'delete_invoice') {
+            const { id } = payload;
+            if (id) {
+              if (env.KV && currentKv.invoices) {
+                currentKv.invoices = currentKv.invoices.filter(i => i.id !== id && i.invoiceNo !== id && i.billNo !== id);
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+              if (env.DB) {
+                try {
+                  await env.DB.prepare("DELETE FROM invoices WHERE id = ? OR bill_no = ?").bind(id, id).run();
+                } catch(e) {}
+              }
+              return jsonResponse({ success: true, message: "Invoice deleted from cloud" });
+            }
+            return jsonResponse({ success: false, error: "Missing invoice id" }, 400);
+          }
+
+          if (action === 'delete_job') {
+            const { id } = payload;
+            if (id) {
+              if (env.KV && currentKv.jobs) {
+                currentKv.jobs = currentKv.jobs.filter(j => j.id !== id && j.token !== id && j.tokenNo !== id);
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+              if (env.DB) {
+                try {
+                  await env.DB.prepare("DELETE FROM repair_jobs WHERE id = ? OR token_no = ?").bind(id, id).run();
+                } catch(e) {}
+              }
+              return jsonResponse({ success: true, message: "Job deleted from cloud" });
+            }
+            return jsonResponse({ success: false, error: "Missing job id" }, 400);
+          }
+
+          if (action === 'delete_expense') {
+            const { id } = payload;
+            if (id) {
+              if (env.KV && currentKv.expenses) {
+                currentKv.expenses = currentKv.expenses.filter(e => e.id !== id);
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+              if (env.DB) {
+                try {
+                  await env.DB.prepare("DELETE FROM expenses WHERE id = ?").bind(id).run();
+                } catch(e) {}
+              }
+              return jsonResponse({ success: true, message: "Expense deleted from cloud" });
+            }
+            return jsonResponse({ success: false, error: "Missing expense id" }, 400);
+          }
+
+          if (action === 'sync_advances') {
+            const advancesList = payload.advances || payload.data;
+            if (Array.isArray(advancesList) && env.KV) {
+              currentKv.advances = advancesList;
+              await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              return jsonResponse({ success: true, message: "Advances synced to cloud" });
+            }
+          }
+
+          if (action === 'sync_transfers') {
+            const trfList = payload.transfers || payload.data;
+            if (Array.isArray(trfList) && env.KV) {
+              currentKv.transfers = trfList;
+              await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              return jsonResponse({ success: true, message: "Transfers synced to cloud" });
+            }
+          }
+
+          if (action === 'sync_contacts') {
+            const contactsList = payload.contacts || payload.data;
+            if (Array.isArray(contactsList) && env.KV) {
+              currentKv.contacts = contactsList;
+              await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              return jsonResponse({ success: true, message: "Contacts synced to cloud" });
+            }
+          }
+
           if (action === 'bind_device') {
             const { empId, deviceToken, deviceModel } = payload;
             if (!empId || !deviceToken) return jsonResponse({ success: false, error: "empId and deviceToken required" }, 400);

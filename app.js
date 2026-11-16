@@ -326,6 +326,39 @@ function filterCategoryDropdown(inputId, query) {
             }
           }
 
+          if (resData.data.transfers && Array.isArray(resData.data.transfers)) {
+            const oldStr = JSON.stringify(state.stockTransfers || []);
+            const newStr = JSON.stringify(resData.data.transfers);
+            if (oldStr !== newStr) {
+              state.stockTransfers = resData.data.transfers;
+              try { localStorage.setItem('mms_stock_transfers', newStr); } catch(e) {}
+              if (state.activeAdminTab === 'transfer' && typeof renderStockTransferModule === 'function') {
+                renderStockTransferModule();
+              }
+              changed = true;
+            }
+          }
+
+          if (resData.data.advances && Array.isArray(resData.data.advances)) {
+            const oldStr = JSON.stringify(state.advances || []);
+            const newStr = JSON.stringify(resData.data.advances);
+            if (oldStr !== newStr) {
+              state.advances = resData.data.advances;
+              try { localStorage.setItem(STORAGE_KEYS.ADVANCES, newStr); } catch(e) {}
+              changed = true;
+            }
+          }
+
+          if (resData.data.contacts && Array.isArray(resData.data.contacts)) {
+            const oldStr = JSON.stringify(state.contacts || []);
+            const newStr = JSON.stringify(resData.data.contacts);
+            if (oldStr !== newStr) {
+              state.contacts = resData.data.contacts;
+              try { localStorage.setItem(STORAGE_KEYS.CONTACTS, newStr); } catch(e) {}
+              changed = true;
+            }
+          }
+
           if (expenses && expenses.length > 0) {
             const oldStr = JSON.stringify(state.expenses || []);
             const map = new Map();
@@ -507,6 +540,94 @@ function filterCategoryDropdown(inputId, query) {
       } catch(e) {
         console.warn('Failed syncing inventory to cloud:', e);
       }
+    },
+
+    pushMasterSync: (() => {
+      let timer = null;
+      return function() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(async () => {
+          if (typeof fetch === 'undefined') return;
+          try {
+            const payload = {
+              action: 'sync_master_state',
+              data: {
+                inventory: state.inventory,
+                invoices: state.invoices,
+                jobs: state.jobs,
+                expenses: state.expenses,
+                attendance: state.attendance,
+                advances: state.advances,
+                staff: state.staff,
+                contacts: state.contacts,
+                stockTransfers: state.stockTransfers || []
+              }
+            };
+            await fetch('/api/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            CloudSync.updateSyncBadge('saved');
+            CloudSync.broadcastLocalChange('master_sync');
+          } catch(e) {
+            console.warn('⚡ [CloudSync] Master state push notice:', e);
+          }
+        }, 80);
+      };
+    })(),
+
+    async deleteInvoice(id) {
+      if (typeof fetch === 'undefined' || !id) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete_invoice', id })
+        });
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('delete_invoice');
+      } catch(e) { console.warn('Delete invoice cloud failed:', e); }
+    },
+
+    async deleteJob(id) {
+      if (typeof fetch === 'undefined' || !id) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete_job', id })
+        });
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('delete_job');
+      } catch(e) { console.warn('Delete job cloud failed:', e); }
+    },
+
+    async deleteExpense(id) {
+      if (typeof fetch === 'undefined' || !id) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete_expense', id })
+        });
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('delete_expense');
+      } catch(e) { console.warn('Delete expense cloud failed:', e); }
+    },
+
+    async syncTransfers(trfList) {
+      const list = trfList || state.stockTransfers || [];
+      if (typeof fetch === 'undefined' || !Array.isArray(list)) return;
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sync_transfers', transfers: list })
+        });
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('transfers');
+      } catch(e) { console.warn('Failed syncing transfers to cloud:', e); }
     },
 
     updateSyncBadge(status) {
@@ -701,10 +822,20 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function persistData() {
-    localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
-    localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(state.jobs));
-    localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(state.invoices));
-    localStorage.setItem(STORAGE_KEYS.CONTACTS, JSON.stringify(state.contacts));
+    try {
+      localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
+      localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(state.jobs));
+      localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(state.invoices));
+      localStorage.setItem(STORAGE_KEYS.CONTACTS, JSON.stringify(state.contacts));
+      if (state.expenses) localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(state.expenses));
+      if (state.advances) localStorage.setItem(STORAGE_KEYS.ADVANCES, JSON.stringify(state.advances));
+      if (state.stockTransfers) localStorage.setItem('mms_stock_transfers', JSON.stringify(state.stockTransfers));
+    } catch(e) {}
+
+    // Pure Cloud-Native Sync: Instantly push state changes to Cloudflare Enterprise Cloud
+    if (typeof CloudSync !== 'undefined' && CloudSync.pushMasterSync) {
+      CloudSync.pushMasterSync();
+    }
   }
 
   // --- Translation & Localization Engine ---
@@ -3503,6 +3634,7 @@ function filterCategoryDropdown(inputId, query) {
     });
 
     persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.pushJob) CloudSync.pushJob(state.jobs[0]);
     if (typeof CloudSync !== "undefined" && CloudSync.syncInventory) {
       CloudSync.syncInventory(state.inventory);
     }
@@ -5461,6 +5593,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       job.status = newStatus;
       job.updatedAt = 'Just now';
       persistData();
+      if (typeof CloudSync !== 'undefined' && CloudSync.pushJob) {
+        CloudSync.pushJob(job);
+      }
       alert(`✅ टोकन ${token} का स्टेटस अपडेट हो गया!`);
     }
   }
@@ -5500,6 +5635,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     });
 
     persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.pushJob) CloudSync.pushJob(state.jobs[0]);
     closeModal(dom.newJobModal);
     document.getElementById('new-job-form').reset();
     renderJobCardsManager();
@@ -9128,7 +9264,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function deleteExpense(id) {
     if (!confirm('क्या आप वाकई इस खर्च रिकॉर्ड को हटाना चाहते हैं?')) return;
     state.expenses = state.expenses.filter(e => e.id !== id);
-    localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(state.expenses));
+    try { localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(state.expenses)); } catch(e) {}
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteExpense) {
+      CloudSync.deleteExpense(id);
+    }
+    persistData();
     renderExpensesModule();
   }
 
@@ -9350,11 +9490,19 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     // 1. Remove from jobs
     state.jobs = state.jobs.filter(j => j.token !== id && j.id !== id);
-    localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(state.jobs));
+    try { localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(state.jobs)); } catch(e) {}
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteJob) {
+      CloudSync.deleteJob(id);
+    }
 
     // 2. Remove from invoices
     state.invoices = state.invoices.filter(inv => inv.invoiceNo !== id && inv.id !== id);
-    localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(state.invoices));
+    try { localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(state.invoices)); } catch(e) {}
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteInvoice) {
+      CloudSync.deleteInvoice(id);
+    }
+
+    persistData();
 
     // 3. Re-render active view
     if (state.activeAdminTab === 'jobs') renderJobCardsManager();
