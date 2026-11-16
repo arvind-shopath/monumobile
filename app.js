@@ -1688,24 +1688,24 @@ function filterCategoryDropdown(inputId, query) {
 
   // --- Instagram Live Repair Showcase Feed ---
   function renderInstagramFeed() {
-    const container = document.getElementById('instagram-feed-container');
+    const container = document.getElementById('instagram-feed-container') || document.getElementById('instagram-grid');
     if (!container) return;
 
     const posts = [
-      { img: 'images/user_img_9.jpg', title: 'OCA डिस्प्ले लेमिनेशन लैब (Hazratganj)', date: 'आज' },
-      { img: 'images/user_img_2.jpg', title: 'मदरबोर्ड IC लेवल माइक्रो-सोल्डरिंग', date: 'कल' },
-      { img: 'images/user_img_11.jpg', title: 'iPhone स्क्रीन रिप्लेसमेंट (100% ओरिजिनल)', date: '2 दिन पहले' },
-      { img: 'images/user_img_6.jpg', title: 'ओरिजिनल बैटरी टेस्टिंग व रिप्लेसमेंट', date: '3 दिन पहले' },
-      { img: 'images/user_img_5.jpg', title: 'मदरबोर्ड IC शील्ड व शॉर्टिंग रिपेयर', date: 'इस हफ्ते' },
-      { img: 'images/user_img_8.jpg', title: 'होलसेल ओरिजिनल मोबाइल एक्सेसरीज डिस्प्ले', date: 'इस हफ्ते' }
+      { img: 'images/insta-1.jpg', title: __L('OCA स्क्रीन लेमिनेशन लैब', 'OCA Screen Lamination Lab'), date: __L('आज', 'Today') },
+      { img: 'images/insta-2.jpg', title: __L('माइक्रो-सोल्डरिंग व IC रीबॉलिंग', 'Micro-Soldering & BGA Reballing'), date: __L('कल', 'Yesterday') },
+      { img: 'images/insta-3.jpg', title: __L('ओरिजिनल बैटरी टेस्टिंग व रिप्लेसमेंट', 'Genuine Battery Replacement'), date: __L('2 दिन पहले', '2 days ago') },
+      { img: 'images/insta-4.jpg', title: __L('थर्मल कैमरा शॉर्टिंग डायग्नोस्टिक्स', 'Thermal Camera Diagnostics'), date: __L('3 दिन पहले', '3 days ago') },
+      { img: 'images/insta-5.jpg', title: __L('Curved AMOLED स्क्रीन फिटिंग', 'Curved AMOLED Display Fitting'), date: __L('इस हफ्ते', 'This week') },
+      { img: 'images/insta-6.jpg', title: __L('एक्सप्रेस रिपेयर लैब हजरतगंज', 'Express Repair Lab Hazratganj'), date: __L('इस हफ्ते', 'This week') }
     ];
 
     container.innerHTML = posts.map(p => `
       <div class="group relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm aspect-square">
         <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-3 text-white">
-          <p class="text-xs font-bold leading-snug">${p.title}</p>
-          <span class="text-[10px] text-slate-300 mt-0.5">${p.date} • @monumobilesolution</span>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-2.5 text-white">
+          <p class="text-[11px] font-bold leading-tight">${p.title}</p>
+          <span class="text-[9px] text-slate-300 mt-0.5">${p.date} • @monumobilesolution</span>
         </div>
       </div>
     `).join('');
