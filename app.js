@@ -8119,9 +8119,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         landmark: isEn ? "(Near Hazratganj Crossing & Ashok Marg, 2nd Floor Sree Rama Towers)" : "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
         timings: isEn ? "12:00 PM - 09:00 PM (Open Daily)" : "12:00 PM - 09:00 PM (रोजाना खुला)",
         phone: "7905859701",
-        gps: "Lat 26.850138°, Long 80.948449°",
-        mapUrl: "https://maps.google.com/maps?q=26.850138,80.948449&t=&z=16&ie=UTF8&iwloc=&output=embed",
-        directMap: "https://maps.google.com/?q=26.850138,80.948449"
+        gps: "Lat 26.8501898°, Long 80.9483763°",
+        mapUrl: "https://maps.google.com/maps?q=26.8501898,80.9483763&t=&z=17&ie=UTF8&iwloc=&output=embed",
+        directMap: "https://www.google.com/maps/place/Monu+Mobile+Solution/@26.8501898,80.9483763,17z/data=!3m1!4b1!4m6!3m5!1s0x399bfdc6a82f28c9:0xf7b5e53c4a9cf571!8m2!3d26.8501898!4d80.9483763!16s%2Fg%2F11jfzjtt5z"
       },
       naka: {
         badge: isEn ? "Naka Hindola Branch (Lucknow)" : "नाका हिंडोला शाखा (लखनऊ)",

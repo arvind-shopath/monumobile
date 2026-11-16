@@ -10,7 +10,7 @@
   <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
   <script>
     (function() {
-      window.MMS_CLIENT_BUILD = "20261116_99";
+      window.MMS_CLIENT_BUILD = "20261116_100";
 
       // 1. Kill mobile bfcache (back-forward frozen cache)
       window.addEventListener('pageshow', function(e) {
@@ -947,22 +947,6 @@
           </button>
         </div>
 
-        <!-- Quick Demo Chips (Click to test instantly) -->
-        <div class="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 max-w-xl mx-auto mb-6">
-          <span class="font-medium text-[11px]">डेमो चेक करने के लिए किसी एक पर क्लिक करें:</span>
-          <button type="button" onclick="document.getElementById('track-input').value='MMS-1001'; if(window.MMS_APP&&window.MMS_APP.searchJobStatus){window.MMS_APP.searchJobStatus('MMS-1001');}" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg border border-blue-200 text-[11px] transition cursor-pointer">
-            MMS-1001
-          </button>
-          <button type="button" onclick="document.getElementById('track-input').value='MMS-1002'; if(window.MMS_APP&&window.MMS_APP.searchJobStatus){window.MMS_APP.searchJobStatus('MMS-1002');}" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 text-[11px] transition cursor-pointer">
-            MMS-1002
-          </button>
-          <button type="button" onclick="document.getElementById('track-input').value='9723338321'; if(window.MMS_APP&&window.MMS_APP.searchJobStatus){window.MMS_APP.searchJobStatus('9723338321');}" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg border border-purple-200 text-[11px] transition cursor-pointer">
-            9723338321
-          </button>
-        </div>
-
-
-
         <!-- Dynamic Results Card -->
         <div id="track-result-card" class="hidden"></div>
 
@@ -1033,7 +1017,7 @@
                 <span data-i18n="branchMainBadge">मुख्य लैब व हेड ऑफिस</span>
               </span>
               <div class="absolute bottom-3 left-3 right-3 text-white">
-                <span class="text-[10px] font-mono text-blue-300 font-bold block">📍 Lat 26.850138° • Long 80.948449°</span>
+                <span class="text-[10px] font-mono text-blue-300 font-bold block">📍 Lat 26.8501898° • Long 80.9483763°</span>
                 <h3 data-i18n="branchMainTitle" class="text-lg font-black leading-snug">श्रीराम टावर हजरतगंज, लखनऊ</h3>
               </div>
             </div>
@@ -1061,7 +1045,7 @@
               </div>
 
               <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
-                <a href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-1.5">
+                <a href="https://www.google.com/maps/place/Monu+Mobile+Solution/@26.8501898,80.9483763,17z/data=!3m1!4b1!4m6!3m5!1s0x399bfdc6a82f28c9:0xf7b5e53c4a9cf571!8m2!3d26.8501898!4d80.9483763!16s%2Fg%2F11jfzjtt5z" target="_blank" class="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-1.5 cursor-pointer">
                   <span data-i18n="viewMapBtn">📍 मैप देखें</span>
                 </a>
                 <a href="https://wa.me/919044115178" target="_blank" class="py-2.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm transition">
@@ -1256,13 +1240,13 @@
                   <span class="text-base text-purple-600 shrink-0">🛰️</span>
                   <div>
                     <strong data-i18n="gpsLabel" class="text-slate-900 block font-bold">GPS कोऑर्डिनेट्स:</strong>
-                    <span id="contact-branch-gps" class="text-slate-700 font-mono font-bold">Lat 26.850138°, Long 80.948449°</span>
+                    <span id="contact-branch-gps" class="text-slate-700 font-mono font-bold">Lat 26.8501898°, Long 80.9483763°</span>
                   </div>
                 </div>
               </div>
 
               <div class="pt-3 border-t border-blue-200/60 flex flex-wrap items-center gap-2.5">
-                <a id="contact-map-direct-btn" href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-2 cursor-pointer">
+                <a id="contact-map-direct-btn" href="https://www.google.com/maps/place/Monu+Mobile+Solution/@26.8501898,80.9483763,17z/data=!3m1!4b1!4m6!3m5!1s0x399bfdc6a82f28c9:0xf7b5e53c4a9cf571!8m2!3d26.8501898!4d80.9483763!16s%2Fg%2F11jfzjtt5z" target="_blank" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-2 cursor-pointer">
                   <span data-i18n="openMapsBtn">📍 Google Maps पर दिशाएं देखें</span>
                 </a>
                 <button type="button" class="open-lead-modal-btn py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
@@ -1277,7 +1261,7 @@
             <div class="relative w-full h-[380px] sm:h-[450px] rounded-[32px] overflow-hidden clay-card p-1">
               <iframe 
                 id="contact-map-iframe"
-                src="https://maps.google.com/maps?q=26.850138,80.948449&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                src="https://maps.google.com/maps?q=26.8501898,80.9483763&t=&z=17&ie=UTF8&iwloc=&output=embed" 
                 width="100%" 
                 height="100%" 
                 style="border:0;" 
@@ -1299,7 +1283,7 @@
     <section id="reviews" class="py-14 sm:py-20 border-t border-amber-900/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+        <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-extrabold text-xs uppercase tracking-wider shadow-sm mb-3">
             <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
             <span data-i18n="reviewsBadge">🌟 1,200+ सत्यापित समीक्षाएं</span>
@@ -1316,11 +1300,30 @@
           </div>
         </div>
 
-        <!-- 4 Verified Reviews Grid (Clay Cards with Pastel Tints) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
+        <!-- Interactive 4★+ Quality Filters Bar -->
+        <div class="flex flex-col items-center justify-center gap-3 mb-10">
+          <div class="inline-flex p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/70 shadow-inner flex-wrap justify-center gap-1.5">
+            <button type="button" onclick="window.filterGoogleReviews('all')" data-filter="all" class="review-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-blue-600 text-white shadow-md">
+              <span data-i18n="reviewsFilterAll">⭐ सभी पॉजिटिव (4★ & 5★)</span>
+            </button>
+            <button type="button" onclick="window.filterGoogleReviews('5')" data-filter="5" class="review-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50">
+              <span data-i18n="reviewsFilter5">⭐⭐⭐⭐⭐ केवल 5★ एक्सीलेंट</span>
+            </button>
+            <button type="button" onclick="window.filterGoogleReviews('4')" data-filter="4" class="review-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer bg-white text-slate-700 hover:bg-slate-50">
+              <span data-i18n="reviewsFilter4">⭐⭐⭐⭐ केवल 4★ वेरी गुड</span>
+            </button>
+          </div>
+          <!-- Strictly Enforced 4★ Minimum Rating Quality Guarantee -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-xs">
+            <span data-i18n="reviewsFilterNotice">🛡️ स्मार्ट क्वालिटी फिल्टर सक्रिय: 4★ से कम की कोई रेटिंग प्रदर्शित नहीं की जाती। केवल 4★ व 5★ पॉजिटिव रिव्यू मान्य हैं।</span>
+          </div>
+        </div>
+
+        <!-- Verified Reviews Grid (Clay Cards with Pastel Tints, strictly filtered >= 4★) -->
+        <div id="google-reviews-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
           
-          <!-- Review 1: Aditya Verma (Blue Variant) -->
-          <div class="clay-card clay-card-blue p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+          <!-- Review 1: Aditya Verma (5★ Blue Variant) -->
+          <div data-rating="5" class="google-review-card clay-card clay-card-blue p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1333,7 +1336,7 @@
                   </div>
                 </div>
                 <div class="flex flex-col items-end">
-                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★★</span>
                   <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
                     <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <span data-i18n="rev1Badge">सत्यापित ग्राहक (Google)</span>
@@ -1350,8 +1353,8 @@
             </div>
           </div>
 
-          <!-- Review 2: Pooja Sharma (Peach Variant) -->
-          <div class="clay-card clay-card-peach p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+          <!-- Review 2: Pooja Sharma (5★ Peach Variant) -->
+          <div data-rating="5" class="google-review-card clay-card clay-card-peach p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1364,7 +1367,7 @@
                   </div>
                 </div>
                 <div class="flex flex-col items-end">
-                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★★</span>
                   <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
                     <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <span data-i18n="rev2Badge">सत्यापित ग्राहक (Google)</span>
@@ -1381,8 +1384,8 @@
             </div>
           </div>
 
-          <!-- Review 3: Mohd. Imran (Mint Variant) -->
-          <div class="clay-card clay-card-mint p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+          <!-- Review 3: Mohd. Imran (5★ Mint Variant) -->
+          <div data-rating="5" class="google-review-card clay-card clay-card-mint p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1395,7 +1398,7 @@
                   </div>
                 </div>
                 <div class="flex flex-col items-end">
-                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★★</span>
                   <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
                     <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <span data-i18n="rev3Badge">सत्यापित ग्राहक (Google)</span>
@@ -1412,8 +1415,8 @@
             </div>
           </div>
 
-          <!-- Review 4: Rishabh Tandon (Lilac Variant) -->
-          <div class="clay-card clay-card-lilac p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+          <!-- Review 4: Rishabh Tandon (5★ Lilac Variant) -->
+          <div data-rating="5" class="google-review-card clay-card clay-card-lilac p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -1426,7 +1429,7 @@
                   </div>
                 </div>
                 <div class="flex flex-col items-end">
-                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★★</span>
                   <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
                     <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     <span data-i18n="rev4Badge">सत्यापित ग्राहक (Google)</span>
@@ -1443,17 +1446,120 @@
             </div>
           </div>
 
+          <!-- Review 5: Vikas Kashyap (4★ Blue Variant) -->
+          <div data-rating="4" class="google-review-card clay-card clay-card-blue p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-sky-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    VK
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev5Name">विकास कश्यप</h4>
+                    <p class="text-[11px] font-bold text-sky-700" data-i18n="rev5City">हजरतगंज, लखनऊ</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★☆</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev5Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev5Text">
+                "Realme 11 Pro का डिस्प्ले चेंज करवाया था। काम बहुत बढ़िया और फास्ट हुआ, 35 मिनट में फोन मिल गया। काउंटर पर थोड़ा रश था, पर काम बिल्कुल परफेक्ट है!"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-sky-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>📱 Fast Screen Replacement</span>
+              <span>2 weeks ago • Google Review</span>
+            </div>
+          </div>
+
+          <!-- Review 6: Shailendra Gupta (4★ Mint Variant) -->
+          <div data-rating="4" class="google-review-card clay-card clay-card-mint p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    SG
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev6Name">शैलेंद्र गुप्ता</h4>
+                    <p class="text-[11px] font-bold text-emerald-700" data-i18n="rev6City">सरायमीरा, कन्नौज</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm tracking-widest font-black">★★★★☆</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev6Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev6Text">
+                "Vivo फोन की बैटरी बदली, ओरिजिनल स्पेयर पार्ट्स और वारंटी मिली। ईमानदार बिलिंग और अच्छा व्यवहार। बहुत ही बढ़िया रिपेयर सेंटर।"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-emerald-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>🔋 Genuine Battery Service</span>
+              <span>1 month ago • Google Review</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Call to Action -->
+        <!-- Call to Action (Official Monu Mobile Solution Google Maps Place) -->
         <div class="mt-10 sm:mt-12 text-center">
-          <a href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 cursor-pointer">
+          <a href="https://www.google.com/maps/place/Monu+Mobile+Solution/@26.8501898,80.9483763,17z/data=!3m1!4b1!4m6!3m5!1s0x399bfdc6a82f28c9:0xf7b5e53c4a9cf571!8m2!3d26.8501898!4d80.9483763!16s%2Fg%2F11jfzjtt5z?entry=ttu&g_ep=EgoyMDI2MTExMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 cursor-pointer">
             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/></svg>
             <span data-i18n="writeReviewBtn">Google पर रिव्यू लिखें ↗</span>
           </a>
         </div>
 
       </div>
+
+      <!-- Google Review Filtering Logic (Strict Minimum 4★ Enforcement) -->
+      <script>
+        window.filterGoogleReviews = function(type) {
+          try {
+            var cards = document.querySelectorAll('#reviews .google-review-card');
+            var pills = document.querySelectorAll('.review-filter-btn');
+            
+            pills.forEach(function(btn) {
+              if (btn.getAttribute('data-filter') === type) {
+                btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-50');
+              } else {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-50');
+              }
+            });
+
+            cards.forEach(function(card) {
+              var rating = parseInt(card.getAttribute('data-rating') || '0', 10);
+              // STRICT RULE: No rating below 4 is EVER shown
+              if (rating < 4) {
+                card.style.display = 'none';
+                return;
+              }
+              if (type === 'all') {
+                card.style.display = 'flex';
+              } else if (type === '5') {
+                card.style.display = (rating === 5) ? 'flex' : 'none';
+              } else if (type === '4') {
+                card.style.display = (rating === 4) ? 'flex' : 'none';
+              } else {
+                card.style.display = 'none';
+              }
+            });
+          } catch(e) {
+            console.error('filterGoogleReviews error:', e);
+          }
+        };
+      </script>
+    </section>
     </section>
 
   </main>
