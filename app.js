@@ -1245,7 +1245,7 @@ function filterCategoryDropdown(inputId, query) {
       try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(staffList)); } catch(err) {}
     }
 
-    const allUsers = [...staffList, ...(window.MMS_DATA.users || [])];
+    const allUsers = [...(window.MMS_DATA.users || []), ...staffList];
     const matched = allUsers.find(u => {
       const uPhone = String(u.phone || '').replace(/[^0-9]/g, '').slice(-10);
       if (uPhone !== cleanPhone) return false;
