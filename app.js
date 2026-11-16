@@ -186,18 +186,38 @@ function filterCategoryDropdown(inputId, query) {
 
     reRenderActiveTab() {
       if (typeof state === 'undefined') return;
+      
+      // CRITICAL GUARD: Never destroy DOM if the user is typing/interacting with any form element!
+      if (typeof document !== 'undefined' && document.activeElement) {
+        const tag = document.activeElement.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+          console.log('⚡ [CloudSync] Skipping auto-reRender because user is active on:', document.activeElement.id || tag);
+          return;
+        }
+      }
+
       const tab = state.activeAdminTab;
       try {
         if (tab === 'staff' && typeof renderStaffHRModule === 'function') renderStaffHRModule();
         else if (tab === 'jobs' && typeof renderJobCardsManager === 'function') renderJobCardsManager();
         else if (tab === 'mywork' && typeof renderMyWorkModule === 'function') renderMyWorkModule();
-        else if (tab === 'pos' && typeof renderPOS === 'function') renderPOS();
+        else if (tab === 'pos') {
+          // Never re-render POS counter automatically while user may be billing
+          return;
+        }
         else if (tab === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
         else if (tab === 'attendance' && typeof renderAttendanceModule === 'function') renderAttendanceModule();
         else if (tab === 'sales' && typeof renderDailySales === 'function') renderDailySales();
         else if (tab === 'khata' && typeof renderKhata === 'function') renderKhata();
         else if (tab === 'expenses' && typeof renderExpensesModule === 'function') renderExpensesModule();
-        else if (tab === 'inventory' && typeof renderInventory === 'function') renderInventory();
+        else if (tab === 'inventory') {
+          // In inventory, only update the table body without wiping search box or filters
+          if (typeof updateInventoryTableOnly === 'function' && document.getElementById('inventory-table-body')) {
+            updateInventoryTableOnly();
+          } else if (typeof renderInventory === 'function') {
+            renderInventory();
+          }
+        }
       } catch(e) {
         console.warn('Re-render active tab notice:', e);
       }
@@ -214,15 +234,20 @@ function filterCategoryDropdown(inputId, query) {
           let changed = false;
 
           if (attendance && attendance.length > 0) {
+            const oldStr = JSON.stringify(state.attendance || []);
             const map = new Map();
             (state.attendance || []).forEach(a => map.set(a.id, a));
             attendance.forEach(a => map.set(a.id, { ...map.get(a.id), ...a }));
             state.attendance = Array.from(map.values()).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
-            localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(state.attendance));
-            changed = true;
+            const newStr = JSON.stringify(state.attendance);
+            if (oldStr !== newStr) {
+              localStorage.setItem(STORAGE_KEYS.ATTENDANCE, newStr);
+              changed = true;
+            }
           }
 
           if (invoices && invoices.length > 0) {
+            const oldStr = JSON.stringify(state.invoices || []);
             const map = new Map();
             (state.invoices || []).forEach(i => map.set(i.id || i.invoiceNo, i));
             invoices.forEach(i => {
@@ -241,42 +266,58 @@ function filterCategoryDropdown(inputId, query) {
               map.set(key, merged);
             });
             state.invoices = Array.from(map.values()).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
-            localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(state.invoices));
-            changed = true;
+            const newStr = JSON.stringify(state.invoices);
+            if (oldStr !== newStr) {
+              localStorage.setItem(STORAGE_KEYS.INVOICES, newStr);
+              changed = true;
+            }
           }
 
           if (jobs && jobs.length > 0) {
+            const oldStr = JSON.stringify(state.jobs || []);
             const map = new Map();
             (state.jobs || []).forEach(j => map.set(j.id, j));
             jobs.forEach(j => map.set(j.id, { ...map.get(j.id), ...j }));
             state.jobs = Array.from(map.values()).sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-            localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(state.jobs));
-            changed = true;
+            const newStr = JSON.stringify(state.jobs);
+            if (oldStr !== newStr) {
+              localStorage.setItem(STORAGE_KEYS.JOBS, newStr);
+              changed = true;
+            }
           }
 
           if (resData.data.staff && Array.isArray(resData.data.staff) && resData.data.staff.length > 0) {
-            state.staff = resData.data.staff;
-            localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff));
-            if (state.currentUser) {
-              const matchedEmp = state.staff.find(s => s.id === state.currentUser.id || s.phone === state.currentUser.phone || (s.role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin'));
-              if (matchedEmp) {
-                state.currentUser = { ...state.currentUser, ...matchedEmp };
-                localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
+            const oldStr = JSON.stringify(state.staff || []);
+            const newStaff = resData.data.staff;
+            const newStr = JSON.stringify(newStaff);
+            if (oldStr !== newStr) {
+              state.staff = newStaff;
+              localStorage.setItem(STORAGE_KEYS.STAFF, newStr);
+              if (state.currentUser) {
+                const matchedEmp = state.staff.find(s => s.id === state.currentUser.id || s.phone === state.currentUser.phone || (s.role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin'));
+                if (matchedEmp) {
+                  state.currentUser = { ...state.currentUser, ...matchedEmp };
+                  localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
+                }
               }
+              if (state.activeAdminTab === 'staff' && typeof renderStaffHRModule === 'function') {
+                renderStaffHRModule();
+              }
+              changed = true;
             }
-            if (state.activeAdminTab === 'staff' && typeof renderStaffHRModule === 'function') {
-              renderStaffHRModule();
-            }
-            changed = true;
           }
 
           if (expenses && expenses.length > 0) {
+            const oldStr = JSON.stringify(state.expenses || []);
             const map = new Map();
             (state.expenses || []).forEach(e => map.set(e.id, e));
             expenses.forEach(e => map.set(e.id, { ...map.get(e.id), ...e }));
             state.expenses = Array.from(map.values()).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
-            localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(state.expenses));
-            changed = true;
+            const newStr = JSON.stringify(state.expenses);
+            if (oldStr !== newStr) {
+              localStorage.setItem(STORAGE_KEYS.EXPENSES, newStr);
+              changed = true;
+            }
           }
 
           this.lastSyncTime = new Date();
@@ -1243,7 +1284,7 @@ function filterCategoryDropdown(inputId, query) {
           paid: 2200,
           due: 0,
           status: 'delivered',
-          branchName: 'उन्नाव शाखा (रियलमी केयर) (सरायमीरा)'
+          branchName: 'कन्नौज शाखा (सरायमीरा)'
         }
       };
       if (LOCAL_DEMO_LOOKUP[val]) {
@@ -1879,9 +1920,9 @@ function filterCategoryDropdown(inputId, query) {
     if (roleType === 'admin') {
       target = { phone: "7905859701", role: "admin", name: "मोनू जी (Monu - Super Admin)", branchId: "all" };
     } else if (roleType === 'manager') {
-      target = { phone: "9988772211", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_hazratganj" };
+      target = { phone: "8931059701", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_naka" };
     } else {
-      target = { phone: "9839988776", role: "technician", name: "विकास पाल (Vikas Pal - Realme Unnao)", branchId: "branch_kannauj" };
+      target = { phone: "9044115178", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" };
     }
     state.currentUser = target;
     localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(target));
@@ -3211,6 +3252,19 @@ function filterCategoryDropdown(inputId, query) {
 
     renderPOS();
     showInvoiceModal(invoiceRecord);
+  }
+
+  // POS SKU Search click-outside listener
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+      const searchInput = document.getElementById('pos-sku-search-input');
+      const resultsContainer = document.getElementById('pos-sku-search-results');
+      if (resultsContainer && searchInput) {
+        if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+          resultsContainer.classList.add('hidden');
+        }
+      }
+    });
   }
 
   // --- Search / Filter SKU Autocomplete ---
@@ -4657,7 +4711,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="p-4 border-b border-slate-100">
             <h4 class="text-sm font-black text-slate-900">🏢 3 शाखाओं का तुलनात्मक लाभ-हानि खाता (Branch-Wise P&L)</h4>
-            <p class="text-xs text-slate-500">हजरतगंज (Head Lab), अमीनाबाद और उन्नाव शाखा (रियलमी केयर) का अलग-अलग परफॉर्मेंस</p>
+            <p class="text-xs text-slate-500">हजरतगंज (Head Lab), नाका हिंडोला और कन्नौज शाखा (सरायमीरा) का अलग-अलग परफॉर्मेंस</p>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -5441,7 +5495,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     } else if (branchFilter === 'branch_naka' || branchFilter === 'branch_naka') {
       branchHeading = 'नाका हिंडोला शाखा - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
     } else if (branchFilter === 'branch_kannauj' || branchFilter === 'branch_kannauj') {
-      branchHeading = 'उन्नाव शाखा (रियलमी केयर) - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
+      branchHeading = 'कन्नौज शाखा (सरायमीरा) - रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड';
     } else {
       branchHeading = `${getBranchName(branchFilter)} - रजिस्टर्ड रिकॉर्ड`;
     }
@@ -5708,7 +5762,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         ${isOwner ? `<option value="all" ${curBranch === 'all' ? 'selected' : ''}>🏢 सभी शाखाएं (All Branches)</option>` : ''}
         <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (Head Lab)</option>
         <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला शाखा</option>
-        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 उन्नाव शाखा (रियलमी केयर)</option>
+        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
       </select>
     `;
   }
@@ -5725,7 +5779,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBar(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isUnnao = cur === 'branch_kannauj';
+    const isKannauj = cur === 'branch_kannauj';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-slate-500 px-2 flex items-center gap-1">
@@ -5740,7 +5794,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isUnnao ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}">
           <span>📍</span> कन्नौज (सरायमीरा)
         </button>
       </div>
@@ -5750,7 +5804,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderBranchFilterBarDark(activeBranch, extraClass = '') {
     const cur = activeBranch || state.activeBranch || 'all';
     const isNaka = cur === 'branch_naka' || cur === 'branch_naka';
-    const isUnnao = cur === 'branch_kannauj';
+    const isKannauj = cur === 'branch_kannauj';
     return `
       <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 text-xs ${extraClass}">
         <span class="text-[10px] font-black uppercase text-blue-200 px-2 flex items-center gap-1">
@@ -5765,7 +5819,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_naka')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isNaka ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
           <span>📍</span> नाका हिंडोला
         </button>
-        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isUnnao ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
+        <button type="button" onclick="window.MMS_APP.setPortalActiveBranch('branch_kannauj')" class="px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1 ${isKannauj ? 'bg-blue-600 text-white shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'}">
           <span>📍</span> कन्नौज (सरायमीरा)
         </button>
       </div>
@@ -6433,7 +6487,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="punch-branch-select" ${isEmployee ? 'disabled' : ''} onchange="window.MMS_APP.filterPunchEmployees(this.value); window.MMS_APP.checkGeofenceSecurity();" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj" ${targetBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (Head Lab)</option>
                 <option value="branch_naka" ${targetBranch === 'branch_naka' || targetBranch === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला शाखा (लखनऊ)</option>
-                <option value="branch_kannauj" ${targetBranch === 'branch_kannauj' || targetBranch === 'branch_kannauj' ? 'selected' : ''}>📍 उन्नाव शाखा (रियलमी केयर) (सरायमीरा)</option>
+                <option value="branch_kannauj" ${targetBranch === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
               </select>
             </div>
           </div>
@@ -6983,7 +7037,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         address: "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग स्टेशन रोड), लखनऊ, उत्तर प्रदेश 226004",
         landmark: "(चारबाग रेलवे स्टेशन से मात्र 500 मीटर, गुरुद्वारा रोड नाका हिंडोला)",
         timings: "12:00 PM - 09:00 PM (रोजाना खुला)",
-        phone: "9988772211",
+        phone: "8931059701",
         gps: "Lat 26.8370°N, Long 80.9241°E",
         mapUrl: "https://maps.google.com/maps?q=26.8370,80.9241&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=26.8370,80.9241"
@@ -6994,7 +7048,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
         landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
         timings: "10:00 AM - 06:00 PM (सोमवार - शनिवार)",
-        phone: "9839988776",
+        phone: "9044115178",
         gps: "Lat 27.0283°N, Long 79.926383°E",
         mapUrl: "https://maps.google.com/maps?q=27.0283,79.926383&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=27.0283,79.926383"
@@ -8164,7 +8218,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <select id="exp-branch-select" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="branch_hazratganj">📍 हजरतगंज (Head Lab)</option>
                 <option value="branch_naka">📍 नाका हिंडोला शाखा</option>
-                <option value="branch_kannauj">📍 उन्नाव शाखा (रियलमी केयर)</option>
+                <option value="branch_kannauj">📍 कन्नौज (सरायमीरा)</option>
               </select>
             </div>
             <div>

@@ -34,7 +34,7 @@ window.MMS_DATA = {
     tagline: "Express Mobile Repair Lab & Retail POS",
     city: "Hazratganj, Lucknow",
     phone: "7905859701",
-    whatsapp: "917905859701",
+    whatsapp: "919044115178",
     email: "monumobilesolution@gmail.com",
     address: "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, Uttar Pradesh 226001",
     timings: "10:30 AM - 08:30 PM (सोमवार - रविवार)",
@@ -45,13 +45,13 @@ window.MMS_DATA = {
 
   // Role Credentials (Real Working Accounts - 3 Accounts Only)
     users: [
-    { phone: "7905859701", pass: "Mms@859701", role: "admin", name: "मोनू जी (Monu - Owner)", branchId: "all" },
-    { phone: "9044115178", pass: "Mms@115178", role: "technician", name: "Mini tiwari", branchId: "branch_hazratganj" },
-    { phone: "8707641628", pass: "Mms@641628", role: "manager", name: "Soniya Kashyap", branchId: "branch_hazratganj" },
-    { phone: "9026445293", pass: "Mms@445293", role: "technician", name: "Sourab Yadav", branchId: "branch_hazratganj" },
-    { phone: "9839988776", pass: "Mms@988776", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" },
-    { phone: "9988772211", pass: "Mms@772211", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_hazratganj" },
-    { phone: "9955443311", pass: "Mms@443311", role: "technician", name: "रवि कुमार (Ravi - Tech Staff)", branchId: "branch_hazratganj" }
+    { phone: "7905859701", pass: "123456", role: "admin", name: "मोनू जी (Monu - Owner)", branchId: "all" },
+    { phone: "9044115178", pass: "123456", role: "technician", name: "Mini tiwari", branchId: "branch_hazratganj" },
+    { phone: "8707641628", pass: "123456", role: "manager", name: "Soniya Kashyap", branchId: "branch_hazratganj" },
+    { phone: "9026445293", pass: "123456", role: "technician", name: "Sourab Yadav", branchId: "branch_hazratganj" },
+    { phone: "9044115178", pass: "123456", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" },
+    { phone: "8931059701", pass: "123456", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_naka" },
+    { phone: "9955443311", pass: "123456", role: "technician", name: "रवि कुमार (Ravi - Tech Staff)", branchId: "branch_hazratganj" }
   ],
 
   // Bilingual Localization
@@ -182,9 +182,9 @@ window.MMS_DATA = {
     },
 
     en: {
-      topTagline: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Unnao (Realme Care)",
-      topAddress: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Unnao (Realme Care)",
-      topTimings: "⏰ Lucknow: 12:00 PM - 09:00 PM • Unnao (Realme Care): 10:00 AM - 07:00 PM",
+      topTagline: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Kannauj (Saraimeera)",
+      topAddress: "🏢 3 Express Labs: Hazratganj, Naka Hindola (Lucknow) & Kannauj (Saraimeera)",
+      topTimings: "⏰ Lucknow: 12:00 PM - 09:00 PM • Kannauj (Saraimeera): 10:00 AM - 07:00 PM",
       loginPortal: "Login",
       staffLogin: "Login",
       navHome: "Home",
@@ -387,7 +387,7 @@ window.MMS_DATA = {
     // Pre-seeded SKU Inventory with comprehensive branch categorization
   initialInventory: [
     // ==========================================
-    // 🏢 उन्नाव शाखा (Realme Authorized Service Center Spares & BBK Ecosystem)
+    // 🏢 कन्नौज शाखा (सरायमीरा - स्पेयर पार्ट्स व रिपेयरिंग)
     // ==========================================
     { sku: "SCR-R12P-CRV", name: "Realme 12 Pro+ 5G Curved OLED Display Combo (Genuine Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 4200, sellPrice: 6200, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
     { sku: "SCR-R11P-CRV", name: "Realme 11 Pro / 11 Pro+ 5G Curved AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
@@ -533,7 +533,7 @@ window.MMS_DATA = {
       shortName: "हजरतगंज (श्रीराम टावर)",
       city: "लखनऊ",
       phone: "7905859701",
-      whatsapp: "917905859701",
+      whatsapp: "919044115178",
       address: "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001",
       lat: 26.850138,
       lng: 80.948449,
@@ -549,8 +549,8 @@ window.MMS_DATA = {
       name: "नाका हिंडोला शाखा (Naka Hindola Lucknow)",
       shortName: "नाका हिंडोला (लखनऊ)",
       city: "लखनऊ",
-      phone: "9988772211",
-      whatsapp: "919988772211",
+      phone: "8931059701",
+      whatsapp: "918931059701",
       address: "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग), लखनऊ, उत्तर प्रदेश 226004",
       lat: 26.8370,
       lng: 80.9241,
@@ -566,8 +566,8 @@ window.MMS_DATA = {
       name: "कन्नौज शाखा (सरायमीरा - मुख्य जी.टी. रोड)",
       shortName: "कन्नौज (सरायमीरा)",
       city: "कन्नौज",
-      phone: "9839988776",
-      whatsapp: "919839988776",
+      phone: "9044115178",
+      whatsapp: "919044115178",
       address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
       landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
       lat: 27.0283,
@@ -587,7 +587,7 @@ window.MMS_DATA = {
       id: "emp_101",
       name: "मोनू जी (Monu)",
       phone: "7905859701",
-      pass: "Mms@859701",
+      pass: "123456",
       role: "admin",
       roleLabel: "सुपर एडमिन (Owner)",
       branchId: "all",
@@ -609,7 +609,7 @@ window.MMS_DATA = {
       id: "emp_102",
       name: "Soniya Kashyap",
       phone: "8707641628",
-      pass: "Mms@641628",
+      pass: "123456",
       role: "manager",
       roleLabel: "ब्रांच मैनेजर (हजरतगंज)",
       branchId: "branch_hazratganj",
@@ -631,7 +631,7 @@ window.MMS_DATA = {
       id: "emp_103",
       name: "Mini tiwari",
       phone: "9044115178",
-      pass: "Mms@115178",
+      pass: "123456",
       role: "technician",
       roleLabel: "रिपेयरिंग टेक्नीशियन",
       branchId: "branch_hazratganj",
@@ -653,7 +653,7 @@ window.MMS_DATA = {
       id: "emp_104",
       name: "Sourab Yadav",
       phone: "9026445293",
-      pass: "Mms@445293",
+      pass: "123456",
       role: "technician",
       roleLabel: "रिपेयरिंग टेक्नीशियन",
       branchId: "branch_hazratganj",
@@ -674,8 +674,8 @@ window.MMS_DATA = {
     {
       id: "emp_105",
       name: "विकास पाल (Vikas Pal)",
-      phone: "9839988776",
-      pass: "Mms@988776",
+      phone: "9044115178",
+      pass: "123456",
       role: "technician",
       roleLabel: "टेक्नीशियन (कन्नौज सरायमीरा)",
       branchId: "branch_kannauj",
