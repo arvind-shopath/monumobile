@@ -10,7 +10,7 @@
   <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
   <script>
     (function() {
-      window.MMS_CLIENT_BUILD = "20261116_91";
+      window.MMS_CLIENT_BUILD = "20261116_92";
 
       // 1. Kill mobile bfcache (back-forward frozen cache)
       window.addEventListener('pageshow', function(e) {
@@ -1159,7 +1159,7 @@
           <div class="sidebar-text-label transition-opacity duration-200">
             <div class="flex items-center gap-1.5">
               <span class="text-xs uppercase tracking-wider font-extrabold text-blue-400">Control Panel</span>
-              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v9.1</span>
+              <span class="text-[9px] bg-blue-500/20 text-blue-300 font-bold px-1.5 py-0.2 rounded-full border border-blue-500/30">v9.2</span>
             </div>
             <h2 class="text-sm font-black text-white tracking-tight truncate">Monu Mobile ERP</h2>
           </div>
@@ -1185,15 +1185,15 @@
         <!-- ग्रुप 1: कोर ओवरव्यू -->
         <div id="portal-nav-group-core">
           <div class="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center justify-between sidebar-text-label">
-            <span>डैशबोर्ड व ओवरव्यू</span>
+            <span>ओवरव्यू</span>
             <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
           </div>
           <div class="space-y-1">
-            <button data-tab="dashboard" data-role-required="manager" title="मुख्य डैशबोर्ड (KPIs)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition font-bold bg-blue-600 text-white shadow-sm">
+            <button data-tab="dashboard" data-role-required="manager" title="डैशबोर्ड" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition font-bold bg-blue-600 text-white shadow-sm">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 10a2 2 0 012-2h2a2 2 0 012 2v8a2 2 0 01-2 2h-2a2 2 0 01-2-2v-8z"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">मुख्य डैशबोर्ड (KPIs)</span>
+              <span class="flex-1 sidebar-text-label truncate">डैशबोर्ड</span>
               <span class="text-[9px] bg-white/20 text-white font-bold px-1.5 py-0.5 rounded-full sidebar-text-label">Live</span>
             </button>
           </div>
@@ -1202,38 +1202,38 @@
         <!-- ग्रुप 2: दुकान काउंटर व जॉब्स -->
         <div id="portal-nav-group-ops">
           <div class="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 sidebar-text-label">
-            दुकान ऑपरेशंस & बिलिंग
+            दुकान
           </div>
           <div class="space-y-1">
-            <button data-tab="pos" data-role-required="frontdesk" title="POS बिलिंग (काउंटर)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="pos" data-role-required="frontdesk" title="बिलिंग" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">POS बिलिंग (काउंटर)</span>
+              <span class="flex-1 sidebar-text-label truncate">बिलिंग</span>
             </button>
-            <button data-tab="jobs" data-role-required="technician" title="रिपेयर जॉब-शीट (टोकन)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="jobs" data-role-required="technician" title="रिपेयर" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="1.8"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">रिपेयर जॉब-शीट (टोकन)</span>
+              <span class="flex-1 sidebar-text-label truncate">रिपेयर</span>
             </button>
-            <button data-tab="inventory" data-role-required="manager" title="इन्वेंट्री & स्पेयर SKU" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="inventory" data-role-required="manager" title="इन्वेंट्री" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">इन्वेंट्री & स्पेयर SKU</span>
+              <span class="flex-1 sidebar-text-label truncate">इन्वेंट्री</span>
             </button>
             <button data-tab="transfer" data-role-required="manager" title="ट्रांसफर इन्वेंट्री (हजरतगंज ➔ नाका)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">ट्रांसफर इन्वेंट्री (Stock Transfer)</span>
+              <span class="flex-1 sidebar-text-label truncate">ट्रांसफर</span>
             </button>
-            <button data-tab="directory" data-role-required="manager" title="ग्राहक व दुकानदार CRM" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="directory" data-role-required="manager" title="ग्राहक" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">ग्राहक व दुकानदार CRM</span>
+              <span class="flex-1 sidebar-text-label truncate">ग्राहक</span>
             </button>
           </div>
         </div>
@@ -1241,32 +1241,32 @@
         <!-- ग्रुप 3: फाइनेंस, उधार व गल्ला (एक साथ) -->
         <div id="portal-nav-group-finance">
           <div class="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 sidebar-text-label">
-            फाइनेंस, गल्ला व एकाउंट्स
+            हिसाब
           </div>
           <div class="space-y-1">
-            <button data-tab="sales" data-role-required="manager" title="डेली सेल्स & गल्ला" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="sales" data-role-required="manager" title="बिक्री" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">डेली सेल्स & गल्ला</span>
+              <span class="flex-1 sidebar-text-label truncate">बिक्री</span>
             </button>
-            <button data-tab="khata" data-role-required="manager" title="उधार खाता-बही (Khata)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="khata" data-role-required="manager" title="खाता" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">उधार खाता-बही (Khata)</span>
+              <span class="flex-1 sidebar-text-label truncate">खाता</span>
             </button>
-            <button data-tab="expenses" data-role-required="manager" title="दुकान खर्च (Expenses)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="expenses" data-role-required="manager" title="खर्चे" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">दुकान खर्च (Expenses)</span>
+              <span class="flex-1 sidebar-text-label truncate">खर्चे</span>
             </button>
-            <button data-tab="balance" data-role-required="admin" title="बैलेंस शीट & P&L (एडमिन)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="balance" data-role-required="admin" title="रिपोर्ट्स" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">बैलेंस शीट & P&L (एडमिन)</span>
+              <span class="flex-1 sidebar-text-label truncate">रिपोर्ट्स</span>
             </button>
           </div>
         </div>
@@ -1274,30 +1274,30 @@
         <!-- ग्रुप 4: एचआर, अटेंडेंस व पेरोल -->
         <div id="portal-nav-group-hr">
           <div id="portal-nav-group-hr-title" class="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-slate-400 sidebar-text-label">
-            कर्मचारी, अटेंडेंस व पेरोल
+            स्टाफ
           </div>
           <div class="space-y-1">
             <button type="button" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white font-medium" data-tab="mywork">
             <span class="text-lg">🛠️</span>
-            <span class="text-sm font-semibold">मेरे कार्य (Daily Assigned Work)</span>
+            <span class="text-sm font-semibold">टास्क</span>
           </button>
-          <button data-tab="attendance" title="सेल्फी व GPS अटेंडेंस" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+          <button data-tab="attendance" title="हाजिरी" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4" stroke-width="1.8"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">सेल्फी व GPS अटेंडेंस</span>
+              <span class="flex-1 sidebar-text-label truncate">हाजिरी</span>
             </button>
-            <button data-tab="staff" data-role-required="admin" title="कर्मचारी व सैलरी (HR)" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="staff" data-role-required="admin" title="स्टाफ" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate">कर्मचारी व सैलरी (HR)</span>
+              <span class="flex-1 sidebar-text-label truncate">स्टाफ</span>
             </button>
-            <button data-tab="settings" data-role-required="admin" title="सिस्टम व शाखा सेटिंग्स" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
+            <button data-tab="settings" data-role-required="admin" title="सेटिंग्स" class="portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white">
               <div class="shrink-0 w-5 h-5 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
               </div>
-              <span class="flex-1 sidebar-text-label truncate" id="portal-settings-tab-label">सिस्टम व शाखा सेटिंग्स</span>
+              <span class="flex-1 sidebar-text-label truncate" id="portal-settings-tab-label">सेटिंग्स</span>
             </button>
           </div>
         </div>
@@ -1326,85 +1326,56 @@
     <main id="portal-main-scroll" class="flex-1 flex flex-col min-w-0 bg-[#f6f8fc] h-full overflow-y-auto custom-scrollbar">
       
       <!-- Top Sticky Control Header Bar -->
-      <header class="bg-white/95 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200/90 px-3 sm:px-5 py-2.5 shadow-2xs w-full">
-        <!-- Top Row: Identity on Left, Tools on Right -->
-        <div class="flex items-center justify-between gap-2">
+      <header class="bg-white/95 backdrop-blur-md sticky top-0 z-20 border-b border-slate-200 px-3 sm:px-5 py-2 shadow-2xs w-full">
+        <div class="flex items-center justify-between gap-3">
           
-          <!-- Left: Mobile Menu Trigger + Clean Name & Designation Below -->
-          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-            <button id="sidebar-open-btn" onclick="window.MMS_APP.openMobileSidebar()" title="मेनू खोलें" class="lg:hidden p-2 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition shrink-0 cursor-pointer">
+          <!-- Left: Menu Toggle + User Name -->
+          <div class="flex items-center gap-2 min-w-0">
+            <button id="sidebar-open-btn" onclick="window.MMS_APP.openMobileSidebar()" title="मेनू" class="lg:hidden p-1.5 text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition shrink-0 cursor-pointer">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             
-            <div class="min-w-0 flex flex-col justify-center">
-              <div class="flex items-center gap-1">
-                <span id="header-greeting" class="text-[11px] sm:text-xs font-bold text-slate-500">नमस्ते,</span>
-                <span id="header-user-name" class="text-xs sm:text-sm font-black text-slate-900 truncate">मोनू जी (Monu)</span>
-              </div>
-              <!-- Designation cleanly placed directly below the name (does not push header out) -->
-              <span id="header-user-role" class="text-[9px] sm:text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block leading-tight">
-                सुपर एडमिन (Owner)
-              </span>
+            <div class="min-w-0 flex items-center gap-1.5">
+              <span id="header-user-name" class="text-xs sm:text-sm font-black text-slate-900 truncate">मोनू जी</span>
+              <span id="header-user-role" class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">एडमिन</span>
             </div>
           </div>
 
-          <!-- Right Tools: Language + Alert Bell + Fast Actions -->
+          <!-- Right: Branch Selector + Shop Status + Language + Alert Bell -->
           <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <!-- Cloudflare D1 Real-time Sync Status -->
-            <div id="cloud-sync-status-badge" title="MMS Enterprise Dedicated Cloud Live" class="flex items-center gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span class="hidden sm:inline">प्राइवेट सर्वर:</span> सिंक सक्रिय
-            </div>
+            <!-- Branch Selector -->
+            <div id="portal-branch-switcher"></div>
+
+            <!-- Shop Status Toggle -->
+            <div id="portal-shop-status-control"></div>
+
             <!-- Language Switcher -->
-            <div class="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px] font-bold shadow-2xs">
-              <button type="button" onclick="window.MMS_APP.setPortalLanguage('en')" id="btn-portal-lang-en" title="Switch to English" class="px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer">
+            <div class="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-bold">
+              <button type="button" onclick="window.MMS_APP.setPortalLanguage('en')" id="btn-portal-lang-en" class="px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer">
                 EN
               </button>
-              <button type="button" onclick="window.MMS_APP.setPortalLanguage('hi')" id="btn-portal-lang-hi" title="हिन्दी में बदलें" class="px-2 py-0.5 rounded-md text-[10px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs">
+              <button type="button" onclick="window.MMS_APP.setPortalLanguage('hi')" id="btn-portal-lang-hi" class="px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs">
                 हिन्दी
               </button>
             </div>
 
-            <!-- Real-Time Duty Alert Bell -->
+            <!-- Alert Bell -->
             <div id="portal-alert-container" class="relative">
-              <button id="alert-bell-btn" type="button" onclick="window.MMS_APP.toggleAlertDropdown()" title="स्टाफ ड्यूटी अलर्ट्स" class="relative p-1.5 sm:p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center cursor-pointer">
-                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v9.1c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+              <button id="alert-bell-btn" type="button" onclick="window.MMS_APP.toggleAlertDropdown()" title="अलर्ट्स" class="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition border border-slate-200 flex items-center justify-center cursor-pointer">
+                <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v9.2c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 <span id="alert-badge-count" class="hidden absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full text-[9px] font-black bg-rose-600 text-white animate-pulse">0</span>
               </button>
               
               <!-- Alert Dropdown Menu -->
-              <div id="alert-dropdown-menu" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                <div class="p-3.5 bg-slate-900 text-white flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm">🔔</span>
-                    <strong class="text-xs font-black uppercase tracking-wider">स्टाफ ड्यूटी ऑन/ऑफ अलर्ट्स</strong>
-                  </div>
-                  <button type="button" onclick="window.MMS_APP.clearAllAlerts()" class="text-[10px] text-blue-300 hover:text-white font-bold transition">
-                    सब पढ़ा हुआ मार्क करें
-                  </button>
+              <div id="alert-dropdown-menu" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div class="p-3 bg-slate-900 text-white flex items-center justify-between">
+                  <span class="text-xs font-bold">🔔 अलर्ट्स</span>
+                  <button type="button" onclick="window.MMS_APP.clearAllAlerts()" class="text-[10px] text-blue-300 hover:text-white font-bold transition">क्लियर</button>
                 </div>
-                <div id="alert-dropdown-list" class="max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
-                  <!-- Live alerts rendered via JS -->
-                </div>
+                <div id="alert-dropdown-list" class="max-h-72 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar"></div>
               </div>
             </div>
-
-            <!-- Fast Action Shortcut Buttons on Desktop -->
-            <div class="hidden md:flex items-center gap-1.5 pl-2 border-l border-slate-200">
-              <button onclick="window.MMS_APP.switchPortalTab('pos')" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs">
-                <span>➕ बिल</span>
-              </button>
-              <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs">
-                <span>🔧 टोकन</span>
-              </button>
-            </div>
           </div>
-        </div>
-
-        <!-- Row 2: Branch Selector & Live Shop Status -->
-        <div class="mt-2 pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div id="portal-branch-switcher" class="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200 text-xs font-bold shadow-2xs"></div>
-          <div id="portal-shop-status-control" class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold shadow-2xs"></div>
         </div>
       </header>
 
@@ -1896,7 +1867,7 @@
 
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js?v=20261116_91"></script>
-  <script src="app.js?v=20261116_91"></script>
+  <script src="data.js?v=20261116_92"></script>
+  <script src="app.js?v=20261116_92"></script>
 </body>
 </html>

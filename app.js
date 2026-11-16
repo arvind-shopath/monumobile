@@ -956,7 +956,7 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function applyPortalLanguageUI() {
-    const lang = state.portalLang || 'en';
+    const lang = state.portalLang || 'hi';
     const isEn = lang === 'en';
 
     // Update Language Switcher active styles
@@ -964,49 +964,30 @@ function filterCategoryDropdown(inputId, query) {
     const btnHi = document.getElementById('btn-portal-lang-hi');
     if (btnEn && btnHi) {
       if (isEn) {
-        btnEn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnHi.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       } else {
-        btnHi.className = 'px-2.5 py-1 rounded-lg text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnEn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       }
     }
 
-    // Update Header greeting & Role
-    const greetingEl = document.getElementById('header-greeting');
-    if (greetingEl) greetingEl.textContent = isEn ? 'Hello,' : 'नमस्ते,';
-
-    const headerSyncBadge = document.getElementById('cloud-sync-status-badge');
-    if (headerSyncBadge) {
-      headerSyncBadge.innerHTML = isEn 
-        ? '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ Live App:</span> Sync Active'
-        : '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ लाइव ऐप:</span> सिंक सक्रिय';
-    }
-
-    const quickBillBtn = document.getElementById('btn-header-quick-bill');
-    if (quickBillBtn) quickBillBtn.innerHTML = isEn ? '+ New Invoice' : '+ बिल';
-    const quickTokenBtn = document.getElementById('btn-header-quick-token');
-    if (quickTokenBtn) quickTokenBtn.innerHTML = isEn ? '+ New Token' : '+ टोकन';
-
-    const publicSiteBtn = document.getElementById('btn-portal-public-site');
-    if (publicSiteBtn) publicSiteBtn.textContent = isEn ? 'Public Website' : 'पब्लिक वेबसाइट';
-    const portalLogoutBtn = document.getElementById('btn-portal-logout');
-    if (portalLogoutBtn) portalLogoutBtn.textContent = isEn ? 'Sign Out' : 'लॉगआउट';
-
-    // Update Sidebar Navigation Button Labels
+    // Single-Word Sidebar Navigation Button Labels
     const tabMap = {
-      dashboard: pT('tabDashboard'),
-      pos: pT('tabPos'),
-      jobs: pT('tabJobs'),
-      inventory: pT('tabInventory'),
-      directory: pT('tabDirectory'),
-      sales: pT('tabSales'),
-      khata: pT('tabKhata'),
-      expenses: pT('tabExpenses'),
-      balance: pT('tabBalance'),
-      attendance: pT('tabAttendance'),
-      staff: pT('tabStaff'),
-      settings: pT('tabSettings')
+      dashboard: isEn ? 'Dashboard' : 'डैशबोर्ड',
+      pos: isEn ? 'Billing' : 'बिलिंग',
+      jobs: isEn ? 'Repairs' : 'रिपेयर',
+      inventory: isEn ? 'Inventory' : 'इन्वेंट्री',
+      transfer: isEn ? 'Transfer' : 'ट्रांसफर',
+      directory: isEn ? 'Customers' : 'ग्राहक',
+      sales: isEn ? 'Sales' : 'बिक्री',
+      khata: isEn ? 'Khata' : 'खाता',
+      expenses: isEn ? 'Expenses' : 'खर्चे',
+      balance: isEn ? 'Reports' : 'रिपोर्ट्स',
+      mywork: isEn ? 'Tasks' : 'टास्क',
+      attendance: isEn ? 'Attendance' : 'हाजिरी',
+      staff: isEn ? 'Staff' : 'स्टाफ',
+      settings: isEn ? 'Settings' : 'सेटिंग्स'
     };
 
     const pTabs = (dom && dom.portalTabs && dom.portalTabs.length) ? dom.portalTabs : document.querySelectorAll(".portal-tab-btn");
@@ -1018,29 +999,29 @@ function filterCategoryDropdown(inputId, query) {
       }
     });
 
-    // Update Nav Group Headers
+    // Single-Word Nav Group Headers
     const grpCoreTitle = document.querySelector('#portal-nav-group-core .sidebar-text-label span');
-    if (grpCoreTitle) grpCoreTitle.textContent = pT('navCore');
+    if (grpCoreTitle) grpCoreTitle.textContent = isEn ? 'Overview' : 'ओवरव्यू';
 
     const grpOpsTitle = document.querySelector('#portal-nav-group-ops .sidebar-text-label');
-    if (grpOpsTitle) grpOpsTitle.textContent = pT('navOps');
+    if (grpOpsTitle) grpOpsTitle.textContent = isEn ? 'Store' : 'दुकान';
 
     const grpFinanceTitle = document.querySelector('#portal-nav-group-finance .sidebar-text-label');
-    if (grpFinanceTitle) grpFinanceTitle.textContent = pT('navFinance');
+    if (grpFinanceTitle) grpFinanceTitle.textContent = isEn ? 'Finance' : 'हिसाब';
 
     const grpHrTitle = document.getElementById('portal-nav-group-hr-title');
-    if (grpHrTitle) grpHrTitle.textContent = pT('navHr');
+    if (grpHrTitle) grpHrTitle.textContent = isEn ? 'Staff' : 'स्टाफ';
 
     const backSiteBtn = document.getElementById('back-to-site-btn');
     if (backSiteBtn) {
       const span = backSiteBtn.querySelectorAll('span')[1];
-      if (span) span.textContent = pT('publicSite');
+      if (span) span.textContent = isEn ? 'Website' : 'वेबसाइट';
     }
 
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
       const span = logoutBtn.querySelectorAll('span')[1];
-      if (span) span.textContent = pT('logout');
+      if (span) span.textContent = isEn ? 'Sign Out' : 'लॉगआउट';
     }
   }
   
@@ -1575,14 +1556,12 @@ function filterCategoryDropdown(inputId, query) {
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
               ${curBranch === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(curBranch)}
             </span>
-            <span class="text-xs text-slate-400">• ${__L("आज का लाइव कंट्रोल डैशबोर्ड", "Today's Live Control Dashboard")}</span>
+            
           </div>
           <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
             ${__L("दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग", "Store Operations, Sales & Staff Monitoring")}
           </h2>
-          <p class="text-xs text-slate-300 mt-1 max-w-2xl">
-            ${__L("शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रियल-टाइम हिसाब।", "Live branch status, GPS-verified store opening, staff late arrival alerts, and real-time net sales summary.")}
-          </p>
+          
         </div>
 
         <div class="flex flex-wrap items-center gap-2 self-start md:self-center">
@@ -1675,15 +1654,13 @@ function filterCategoryDropdown(inputId, query) {
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-base font-black text-slate-900">📍 ${__L("शाखा लाइव स्थिति व GPS-सत्यापित स्टोर कंट्रोल", "Live Branch Status & GPS-Verified Store Control")}</h3>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">${__L("सत्यापित जियोफेंसिंग", "Anti-Spoof Geofence")}</span>
+              
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">
-              ${__L("प्रबंधक केवल दुकान की वास्तविक लोकेशन (250m के दायरे) में खड़े होकर ही दुकान खोल सकते हैं।", "Managers can only open store within 250m of verified physical location.")}
-            </p>
+            
           </div>
           <div class="text-xs text-slate-500 flex items-center gap-2">
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span>${__L("हरे का मतलब दुकान खुली है", "Green indicates store is OPEN")}</span>
+            
           </div>
         </div>
 
@@ -2081,50 +2058,33 @@ function filterCategoryDropdown(inputId, query) {
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left: Product Search, Quick SKU Add, Custom Labor & Cart Table -->
         <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="mb-4 pb-3 border-b border-slate-100 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex flex-wrap items-center gap-3">
-                <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">${__L("काउंटर बिलिंग व कार्ट", "POS Counter Billing & Cart")}</h3>
-                
-                <!-- Billing Store Selector -->
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-md border-2 border-blue-400">
-                  <span class="text-xs font-bold text-blue-200">🏢 ${__L("बिलिंग दुकान:", "Billing Store:")}</span>
-                  <span class="text-sm font-black text-amber-300 tracking-wide">${getBranchName((state.posBillingBranch && state.posBillingBranch !== 'all') ? state.posBillingBranch : (state.activeBranch && state.activeBranch !== 'all') ? state.activeBranch : 'branch_hazratganj')}</span>
-                  <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="ml-1 bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold rounded-lg px-2 py-0.5 border-none outline-none cursor-pointer">
-                    <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">${__L("हजरतगंज (मुख्य लैब)", "Hazratganj (Head Lab)")}</option>
-                    <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''} class="text-slate-900">${__L("नाका हिंडोला (लखनऊ)", "Naka Hindola (Lucknow)")}</option>
-                    <option value="branch_kannauj" ${(state.posBillingBranch || state.activeBranch) === 'branch_kannauj' ? 'selected' : ''} class="text-slate-900">${__L("कन्नौज (सरायमीरा)", "Kannauj (Saraimeera)")}</option>
-                  </select>
-                </div>
+          <!-- POS Top Header: Title, Store, and Date in one clean row -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <h3 class="text-xl font-black text-slate-900 tracking-tight">${__L("बिलिंग", "Billing")}</h3>
+              
+              <!-- Store Dropdown -->
+              <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''}>${__L("हजरतगंज", "Hazratganj")}</option>
+                <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''}>${__L("नाका", "Naka")}</option>
+                <option value="branch_kannauj" ${(state.posBillingBranch || state.activeBranch) === 'branch_kannauj' ? 'selected' : ''}>${__L("कन्नौज", "Kannauj")}</option>
+              </select>
 
-                <!-- 📅 PROMINENT DATE PICKER RIGHT HERE AT THE TOP! -->
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl ${isBackdated ? 'bg-amber-500 text-slate-950 border-2 border-amber-300 ring-2 ring-amber-400' : 'bg-slate-900 text-white border-2 border-slate-700'} shadow-md">
-                  <span class="text-xs font-black flex items-center gap-1">
-                    <span>📅</span> <span>${__L("बिल की तारीख:", "Bill Date:")}</span>
-                  </span>
-                  ${canBackdate ? `
-                    <input type="date" id="pos-top-invoice-date" value="${selectedDate}" onchange="window.MMS_APP.setPosInvoiceDate(this.value)" class="bg-white text-slate-950 font-mono text-xs font-black rounded-lg px-2.5 py-1 border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
-                    ${isBackdated ? `
-                      <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-950 text-amber-100 animate-pulse">
-                        ${__L("⚠️ बैक-डेट बिलिंग", "⚠️ Backdated")}
-                      </span>
-                      <button type="button" onclick="window.MMS_APP.setPosInvoiceDate(getTodayDateStr())" class="px-2 py-0.5 text-[10px] font-black bg-white/30 hover:bg-white/50 text-white rounded-md cursor-pointer transition" title="${__L("आज की तारीख सेट करें", "Reset to today")}">
-                        ${__L("आज करें", "Reset Today")}
-                      </button>
-                    ` : ''}
-                  ` : `
-                    <span class="font-mono text-xs font-black bg-slate-800 text-slate-100 px-2.5 py-1 rounded-lg">${selectedDate}</span>
-                    <span class="text-[10px] text-slate-400 font-bold">🔒 ${__L("लॉक", "Locked")}</span>
-                  `}
-                </div>
+              <!-- Bill Date Picker -->
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${isBackdated ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+                <span class="text-xs">📅</span>
+                ${canBackdate ? `
+                  <input type="date" id="pos-top-invoice-date" value="${selectedDate}" onchange="window.MMS_APP.setPosInvoiceDate(this.value)" class="bg-white text-slate-900 font-mono text-xs font-bold rounded px-2 py-0.5 border border-slate-300 outline-none cursor-pointer">
+                  ${isBackdated ? `
+                    <button type="button" onclick="window.MMS_APP.setPosInvoiceDate(getTodayDateStr())" class="text-[10px] font-bold text-amber-900 hover:underline">
+                      ${__L("आज करें", "Reset")}
+                    </button>
+                  ` : ''}
+                ` : `
+                  <span class="font-mono text-xs font-bold">${selectedDate}</span>
+                `}
               </div>
-
-              <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 self-start sm:self-center">
-                ${__L("⚡ ऑटो-स्टॉक डिडक्शन चालू", "⚡ Auto-Stock Deduction Active")}
-              </span>
             </div>
-            
-            <p class="text-xs text-slate-500">${__L("लाइव पार्ट सर्च करें, नया पार्ट जोड़ें या कस्टम रिपेयर सर्विस चार्ज लगाएं", "Live SKU search, quick part add, and custom repair labor charges")}</p>
           </div>
 
           <!-- Live SKU Search Input & Quick Add Button (NO Dropdown, Direct Search) -->
@@ -2201,7 +2161,7 @@ function filterCategoryDropdown(inputId, query) {
 
           <!-- Custom Labor / Extra Charge Input -->
           <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
-            <span class="text-xs font-black text-slate-700 block mb-2">${__L("या कस्टम रिपेयर सर्विस / लेबर चार्ज जोड़ें:", "Or Add Custom Repair Service / Labor Charge:")}</span>
+            <span class="text-xs font-bold text-slate-700 block mb-1.5">${__L("+ लेबर चार्ज जोड़ें", "+ Add Labor Charge")}</span>
             <div class="flex gap-2">
               <input id="pos-custom-name" type="text" placeholder="${__L("उदा. सिर्फ ग्लास चेंज लेबर / IC फिटिंग", "e.g. Glass Change Labor / IC Fitting")}" class="w-2/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-medium">
               <input id="pos-custom-rate" type="number" placeholder="${__L("रेट ₹", "Rate ₹")}" class="w-1/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono">
@@ -2215,7 +2175,7 @@ function filterCategoryDropdown(inputId, query) {
           <div>
             <h4 class="text-xs font-black text-slate-800 mb-2 flex items-center justify-between">
               <span>🛒 ${__L("कार्ट में जुड़े सामान", "Items in Cart")}</span>
-              <span class="text-[11px] text-blue-600 font-bold">${__L("* रेट पर क्लिक करके आप कीमत सीधे बदल सकते हैं", "* Click on rate to edit price directly")}</span>
+              
             </h4>
             
             <div class="overflow-x-auto">
@@ -2450,7 +2410,7 @@ function filterCategoryDropdown(inputId, query) {
                   placeholder="उदा. राहुल भाई ले गए, कल शाम देंगे / डिस्प्ले टेस्टिंग ले गए" 
                   class="w-full p-2 bg-white border border-rose-300 rounded-lg text-xs font-medium focus:ring-1 focus:ring-rose-500"
                 >
-                <p class="text-[10px] text-rose-700">${__L("* यह नोट व तारीख खाता-बही में दर्ज रहेगा।", "* This note and date will be logged in credit ledger.")}</p>
+                
               </div>
             ` : ''}
           </div>
@@ -2461,7 +2421,7 @@ function filterCategoryDropdown(inputId, query) {
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               <span>${__L("बिल पक्का करें व इनवॉइस जारी करें", "Confirm Bill & Generate Invoice")}</span>
             </button>
-            <p class="text-[10px] text-slate-400 text-center mt-1.5">${__L("* बिल पूरा होते ही इन्वेंट्री से स्टॉक घट जाएगा और ग्राहक रिकॉर्ड सुरक्षित रहेगा", "* Stock will auto-deduct from inventory on billing and customer record is saved")}</p>
+            
           </div>
         </div>
       </div>
@@ -3502,7 +3462,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                   ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
                 </span>
               </div>
-              <p class="text-xs text-slate-500">${__L("20+ श्रेणियों में स्पेयर पार्ट्स का लाइव स्टॉक, खरीद व बिक्री दर", "Live stock, cost & selling prices of spare parts across 20+ categories")}</p>
+              
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               ${renderBranchFilterBar(branchFilter)}
@@ -4146,13 +4106,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               </span>
             </div>
             <span class="text-2xl sm:text-3xl font-black font-mono">${formatCurrency(totalMarketDue)}</span>
-            <p class="text-xs text-amber-100 mt-1">कुल ${dueInvoices.length} दुकानदारों / ग्राहकों के पास पेमेंट बकाया है</p>
+            
           </div>
           <div class="flex flex-col gap-2 items-end">
             ${renderBranchFilterBarDark(branchFilter)}
-            <div class="text-xs bg-white/20 backdrop-blur px-3 py-2 rounded-xl border border-white/30">
-              📍 समय पर उधार वसूलने के लिए व्हाट्सएप रिमाइंडर बटन का उपयोग करें।
-            </div>
+            
           </div>
         </div>
 
@@ -4340,7 +4298,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <span class="text-xs text-blue-200 font-bold">• चयनित: ${filterLabel}</span>
             </div>
             <h3 class="text-xl sm:text-2xl font-black">${__L("डेली सेल्स व गल्ला मिलान", "Daily Sales & Cash Register")}</h3>
-            <p class="text-xs text-blue-200">आज, कल, इस महीने या किसी भी तारीख का गल्ला, नकद, यूपीआई व उधार तुरंत देखें</p>
+            
           </div>
 
           <div class="flex flex-col gap-2.5 items-end">
@@ -4736,7 +4694,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
             </div>
-            <p class="text-xs text-slate-500">${__L("ग्राहकों के रिपेयरिंग मोबाइल, पैटर्न लॉक और टोकन स्टेटस", "Live customer repair devices, passcodes and token status")}</p>
+            
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             ${renderBranchFilterBar(branchFilter)}
@@ -5639,40 +5597,24 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function renderPortalBranchSwitcher() {
     const container = document.getElementById('portal-branch-switcher');
     if (!container) return;
-
     const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
-    const isOwner = role === 'admin';
-    const isManager = role === 'manager';
-    const isEmployee = !isOwner && !isManager;
+    const curBranch = state.activeBranch || 'all';
 
-    if (!isOwner) {
-      // MANAGER & EMPLOYEES: STRICTLY LOCKED TO THEIR OWN ASSIGNED BRANCH!
-      const userBranch = (state.currentUser && state.currentUser.branchId && state.currentUser.branchId !== 'all') 
-        ? state.currentUser.branchId 
-        : 'branch_hazratganj';
-      state.activeBranch = userBranch;
+    if (role !== 'admin') {
       container.innerHTML = `
-        <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-          <span>🏢 ${__L("अधिकृत शाखा:", "Assigned Branch:")}</span>
-        </span>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-900 font-black text-xs border border-blue-200 shadow-2xs">
-          <span>📍</span> ${getBranchName(userBranch)} (${isManager ? 'मैनेजर' : 'स्टाफ'})
+        <span class="px-2 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold border border-slate-200">
+          🏢 ${getBranchName(state.currentUser ? state.currentUser.branchId : 'branch_hazratganj')}
         </span>
       `;
       return;
     }
 
-    // SUPER ADMIN ONLY: Can freely switch between All Branches or any specific branch!
-    const curBranch = state.activeBranch || 'all';
     container.innerHTML = `
-      <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-        <span>🏢 ${__L("शाखा व्यू:", "Branch View:")}</span>
-      </span>
-      <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-blue-300 text-blue-950 text-xs font-black rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
+      <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-slate-300 text-slate-900 text-xs font-bold rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
         <option value="all" ${curBranch === 'all' ? 'selected' : ''}>${__L("🌐 सभी शाखाएं", "🌐 All Branches")}</option>
-        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>${__L("📍 1. हजरतगंज (मुख्य लैब)", "📍 1. Hazratganj (Head Lab)")}</option>
-        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>${__L("📍 2. नाका हिंडोला शाखा", "📍 2. Naka Hindola Branch")}</option>
-        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>${__L("📍 3. कन्नौज (सरायमीरा)", "📍 3. Kannauj (Saraimeera)")}</option>
+        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>${__L("📍 हजरतगंज", "📍 Hazratganj")}</option>
+        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>${__L("📍 नाका", "📍 Naka")}</option>
+        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>${__L("📍 कन्नौज", "📍 Kannauj")}</option>
       </select>
     `;
   }
@@ -6143,7 +6085,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <span class="text-xs text-blue-200 font-bold">• ${dateFilterLabel}</span>
             </div>
             <h3 class="text-xl sm:text-2xl font-black">दैनिक उपस्थिति रजिस्टर व स्वीकृति (Admin View)</h3>
-            <p class="text-xs text-slate-300 mt-0.5">कर्मचारियों की सेल्फी, जीपीएस दूरी और इन/आउट समय की जांच व स्वीकृति करें</p>
+            
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <button onclick="window.MMS_APP.exportAttendanceCSV()" class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-md cursor-pointer">
@@ -8219,7 +8161,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               </span>
             </div>
             <h3 class="text-xl font-black">${__L("दुकान खर्च", "Store Overhead Expenses")}</h3>
-            <p class="text-xs text-slate-300 mt-0.5">${__L("किराया, बिजली, इंटरनेट, चाय-नाश्ता, मशीन व टूल मरम्मत खर्च का संपूर्ण हिसाब", "Complete accounting of rent, electricity, internet, pantry, tools and machine repair")}</p>
+            
           </div>
 
           <div class="flex flex-col gap-2.5 items-end">
