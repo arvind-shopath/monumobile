@@ -1692,12 +1692,12 @@ function filterCategoryDropdown(inputId, query) {
     if (!container) return;
 
     const posts = [
-      { img: 'images/insta-1.jpg', title: __L('OCA स्क्रीन लेमिनेशन लैब', 'OCA Screen Lamination Lab'), date: __L('आज', 'Today') },
-      { img: 'images/insta-2.jpg', title: __L('माइक्रो-सोल्डरिंग व IC रीबॉलिंग', 'Micro-Soldering & BGA Reballing'), date: __L('कल', 'Yesterday') },
-      { img: 'images/insta-3.jpg', title: __L('ओरिजिनल बैटरी टेस्टिंग व रिप्लेसमेंट', 'Genuine Battery Replacement'), date: __L('2 दिन पहले', '2 days ago') },
-      { img: 'images/insta-4.jpg', title: __L('थर्मल कैमरा शॉर्टिंग डायग्नोस्टिक्स', 'Thermal Camera Diagnostics'), date: __L('3 दिन पहले', '3 days ago') },
-      { img: 'images/insta-5.jpg', title: __L('Curved AMOLED स्क्रीन फिटिंग', 'Curved AMOLED Display Fitting'), date: __L('इस हफ्ते', 'This week') },
-      { img: 'images/insta-6.jpg', title: __L('एक्सप्रेस रिपेयर लैब हजरतगंज', 'Express Repair Lab Hazratganj'), date: __L('इस हफ्ते', 'This week') }
+      { img: 'images/insta-1.jpg', title: __L('100% ओरिजिनल स्क्रीन रिप्लेसमेंट', '100% Genuine Screen Replacement'), date: __L('आज', 'Today') },
+      { img: 'images/insta-2.jpg', title: __L('माइक्रो-सोल्डरिंग व IC रिपेयर', 'Micro-Soldering & IC Repair'), date: __L('कल', 'Yesterday') },
+      { img: 'images/insta-3.jpg', title: __L('श्रीराम टावर हजरतगंज लैब', 'Sree Rama Towers Hazratganj Lab'), date: __L('2 दिन पहले', '2 days ago') },
+      { img: 'images/insta-4.jpg', title: __L('मल्टीमीटर व सर्किट डायग्नोस्टिक्स', 'Multimeter & Circuit Diagnostics'), date: __L('3 दिन पहले', '3 days ago') },
+      { img: 'images/insta-5.jpg', title: __L('ओरिजिनल बैटरी व फोल्डर फिटिंग', 'Genuine Battery & Display Assembly'), date: __L('इस हफ्ते', 'This week') },
+      { img: 'images/insta-6.jpg', title: __L('चिप-लेवल IC व मदरबोर्ड रिपेयर', 'Chip-Level Motherboard IC Repair'), date: __L('इस हफ्ते', 'This week') }
     ];
 
     container.innerHTML = posts.map(p => `
