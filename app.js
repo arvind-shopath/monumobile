@@ -3478,8 +3478,7 @@ function filterCategoryDropdown(inputId, query) {
                     </span>
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">
-                    <select onchange="window.MMS_APP.assignInvoiceStaff,
-    setPosInvoiceDate('${invId}', this.value)" class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs rounded-xl px-2 py-1 font-bold cursor-pointer hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                    <select onchange="window.MMS_APP.assignInvoiceStaff('${invId}', this.value)" class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs rounded-xl px-2 py-1 font-bold cursor-pointer hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
                       <option value="">👤 इंप्लॉई असाइन करें</option>
                       ${(state.staff || []).map(s => {
                         const isSel = assigned === s.name || (assigned && assigned.includes(s.name));
@@ -10934,8 +10933,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     renderStockTransferModule,
     onTransferSkuChange,
     executeStockTransfer,
-    assignInvoiceStaff
-
+    assignInvoiceStaff,
+    setPosInvoiceDate
   };
 
 })();
