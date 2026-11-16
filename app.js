@@ -937,23 +937,23 @@ function filterCategoryDropdown(inputId, query) {
       const uPhone = String(u.phone || '').replace(/[^0-9]/g, '').slice(-10);
       if (uPhone !== cleanPhone) return false;
 
-      // Allow match if password matches, or default Mms@<6digits>, or master bypass
+      // Priority 1: Match the exact custom password set by Admin Monu
       const uPass = String(u.pass || '').trim();
+      const matchCustom = uPass && (pass === uPass || pass.toLowerCase() === uPass.toLowerCase());
+
+      // Priority 2: Fallback for convenience (last 6 digits, master keys)
       const last6 = cleanPhone.slice(-6);
       const defaultPass = 'Mms@' + last6;
-      return (
-        pass === uPass ||
-        pass.toLowerCase() === uPass.toLowerCase() ||
-        pass.toLowerCase() === defaultPass.toLowerCase() ||
-        pass === last6 ||
-        pass.toLowerCase() === ('mms@' + last6).toLowerCase() ||
-        pass === '123456' ||
-        pass === 'admin123' ||
-        pass === 'monu123' ||
-        pass === 'mms123' ||
-        pass === 'staff123' ||
-        pass === '1234'
-      );
+      const matchFallback = pass.toLowerCase() === defaultPass.toLowerCase() ||
+                            pass === last6 ||
+                            pass === '123456' ||
+                            pass === 'admin123' ||
+                            pass === 'monu123' ||
+                            pass === 'mms123' ||
+                            pass === 'staff123' ||
+                            pass === '1234';
+
+      return matchCustom || matchFallback;
     });
 
     if (matched) {
@@ -7384,10 +7384,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <label class="block font-bold text-slate-700 mb-1">लॉगिन पासवर्ड *</label>
-              <input type="text" id="staff-pass-input" value="${emp ? emp.pass : 'Mms@' + Math.floor(100000 + Math.random() * 900000)}" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-blue-50/60 rounded-2xl border border-blue-200">
+              <div class="flex items-center justify-between mb-1">
+                <label class="font-black text-slate-900 flex items-center gap-1">
+                  <span>🔑 लॉगिन पासवर्ड (अपनी मर्जी का पासवर्ड डालें) *</span>
+                </label>
+              </div>
+              <input type="text" id="staff-pass-input" value="${emp && emp.pass ? emp.pass : ''}" placeholder="उदा. 123456 या monu@123 या अपनी मर्जी का पासवर्ड" required class="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-mono font-bold text-blue-900 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <span class="text-[10px] text-blue-700 font-bold mt-1 block">
+                ✨ कोई फ़िक्स फॉर्मेट जरूरी नहीं है! आप जो भी पासवर्ड यहाँ लिखेंगे, कर्मचारी उसी से लॉगिन करेगा।
+              </span>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">फोटो लिंक / URL (वैकल्पिक)</label>
@@ -7494,7 +7501,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const phone = document.getElementById('staff-phone-input').value.trim();
     const role = document.getElementById('staff-role-select').value;
     const branchId = document.getElementById('staff-branch-select').value;
-    const pass = document.getElementById('staff-pass-input').value.trim();
+    const rawPass = document.getElementById('staff-pass-input').value.trim();
+    const pass = rawPass || '123456';
     const photo = document.getElementById('staff-photo-input').value.trim();
     const inTime24 = document.getElementById('staff-in-time-input')?.value || '10:30';
     const outTime24 = document.getElementById('staff-out-time-input')?.value || '20:30';
@@ -7566,6 +7574,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     }
 
     localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff));
+    if (typeof window !== 'undefined' && window.MMS_DATA && Array.isArray(window.MMS_DATA.users)) {
+      const uIdx = window.MMS_DATA.users.findIndex(u => u.phone === phone);
+      if (uIdx !== -1) {
+        window.MMS_DATA.users[uIdx].pass = pass;
+        window.MMS_DATA.users[uIdx].role = role;
+        window.MMS_DATA.users[uIdx].name = name;
+        window.MMS_DATA.users[uIdx].branchId = branchId;
+      } else {
+        window.MMS_DATA.users.push({ phone, pass, role, name, branchId });
+      }
+    }
     if (typeof CloudSync !== 'undefined' && CloudSync.syncStaff) {
       CloudSync.syncStaff(state.staff);
     }
