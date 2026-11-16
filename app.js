@@ -688,8 +688,15 @@ function filterCategoryDropdown(inputId, query) {
     'MMS-INV-203', 'MMS-INV-204', 'MMS-INV-205', 'MMS-2026-88',
     'MMS-1001', 'MMS-1002', 'MMS-1003'
   ];
-  const DUMMY_PHONES = ['9876543210', '9876501234', '9876505678', '9876509012'];
-  const DUMMY_NAMES = ['Rahul Sharma', 'राहुल शर्मा', 'Rajesh Verma', 'राजेश वर्मा', 'दीपक कुमार', 'अमित सिंह'];
+  const DUMMY_PHONES = [
+    '9933445566', '9887766554', '9123456789', '9455667788', '9723338321', '9911223344',
+    '9876543210', '9876501234', '9876505678', '9876509012'
+  ];
+  const DUMMY_NAMES = [
+    'संजय मोबाइल', 'Sanjay Mobile', 'राजू टेलीकॉम', 'Raju Telecom', 'अमन रिपेयरिंग', 'Aman Repair',
+    'लखनऊ मोबाइल हब', 'Lucknow Mobile Hub', 'अरविंद शुक्ला', 'Arvind Shukla', 'अमित कुमार वर्मा', 'Amit Verma',
+    'Rahul Sharma', 'राहुल शर्मा', 'Rajesh Verma', 'राजेश वर्मा', 'दीपक कुमार', 'अमित सिंह'
+  ];
 
   function isDummyRecord(item) {
     if (!item) return false;
@@ -704,7 +711,7 @@ function filterCategoryDropdown(inputId, query) {
 
   // Active Purge of LocalStorage on Load
   try {
-    ['mms_jobs_v10', 'mms_invoices_v10'].forEach(k => {
+    ['mms_jobs_v10', 'mms_invoices_v10', STORAGE_KEYS.CONTACTS].forEach(k => {
       let raw = localStorage.getItem(k);
       if (raw) {
         let parsed = JSON.parse(raw);
@@ -810,16 +817,26 @@ function filterCategoryDropdown(inputId, query) {
     myWorkDate: 'today', // 'today' | 'yesterday' | 'week' | 'all' | 'custom'
     myWorkCustomDate: '',
 
-    // Customer & Shopkeeper Directory Database
-    contacts: JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTACTS) || 'null') || [
-      { name: 'संजय मोबाइल (Sanjay Mobile Shop, Hazratganj)', phone: '9933445566', type: 'shopkeeper' },
-      { name: 'राजू टेलीकॉम (Raju Telecom, Narhi)', phone: '9887766554', type: 'shopkeeper' },
-      { name: 'अमन रिपेयरिंग सेंटर (Aman Repair Center)', phone: '9123456789', type: 'shopkeeper' },
-      { name: 'लखनऊ मोबाइल हब (Lucknow Mobile Hub)', phone: '9455667788', type: 'shopkeeper' },
-      { name: 'अरविंद शुक्ला', phone: '9723338321', type: 'customer' },
-      
-      { name: 'अमित कुमार वर्मा (Amit Verma)', phone: '9911223344', type: 'customer' }
-    ],
+    // Customer & Shopkeeper Directory Database (Strictly Zero Dummy Data)
+    contacts: (() => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.CONTACTS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            const clean = parsed.filter(c => !isDummyRecord(c));
+            localStorage.setItem(STORAGE_KEYS.CONTACTS, JSON.stringify(clean));
+            return clean;
+          }
+        }
+      } catch (e) {}
+      localStorage.setItem(STORAGE_KEYS.CONTACTS, JSON.stringify([]));
+      return [];
+    })(),
+
+    // Multi-Item Stock Transfer State
+    transferCart: [],
+    transferSearchQuery: '',
 
     // Quick SKU Add Form State
     quickSkuVisible: false,
@@ -1255,7 +1272,9 @@ function filterCategoryDropdown(inputId, query) {
       state.currentUser = matched;
       localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(matched));
       localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
-      if (modal) { closeModal(modal); modal.style.display = 'none'; modal.classList.add('hidden'); }
+      if (modal) { closeModal(modal); modal.style.display = 'none'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      const fallbackM = document.getElementById('login-modal');
+      if (fallbackM) { fallbackM.style.display = 'none'; fallbackM.classList.add('hidden'); fallbackM.classList.remove('flex'); }
       if (errEl) errEl.classList.add('hidden');
       if (formEl) formEl.reset();
       renderAuthPill();
@@ -1285,6 +1304,13 @@ function filterCategoryDropdown(inputId, query) {
     if (!state.currentUser) {
       openModal(dom.loginModal);
       return;
+    }
+    // Force close login modal if open
+    const lm = (dom && dom.loginModal) || document.getElementById('login-modal');
+    if (lm) {
+      lm.classList.add('hidden');
+      lm.classList.remove('flex');
+      lm.style.display = 'none';
     }
     localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
     state.activeView = 'portal';
@@ -4742,13 +4768,18 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <p><strong>कन्नौज शाखा (Realme ऑथराइज्ड सर्विस सेंटर):</strong> यहाँ के पार्ट्स कंपनी द्वारा सीधे दिए जाते हैं, अतः इन्वेंट्री हजरतगंज (मुख्य गोदाम) में रखी जाती है और यहीं से नाका हिंडोला शाखा को ट्रांसफर होती है।</p>
         </div>
 
-        <!-- Dispatch Transfer Card -->
+        <!-- Dispatch Transfer Card (Multi-Item Search & Select) -->
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
-          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-            <span>📦 ${__L("नया माल डिस्पैच करें", "Dispatch New Stock")}</span>
-          </h3>
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+              <span>📦 ${__L("नया माल डिस्पैच करें (मल्टी-आइटम ट्रांसफर)", "Dispatch New Stock (Multi-Item Transfer)")}</span>
+            </h3>
+            <span class="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-800 border border-blue-200">
+              हजरतगंज ➔ नाका हिंडोला
+            </span>
+          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <!-- Source Branch -->
             <div>
               <label class="block font-bold text-slate-700 mb-1.5">${__L("भेजने वाली शाखा (मुख्य गोदाम)", "Source Branch (Main Warehouse)")}</label>
@@ -4766,45 +4797,153 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 <span>नाका हिंडोला शाखा (चारबाग)</span>
               </div>
             </div>
+          </div>
 
-            <!-- Select SKU / Product -->
-            <div class="lg:col-span-2">
-              <label class="block font-bold text-slate-700 mb-1.5">${__L("पार्ट / SKU चुनें (हजरतगंज में उपलब्ध पार्ट्स) *", "Select Part / SKU (Available in Hazratganj) *")}</label>
-              <select id="trf-sku-select" onchange="window.MMS_APP.onTransferSkuChange(this.value)" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                <option value="">-- पार्ट या SKU चुनें (${hazratganjItems.length} उपलब्ध) --</option>
-                ${hazratganjItems.map(item => `
-                  <option value="${item.sku}">
-                    [${item.sku}] ${item.name} • (उपलब्ध: ${item.stock} पीस | लागत: ₹${item.costPrice})
-                  </option>
-                `).join('')}
-              </select>
+          <!-- Live Search Bar for Parts -->
+          <div class="space-y-2">
+            <label class="block font-bold text-slate-700 text-xs">
+              🔍 ${__L("पार्ट्स खोजें और लिस्ट में जोड़ें (हजरतगंज स्टॉक से)", "Search & Add Parts (From Hazratganj Stock)")} *
+            </label>
+            <div class="relative">
+              <input 
+                id="trf-search-input" 
+                type="text" 
+                value="${state.transferSearchQuery || ''}"
+                oninput="window.MMS_APP.onTransferSearch(this.value)"
+                placeholder="पार्ट का नाम, मॉडल या SKU कोड लिखें (उदा. iPhone, Realme, Display, Battery, Sub-board)..." 
+                class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold focus:bg-white focus:ring-2 focus:ring-emerald-500 shadow-sm"
+              >
+              <span class="absolute left-3 top-3 text-xs text-slate-400">🔍</span>
+            </div>
+
+            <!-- Auto-Suggestions Dropdown List -->
+            <div id="trf-search-results" class="${(state.transferSearchQuery && state.transferSearchQuery.trim()) ? '' : 'hidden'} max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg divide-y divide-slate-100">
+              ${(() => {
+                const q = (state.transferSearchQuery || '').trim().toLowerCase();
+                if (!q) return '';
+                const matches = hazratganjItems.filter(i => 
+                  (i.name && i.name.toLowerCase().includes(q)) || 
+                  (i.sku && i.sku.toLowerCase().includes(q)) ||
+                  (i.category && i.category.toLowerCase().includes(q))
+                ).slice(0, 10);
+
+                if (matches.length === 0) {
+                  return `<div class="p-3 text-center text-xs text-slate-400 font-bold">हजरतगंज में इस नाम का कोई पार्ट उपलब्ध नहीं है।</div>`;
+                }
+                return matches.map(item => `
+                  <div class="p-2.5 flex items-center justify-between hover:bg-slate-50 transition gap-2 text-xs">
+                    <div>
+                      <strong class="text-slate-900 block font-bold">${item.name}</strong>
+                      <span class="text-[10px] text-blue-600 font-mono font-bold">[${item.sku}]</span>
+                      <span class="text-[10px] text-slate-500 ml-2">उपलब्ध: <strong class="text-emerald-700 font-mono">${item.stock} पीस</strong> | लागत: ₹${item.costPrice}</span>
+                    </div>
+                    <button 
+                      type="button" 
+                      onclick="window.MMS_APP.addToTransferCart('${item.sku}')"
+                      class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black shadow-sm transition shrink-0 cursor-pointer"
+                    >
+                      + लिस्ट में जोड़ें
+                    </button>
+                  </div>
+                `).join('');
+              })()}
             </div>
           </div>
 
-          <!-- Quantity, Available preview & Note Row -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-2">
-            <div>
-              <label class="block font-bold text-slate-700 mb-1.5">${__L("हजरतगंज में उपलब्ध स्टॉक", "Stock in Hazratganj")}</label>
-              <div id="trf-available-display" class="p-2.5 bg-blue-50 border border-blue-200 rounded-xl font-mono font-black text-blue-900">
-                ${__L("कृपया ऊपर से पार्ट चुनें", "Please select a part above")}
+          <!-- Multi-Part Transfer Cart Table (Selected Parts List) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="block font-black text-slate-900 text-xs">
+                📋 ${__L("ट्रांसफर लिस्ट (नाका हिंडोला भेजे जाने वाले पार्ट्स)", "Transfer Cart (Parts Selected for Dispatch)")}
+              </label>
+              <span class="text-xs font-mono font-bold text-slate-500">
+                कुल पार्ट्स: <strong class="text-blue-700">${(state.transferCart || []).length}</strong> आइटम्स
+              </span>
+            </div>
+
+            ${(!state.transferCart || state.transferCart.length === 0) ? `
+              <div class="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-2xl text-center text-slate-500 text-xs font-bold space-y-1">
+                <span class="text-xl block">📦</span>
+                <span>अभी कोई पार्ट नहीं चुना गया है।</span>
+                <p class="text-[11px] font-normal text-slate-400">ऊपर सर्च बॉक्स से पार्ट खोजें और "+ लिस्ट में जोड़ें" बटन दबाएं। आप एक साथ कई पार्ट्स जोड़ सकते हैं।</p>
               </div>
-            </div>
+            ` : `
+              <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700 font-black">
+                      <th class="p-2.5 rounded-l-xl">क्र.सं.</th>
+                      <th class="p-2.5">पार्ट का नाम व SKU</th>
+                      <th class="p-2.5 text-center">हजरतगंज में उपलब्ध</th>
+                      <th class="p-2.5 text-center">ट्रांसफर मात्रा (Qty)</th>
+                      <th class="p-2.5 text-right">लागत वैल्यू</th>
+                      <th class="p-2.5 text-center rounded-r-xl">एक्शन</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    ${state.transferCart.map((cartItem, idx) => `
+                      <tr class="hover:bg-slate-50 transition">
+                        <td class="p-2.5 font-mono text-slate-400">${idx + 1}</td>
+                        <td class="p-2.5">
+                          <strong class="text-slate-900 block font-bold">${cartItem.name}</strong>
+                          <span class="text-[10px] text-blue-600 font-mono font-bold">${cartItem.sku}</span>
+                        </td>
+                        <td class="p-2.5 text-center font-mono font-bold text-slate-700">
+                          <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                            ${cartItem.stock} पीस
+                          </span>
+                        </td>
+                        <td class="p-2.5 text-center">
+                          <div class="inline-flex items-center gap-1.5 justify-center">
+                            <button type="button" onclick="window.MMS_APP.updateTransferCartQty('${cartItem.sku}', ${cartItem.qty - 1})" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 transition flex items-center justify-center cursor-pointer">-</button>
+                            <input 
+                              type="number" 
+                              min="1" 
+                              max="${cartItem.stock}" 
+                              value="${cartItem.qty}" 
+                              onchange="window.MMS_APP.updateTransferCartQty('${cartItem.sku}', this.value)"
+                              class="w-16 p-1.5 bg-white border border-slate-300 rounded-lg text-center font-mono font-black text-slate-900 focus:ring-2 focus:ring-emerald-500"
+                            >
+                            <button type="button" onclick="window.MMS_APP.updateTransferCartQty('${cartItem.sku}', ${cartItem.qty + 1})" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 transition flex items-center justify-center cursor-pointer">+</button>
+                          </div>
+                        </td>
+                        <td class="p-2.5 text-right font-mono font-bold text-slate-900">
+                          ₹${(cartItem.costPrice || 0) * (cartItem.qty || 1)}
+                        </td>
+                        <td class="p-2.5 text-center">
+                          <button 
+                            type="button" 
+                            onclick="window.MMS_APP.removeFromTransferCart('${cartItem.sku}')"
+                            class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg font-bold text-xs transition cursor-pointer"
+                            title="हटाएं"
+                          >
+                            🗑️ हटाएं
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
+          </div>
 
-            <div>
-              <label class="block font-bold text-slate-700 mb-1.5">${__L("ट्रांसफर मात्रा *", "Transfer Quantity *")}</label>
-              <input id="trf-qty-input" type="number" min="1" value="1" placeholder="उदा. 2" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
-
-            <div>
+          <!-- Challan Note & Dispatch Button -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-3 border-t border-slate-100 items-end">
+            <div class="sm:col-span-2">
               <label class="block font-bold text-slate-700 mb-1.5">${__L("चालान / डिलीवरी नोट (वैकल्पिक)", "Challan / Dispatch Note (Optional)")}</label>
               <input id="trf-note-input" type="text" placeholder="उदा. नाका डिलीवरी चालान #102 / ऑटो से भेजा" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
-          </div>
 
-          <div class="pt-2 flex justify-end">
-            <button onclick="window.MMS_APP.executeStockTransfer()" class="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-lg transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-              <span>🚚 ${__L("नाका हिंडोला को स्टॉक ट्रांसफर करें", "Confirm Dispatch to Naka Hindola")}</span>
-            </button>
+            <div>
+              <button 
+                onclick="window.MMS_APP.executeStockTransfer()" 
+                class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-lg transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                ${(!state.transferCart || state.transferCart.length === 0) ? 'disabled' : ''}
+              >
+                <span>🚚 ${__L(`नाका हिंडोला को सभी (${(state.transferCart || []).length}) पार्ट्स ट्रांसफर करें`, `Dispatch All (${(state.transferCart || []).length}) Parts to Naka Hindola`)}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -4872,98 +5011,165 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     `;
   }
 
-  function onTransferSkuChange(sku) {
-    const display = document.getElementById('trf-available-display');
-    const qtyInput = document.getElementById('trf-qty-input');
-    if (!display) return;
-    if (!sku) {
-      display.textContent = 'कृपया ऊपर से पार्ट चुनें';
-      display.className = 'p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-500';
+  function onTransferSearch(query) {
+    state.transferSearchQuery = query || '';
+    const resContainer = document.getElementById('trf-search-results');
+    if (!resContainer) return;
+    const q = (query || '').trim().toLowerCase();
+    if (!q) {
+      resContainer.classList.add('hidden');
       return;
     }
-    const item = (state.inventory || []).find(i => i.sku === sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
-    if (item) {
-      display.innerHTML = `<span class="text-lg font-black text-emerald-700">${item.stock} पीस</span> <span class="text-[11px] text-slate-500 font-normal">(हजरतगंज में)</span>`;
-      display.className = 'p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl font-mono font-bold text-emerald-900';
-      if (qtyInput) {
-        qtyInput.max = item.stock;
-        qtyInput.value = Math.min(1, item.stock);
-      }
+    const hazratganjItems = (state.inventory || []).filter(i => (i.branchId === 'branch_hazratganj' || !i.branchId) && Number(i.stock || 0) > 0);
+    const matches = hazratganjItems.filter(i => 
+      (i.name && i.name.toLowerCase().includes(q)) || 
+      (i.sku && i.sku.toLowerCase().includes(q)) ||
+      (i.category && i.category.toLowerCase().includes(q))
+    ).slice(0, 10);
+
+    if (matches.length === 0) {
+      resContainer.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 font-bold">हजरतगंज में इस नाम का कोई पार्ट उपलब्ध नहीं है।</div>`;
+      resContainer.classList.remove('hidden');
+      return;
     }
+
+    resContainer.innerHTML = matches.map(item => `
+      <div class="p-2.5 flex items-center justify-between hover:bg-slate-50 transition gap-2 text-xs">
+        <div>
+          <strong class="text-slate-900 block font-bold">${item.name}</strong>
+          <span class="text-[10px] text-blue-600 font-mono font-bold">[${item.sku}]</span>
+          <span class="text-[10px] text-slate-500 ml-2">उपलब्ध: <strong class="text-emerald-700 font-mono">${item.stock} पीस</strong> | लागत: ₹${item.costPrice}</span>
+        </div>
+        <button 
+          type="button" 
+          onclick="window.MMS_APP.addToTransferCart('${item.sku}')"
+          class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black shadow-sm transition shrink-0 cursor-pointer"
+        >
+          + लिस्ट में जोड़ें
+        </button>
+      </div>
+    `).join('');
+    resContainer.classList.remove('hidden');
+  }
+
+  function addToTransferCart(sku) {
+    state.transferCart = state.transferCart || [];
+    const hgItem = (state.inventory || []).find(i => i.sku === sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
+    if (!hgItem) return;
+
+    const existing = state.transferCart.find(i => i.sku === sku);
+    if (existing) {
+      if (existing.qty < hgItem.stock) {
+        existing.qty += 1;
+      } else {
+        alert(`हजरतगंज में केवल ${hgItem.stock} पीस ही उपलब्ध हैं!`);
+      }
+    } else {
+      state.transferCart.push({
+        sku: hgItem.sku,
+        name: hgItem.name,
+        stock: Number(hgItem.stock || 0),
+        costPrice: Number(hgItem.costPrice || 0),
+        qty: 1
+      });
+    }
+    state.transferSearchQuery = '';
+    renderStockTransferModule();
+  }
+
+  function updateTransferCartQty(sku, val) {
+    state.transferCart = state.transferCart || [];
+    const item = state.transferCart.find(i => i.sku === sku);
+    if (!item) return;
+    const parsed = parseInt(val, 10);
+    if (isNaN(parsed) || parsed < 1) {
+      item.qty = 1;
+    } else if (parsed > item.stock) {
+      item.qty = item.stock;
+      alert(`हजरतगंज में केवल ${item.stock} पीस ही उपलब्ध हैं!`);
+    } else {
+      item.qty = parsed;
+    }
+    renderStockTransferModule();
+  }
+
+  function removeFromTransferCart(sku) {
+    state.transferCart = (state.transferCart || []).filter(i => i.sku !== sku);
+    renderStockTransferModule();
   }
 
   function executeStockTransfer() {
-    const skuSelect = document.getElementById('trf-sku-select');
-    const qtyInput = document.getElementById('trf-qty-input');
     const noteInput = document.getElementById('trf-note-input');
-
-    const sku = skuSelect ? skuSelect.value : '';
-    const qty = qtyInput ? Number(qtyInput.value) : 0;
     const note = noteInput ? noteInput.value.trim() : '';
 
-    if (!sku) {
-      alert('कृपया ट्रांसफर करने के लिए पार्ट / SKU चुनें!');
-      return;
-    }
-    if (isNaN(qty) || qty <= 0) {
-      alert('कृपया सही ट्रांसफर मात्रा भरें!');
+    if (!state.transferCart || state.transferCart.length === 0) {
+      alert('कृपया पहले ट्रांसफर करने के लिए कम से कम एक पार्ट खोजकर लिस्ट में जोड़ें!');
       return;
     }
 
-    // 1. Locate item in Hazratganj stock
-    const hgItem = (state.inventory || []).find(i => i.sku === sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
-    if (!hgItem) {
-      alert('यह पार्ट हजरतगंज इन्वेंट्री में नहीं मिला!');
-      return;
+    // Validate all items
+    for (const cartItem of state.transferCart) {
+      const hgItem = (state.inventory || []).find(i => i.sku === cartItem.sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
+      if (!hgItem || Number(hgItem.stock || 0) < cartItem.qty) {
+        alert(`त्रुटि: [${cartItem.name}] के लिए हजरतगंज में पर्याप्त स्टॉक नहीं है!`);
+        return;
+      }
     }
 
-    if (Number(hgItem.stock || 0) < qty) {
-      alert(`हजरतगंज में केवल ${hgItem.stock} पीस उपलब्ध हैं! आप ${qty} पीस ट्रांसफर नहीं कर सकते।`);
-      return;
-    }
+    const challanBatchId = 'TRF-' + Date.now().toString().slice(-6);
+    let totalItemsCount = state.transferCart.length;
+    let totalPiecesCount = 0;
 
-    // 2. Deduct from Hazratganj
-    hgItem.stock = Number(hgItem.stock || 0) - qty;
+    // Process all items
+    state.transferCart.forEach(cartItem => {
+      const hgItem = (state.inventory || []).find(i => i.sku === cartItem.sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
+      if (hgItem) {
+        hgItem.stock = Number(hgItem.stock || 0) - cartItem.qty;
+      }
 
-    // 3. Locate or create item in Naka Hindola branch
-    let nakaItem = (state.inventory || []).find(i => i.sku === sku && i.branchId === 'branch_naka');
-    if (nakaItem) {
-      nakaItem.stock = Number(nakaItem.stock || 0) + qty;
-    } else {
-      nakaItem = {
-        ...hgItem,
-        branchId: 'branch_naka',
-        stock: qty
+      let nakaItem = (state.inventory || []).find(i => i.sku === cartItem.sku && i.branchId === 'branch_naka');
+      if (nakaItem) {
+        nakaItem.stock = Number(nakaItem.stock || 0) + cartItem.qty;
+      } else if (hgItem) {
+        nakaItem = {
+          ...hgItem,
+          branchId: 'branch_naka',
+          stock: cartItem.qty
+        };
+        state.inventory.push(nakaItem);
+      }
+
+      totalPiecesCount += cartItem.qty;
+
+      // Log transfer record
+      const trfRecord = {
+        id: challanBatchId,
+        date: getTodayDateStr(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sku: cartItem.sku,
+        name: cartItem.name,
+        qty: cartItem.qty,
+        fromBranch: 'branch_hazratganj',
+        toBranch: 'branch_naka',
+        transferredBy: state.currentUser ? (state.currentUser.name + ' (' + (state.currentUser.role || 'Admin').toUpperCase() + ')') : 'Monu Ji (Admin)',
+        notes: note || 'हजरतगंज ➔ नाका ट्रांसफर चालान #' + challanBatchId
       };
-      state.inventory.push(nakaItem);
-    }
 
-    // 4. Log transfer
-    const trfRecord = {
-      id: 'TRF-' + Date.now().toString().slice(-6),
-      date: getTodayDateStr(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sku: hgItem.sku,
-      name: hgItem.name,
-      category: hgItem.category,
-      qty: qty,
-      fromBranch: 'branch_hazratganj',
-      toBranch: 'branch_naka',
-      transferredBy: state.currentUser ? (state.currentUser.name + ' (' + (state.currentUser.role || 'Admin').toUpperCase() + ')') : 'Monu Ji (Admin)',
-      notes: note || 'हजरतगंज ➔ नाका ट्रांसफर चालान'
-    };
+      state.stockTransfers = state.stockTransfers || [];
+      state.stockTransfers.unshift(trfRecord);
+    });
 
-    state.stockTransfers = state.stockTransfers || [];
-    state.stockTransfers.unshift(trfRecord);
     localStorage.setItem('mms_stock_transfers', JSON.stringify(state.stockTransfers));
+    state.transferCart = [];
+    state.transferSearchQuery = '';
 
-    // 5. Persist and Sync to Enterprise Cloud
+    // Persist and Sync to Enterprise Cloud
     persistData();
     if (typeof CloudSync !== "undefined" && CloudSync.syncInventory) {
       CloudSync.syncInventory(state.inventory);
     }
 
-    alert(`✅ सफल! ${qty} पीस [${hgItem.name}] हजरतगंज से घटकर नाका हिंडोला शाखा में ट्रांसफर हो गए हैं।`);
+    alert(`✅ सफल! कुल ${totalItemsCount} प्रकार के पार्ट्स (${totalPiecesCount} पीस) चालान #${challanBatchId} द्वारा हजरतगंज से नाका हिंडोला शाखा को ट्रांसफर हो गए हैं।`);
     renderStockTransferModule();
   }
 
@@ -5959,72 +6165,33 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     // IF ADMIN OR MANAGER: SHOW MASTER SYSTEM SETTINGS
     const branches = state.branches || [];
 
-    // Storage card is ONLY for isOwner (Super Admin)
+    // Storage card is ONLY for isOwner (Super Admin) - Clean, simple excel download & clean data
     const adminStorageCard = isOwner ? `
-      <!-- Server Storage Card -->
-      <div class="clay-card bg-white rounded-[26px] border border-slate-200/80 p-5 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <!-- Data Lifecycle & Clean Action -->
+      <div class="clay-card bg-white rounded-[26px] border border-slate-200/80 p-5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
           <div class="flex items-center gap-2">
             <span class="text-lg">🛡️</span>
-            <h3 class="text-sm font-black text-slate-900">${__L('सर्वर स्टोरेज', 'Server Storage')}</h3>
+            <div>
+              <h3 class="text-sm font-black text-slate-900">${__L('डेटा लाइफसाइकिल व स्पेस मैनेजमेंट', 'Data Lifecycle & Space Management')}</h3>
+              <p class="text-[11px] text-slate-500">${__L('45 दिन से पुराने रिकॉर्ड्स का बैकअप व ऑटो-क्लीनअप', '45-day automatic lifecycle backup & cleanup')}</p>
+            </div>
           </div>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            ${__L('स्टोरेज सुरक्षित', 'Healthy')}
+            ${__L('ऑटो-क्लीन सक्रिय', 'Auto-Clean Active')}
           </span>
         </div>
 
-        <!-- Live Storage Capacity Gauges -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-              <span class="flex items-center gap-1 font-extrabold text-slate-900">
-                <span>🗄️</span> ${__L('ERP डेटाबेस', 'ERP Database')}
-              </span>
-              <span class="text-slate-500 font-bold text-[11px]">${__L('अधिकतम: 4.5 GB', 'Max: 4.5 GB')}</span>
-            </div>
-            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-              <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 2.5%;"></div>
-            </div>
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-1.5">
-              <span>${__L('उपयोग', 'Used')}: <strong>0.18 MB</strong></span>
-              <span class="text-emerald-600 font-black">${__L('4,499.8 MB सुरक्षित खाली', '4,499.8 MB Free')}</span>
-            </div>
-          </div>
-
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
-              <span class="flex items-center gap-1 font-extrabold text-slate-900">
-                <span>📸</span> ${__L('मीडिया स्टोरेज', 'Media Storage')}
-              </span>
-              <span class="text-slate-500 font-bold text-[11px]">${__L('अधिकतम: 9.5 GB', 'Max: 9.5 GB')}</span>
-            </div>
-            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-              <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 1.2%;"></div>
-            </div>
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-1.5">
-              <span>${__L('उपयोग', 'Used')}: <strong>0.22 MB</strong></span>
-              <span class="text-emerald-600 font-black">${__L('9,499.7 MB सुरक्षित खाली', '9,499.7 MB Free')}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 60-Day Archive Action -->
-        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white">${__L('60 दिन', '60 Days')}</span>
-            <span class="font-bold text-slate-800">${__L('पुराने रिकॉर्ड्स बैकअप व क्लीनअप', 'Old Records Backup & Purge')}</span>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button type="button" onclick="window.MMS_APP.exportOldDataToExcel(60)" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-              <span>📥</span>
-              <span>${__L('एक्सेल डाउनलोड', 'Export Excel')}</span>
-            </button>
-            <button type="button" onclick="window.MMS_APP.purgeOldDataWithConfirmation()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-              <span>🗑️</span>
-              <span>${__L('डेटा क्लीन', 'Clean Data')}</span>
-            </button>
-          </div>
+        <div class="flex flex-wrap items-center justify-end gap-2.5 pt-1">
+          <button type="button" onclick="window.MMS_APP.exportOldDataToExcel(45)" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+            <span>📥</span>
+            <span>${__L('एक्सेल डाउनलोड करें', 'Export to Excel')}</span>
+          </button>
+          <button type="button" onclick="window.MMS_APP.purgeOldDataWithConfirmation()" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-black transition flex items-center gap-1.5 cursor-pointer">
+            <span>🗑️</span>
+            <span>${__L('डेटा क्लीन करें', 'Clean Data')}</span>
+          </button>
         </div>
       </div>
     ` : '';
@@ -6550,7 +6717,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                       </td>
                     </tr>
                   `;
-                }).join('') || '<tr><td colspan="8" class="p-6 text-center text-slate-400">कोई रिकॉर्ड नहीं मिला।</td></tr>'}
+                }).join('') || '<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold"><div class="space-y-1"><span class="text-2xl block">👥</span><span>अभी तक कोई ग्राहक या दुकानदार नहीं जुड़ा है।</span><p class="text-[11px] font-normal text-slate-400">पीओएस काउंटर से बिल बनाने पर ग्राहक यहाँ अपने आप रिकॉर्ड हो जाएंगे।</p></div></td></tr>'}
               </tbody>
             </table>
           </div>
@@ -8118,7 +8285,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         address: isEn ? "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001" : "216, द्वितीय तल, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ (UP 226001)",
         landmark: isEn ? "(Near Hazratganj Crossing & Ashok Marg, 2nd Floor Sree Rama Towers)" : "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
         timings: isEn ? "12:00 PM - 09:00 PM (Open Daily)" : "12:00 PM - 09:00 PM (रोजाना खुला)",
-        phone: "7905859701",
+        phone: "9044115178",
         gps: "Lat 26.8501898°, Long 80.9483763°",
         mapUrl: "https://maps.google.com/maps?q=26.8501898,80.9483763&t=&z=17&ie=UTF8&iwloc=&output=embed",
         directMap: "https://www.google.com/maps/place/Monu+Mobile+Solution/@26.8501898,80.9483763,17z/data=!3m1!4b1!4m6!3m5!1s0x399bfdc6a82f28c9:0xf7b5e53c4a9cf571!8m2!3d26.8501898!4d80.9483763!16s%2Fg%2F11jfzjtt5z"
@@ -8140,7 +8307,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         address: isEn ? "2WHG+7HC, Saraimeera, G.T. Road (Near Bus Station), Kannauj, UP 209727" : "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
         landmark: isEn ? "(Saraimeera Crossing, Main G.T. Road Kannauj)" : "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
         timings: isEn ? "10:00 AM - 07:00 PM (Monday - Saturday)" : "10:00 AM - 07:00 PM (सोमवार - शनिवार)",
-        phone: "9044115178",
+        phone: "7905859701",
         gps: "Lat 27.0283°N, Long 79.926383°E",
         mapUrl: "https://maps.google.com/maps?q=27.0283,79.926383&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=27.0283,79.926383"
@@ -11023,14 +11190,20 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     renderEmployeeJobAlerts,
     exportAttendanceCSV,
     handleLogin: (e) => handleLogin(e),
+    getCurrentUser: () => state.currentUser,
     closeLoginModal: () => {
       const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
       if (modal) {
         modal.classList.add('hidden');
+        modal.classList.remove('flex');
         modal.style.display = 'none';
       }
     },
     openLoginModal: () => {
+      if (state.currentUser) {
+        showPortal();
+        return;
+      }
       const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
       if (modal) {
         modal.classList.remove('hidden');
@@ -11041,6 +11214,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         if (phoneInput) setTimeout(() => phoneInput.focus(), 50);
       }
     },
+    onTransferSearch,
+    addToTransferCart,
+    updateTransferCartQty,
+    removeFromTransferCart,
+    executeStockTransfer,
     logout: () => handleLogout(),
     handleLogout: () => handleLogout(),
     exportOldDataToExcel: exportOldDataToExcel,
