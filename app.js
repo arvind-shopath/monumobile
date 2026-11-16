@@ -286,6 +286,20 @@ function filterCategoryDropdown(inputId, query) {
             }
           }
 
+          if (resData.data.inventory && Array.isArray(resData.data.inventory) && resData.data.inventory.length > 0) {
+            const oldStr = JSON.stringify(state.inventory || []);
+            const newInv = resData.data.inventory;
+            const newStr = JSON.stringify(newInv);
+            if (oldStr !== newStr) {
+              state.inventory = newInv;
+              localStorage.setItem(STORAGE_KEYS.INVENTORY, newStr);
+              if (state.activeAdminTab === 'inventory' && typeof updateInventoryTableOnly === 'function') {
+                updateInventoryTableOnly();
+              }
+              changed = true;
+            }
+          }
+
           if (resData.data.staff && Array.isArray(resData.data.staff) && resData.data.staff.length > 0) {
             const oldStr = JSON.stringify(state.staff || []);
             const newStaff = resData.data.staff;
@@ -1942,9 +1956,11 @@ function filterCategoryDropdown(inputId, query) {
     // Strict Allowed Tabs per role
     let allowedTabs = [];
     if (isOwner) {
+      // Super Admin: FULL unrestricted access across all 3 branches
       allowedTabs = ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'balance', 'attendance', 'staff', 'settings'];
     } else if (isManager) {
-      allowedTabs = ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance', 'settings'];
+      // Branch Manager: Only branch operational tabs! (NO Balance Sheet P&L, NO Staff Salary HR, NO Master System Settings)
+      allowedTabs = ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance'];
     } else {
       // Employee / Technician: User specifically requires:
       // "अब इंप्लाई का डेली वर्क भी तो दिखाई देगा.. प्लीज वर्क का ऑप्शन भी बढ़ाइये.. जहां उसे असाइन्ड काम दिखाई देगा.."
@@ -2114,8 +2130,8 @@ function filterCategoryDropdown(inputId, query) {
     const allowedTabs = isOwner 
       ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'balance', 'attendance', 'staff', 'settings']
       : isManager 
-        ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance', 'settings']
-        : ['mywork', 'attendance', 'settings'];
+        ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance']
+        : ['mywork', 'attendance'];
 
     // Enforce allowed tab strictly for all roles
     if (!allowedTabs.includes(tab)) {
@@ -3567,6 +3583,7 @@ function filterCategoryDropdown(inputId, query) {
 
     state.inventory.unshift(newRecord);
     persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.syncInventory) CloudSync.syncInventory(state.inventory);
 
     // Auto-add to cart
     addToCart({
@@ -4536,6 +4553,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     }
 
     persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.pushInvoice) CloudSync.pushInvoice(inv);
     closeModal(dom.receivePaymentModal);
     renderKhata();
     alert(`✅ ${inv.customerName} से ${formatCurrency(amount)} पेमेंट प्राप्त दर्ज कर लिया गया!`);
@@ -5923,31 +5941,34 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const isManager = role === 'manager';
     const isEmployee = !isOwner && !isManager;
 
-    if (isEmployee) {
-      const empBranch = (state.currentUser && state.currentUser.branchId) ? state.currentUser.branchId : 'branch_kannauj';
-      state.activeBranch = empBranch;
+    if (!isOwner) {
+      // MANAGER & EMPLOYEES: STRICTLY LOCKED TO THEIR OWN ASSIGNED BRANCH!
+      const userBranch = (state.currentUser && state.currentUser.branchId && state.currentUser.branchId !== 'all') 
+        ? state.currentUser.branchId 
+        : 'branch_hazratganj';
+      state.activeBranch = userBranch;
       container.innerHTML = `
         <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-          <span>🏢 शाखा:</span>
+          <span>🏢 अधिकृत शाखा:</span>
         </span>
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 text-blue-900 font-black text-xs border border-blue-200 shadow-2xs">
-          <span>📍</span> ${getBranchName(empBranch)}
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-900 font-black text-xs border border-blue-200 shadow-2xs">
+          <span>📍</span> ${getBranchName(userBranch)} (${isManager ? 'मैनेजर' : 'स्टाफ'})
         </span>
       `;
       return;
     }
 
+    // SUPER ADMIN ONLY: Can freely switch between All Branches or any specific branch!
     const curBranch = state.activeBranch || 'all';
-
     container.innerHTML = `
       <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-        <span>🏢 शाखा:</span>
+        <span>🏢 सुपर एडमिन शाखा व्यू:</span>
       </span>
-      <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-slate-300 text-slate-900 text-xs font-black rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
-        ${isOwner ? `<option value="all" ${curBranch === 'all' ? 'selected' : ''}>🏢 सभी शाखाएं (All Branches)</option>` : ''}
-        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 हजरतगंज (Head Lab)</option>
-        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>📍 नाका हिंडोला शाखा</option>
-        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 कन्नौज (सरायमीरा)</option>
+      <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-blue-300 text-blue-950 text-xs font-black rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
+        <option value="all" ${curBranch === 'all' ? 'selected' : ''}>🌐 सभी शाखाएं (Master All Branches)</option>
+        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 1. हजरतगंज (Head Lab)</option>
+        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>📍 2. नाका हिंडोला शाखा</option>
+        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 3. कन्नौज (सरायमीरा)</option>
       </select>
     `;
   }

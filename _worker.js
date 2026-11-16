@@ -798,6 +798,34 @@ export default {
             return jsonResponse({ success: true, id, message: "Saved to Enterprise Cloud" });
           }
 
+          
+          if (action === 'sync_inventory') {
+            const invList = payload.inventory || payload.data;
+            if (Array.isArray(invList) && invList.length > 0) {
+              if (env.KV) {
+                currentKv.inventory = invList;
+                await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
+              }
+              if (env.DB) {
+                try {
+                  for (const item of invList.slice(0, 100)) {
+                    await env.DB.prepare(`
+                      INSERT INTO inventory (id, name, sku, category, cost_price, sell_price, stock, min_alert, branch_id)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                      ON CONFLICT(id) DO UPDATE SET stock = excluded.stock, sell_price = excluded.sell_price, cost_price = excluded.cost_price
+                    `).bind(
+                      item.sku || item.id, item.name || '', item.sku || '', item.category || '',
+                      Number(item.costPrice) || 0, Number(item.sellPrice) || 0, Number(item.stock) || 0,
+                      Number(item.minAlert) || 2, item.branchId || 'branch_hazratganj'
+                    ).run();
+                  }
+                } catch(dbErr) { console.warn("sync_inventory db error:", dbErr.message); }
+              }
+              return jsonResponse({ success: true, count: invList.length, message: "Inventory synchronized to Enterprise Cloud" });
+            }
+            return jsonResponse({ success: false, error: "Invalid inventory payload" }, 400);
+          }
+
           if (action === 'sync_staff') {
             const staffList = payload.staff || payload.data;
             if (Array.isArray(staffList) && staffList.length > 0) {
