@@ -239,6 +239,7 @@ function filterCategoryDropdown(inputId, query) {
             (state.attendance || []).forEach(a => map.set(a.id, a));
             attendance.forEach(a => map.set(a.id, { ...map.get(a.id), ...a }));
             state.attendance = Array.from(map.values()).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+            if (typeof purgeOldAttendanceSelfies === 'function') purgeOldAttendanceSelfies();
             const newStr = JSON.stringify(state.attendance);
             if (oldStr !== newStr) {
               localStorage.setItem(STORAGE_KEYS.ATTENDANCE, newStr);
@@ -6153,40 +6154,100 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     return Math.round(R * c);
   }
 
+  function purgeOldAttendanceSelfies() {
+    const fifteenDaysAgoMs = Date.now() - (15 * 86400000);
+    let changed = false;
+    if (Array.isArray(state.attendance)) {
+      state.attendance.forEach(r => {
+        if (r && r.date) {
+          const rDate = new Date(r.date).getTime();
+          if (!isNaN(rDate) && rDate < fifteenDaysAgoMs) {
+            if (r.selfie || r.photo) {
+              r.selfie = null;
+              r.photo = null;
+              r.purged = true;
+              changed = true;
+            }
+          }
+        }
+      });
+    }
+    if (changed) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(state.attendance));
+      } catch (e) {
+        console.warn('Attendance purge storage error:', e);
+      }
+    }
+  }
+
   function previewSelfieModal(url, empName, info) {
     const existing = document.getElementById('selfie-preview-modal');
     if (existing) existing.remove();
 
+    if (!url || url === 'images/avatar_placeholder.png') {
+      alert('⚠️ इस रिकॉर्ड के लिए कोई सेल्फी उपलब्ध नहीं है या 15 दिन पुरानी होने के कारण ऑटो-डिलीट हो चुकी है।');
+      return;
+    }
+
     const modal = document.createElement('div');
     modal.id = 'selfie-preview-modal';
-    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-150';
+    modal.className = 'modal-backdrop fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-150';
 
     modal.innerHTML = `
-      <div class="bg-white rounded-3xl max-w-md w-full p-5 border border-slate-200 shadow-2xl relative">
-        <button type="button" onclick="document.getElementById('selfie-preview-modal').remove()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg leading-none">
-          &times;
-        </button>
-        <h4 class="font-black text-slate-900 text-sm mb-3">📸 सेल्फी व GPS वेरिफिकेशन</h4>
-        <div class="rounded-2xl overflow-hidden border-2 border-slate-200 shadow-sm bg-slate-900">
-          <img src="${url}" class="w-full h-auto object-cover" alt="Verified Selfie">
+      <div class="bg-white rounded-3xl max-w-md w-full p-5 border border-slate-200 shadow-2xl relative animate-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">📸</span>
+            <div>
+              <h4 class="font-black text-slate-900 text-sm">लाइव सेल्फी व हाजिरी वेरिफिकेशन</h4>
+              <p class="text-[10px] text-slate-400">100% ओरिजिनल ड्यूटी पंच-इन रिकॉर्ड</p>
+            </div>
+          </div>
+          <button type="button" onclick="document.getElementById('selfie-preview-modal').remove()" class="bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-600 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg leading-none transition cursor-pointer" title="बंद करें">
+            &times;
+          </button>
         </div>
-        <div class="mt-3 p-3 bg-slate-50 rounded-xl text-xs space-y-1">
+
+        <div class="my-4 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-md bg-slate-950 flex items-center justify-center min-h-[220px] max-h-[60vh]">
+          <img src="${url}" class="w-full h-auto max-h-[60vh] object-contain" alt="Employee Selfie" onerror="this.onerror=null; this.src='images/avatar_placeholder.png'">
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl text-xs space-y-1.5 border border-slate-200">
           <div class="flex justify-between font-bold text-slate-900">
-            <span>कर्मचारी:</span>
-            <span>${empName}</span>
+            <span class="text-slate-500">कर्मचारी का नाम:</span>
+            <span class="font-black text-blue-700">${empName || 'स्टाफ'}</span>
           </div>
           <div class="flex justify-between text-slate-600">
-            <span>विवरण:</span>
-            <span>${info}</span>
+            <span class="text-slate-500">हाजिरी व दूरी विवरण:</span>
+            <span class="font-mono font-bold text-slate-800 text-right">${info || 'दैनिक उपस्थिति'}</span>
+          </div>
+          <div class="text-[10px] text-emerald-600 font-bold flex items-center gap-1 pt-1 border-t border-slate-200">
+            <span>✓ सुरक्षा नीति: यह फोटो 15 दिन बाद स्टोरेज फ्री करने हेतु अपने आप डिलीट हो जाएगी।</span>
           </div>
         </div>
-        <div class="mt-3 text-center">
-          <button type="button" onclick="document.getElementById('selfie-preview-modal').remove()" class="w-full py-2 bg-slate-900 hover:bg-black text-white font-bold rounded-xl text-xs transition">
-            ✕ बंद करें (Close)
+
+        <div class="mt-4 flex gap-2">
+          <button type="button" onclick="document.getElementById('selfie-preview-modal').remove()" class="w-full py-2.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md cursor-pointer flex items-center justify-center gap-1.5">
+            <span>✕ बंद करें (Close Popup)</span>
           </button>
         </div>
       </div>
     `;
+
+    modal.onclick = function(e) {
+      if (e.target === modal) modal.remove();
+    };
+
+    const escHandler = function(e) {
+      if (e.key === 'Escape') {
+        const m = document.getElementById('selfie-preview-modal');
+        if (m) m.remove();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
     document.body.appendChild(modal);
   }
 
@@ -6198,6 +6259,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const container = document.getElementById('tab-view-attendance');
     if (!container) return;
 
+    if (typeof purgeOldAttendanceSelfies === 'function') purgeOldAttendanceSelfies();
     renderDutyAlertBadge();
 
     const todayStr = getTodayDateStr();
@@ -6466,10 +6528,20 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                         </div>
                       </td>
                       <td class="p-3.5 whitespace-nowrap text-slate-700">${getBranchName(r.branchId)}</td>
-                      <td class="p-3.5 text-center">
-                        <button type="button" onclick="window.MMS_APP.previewSelfieImage('${empPhoto}')" class="p-1 rounded-lg hover:bg-slate-100 text-blue-600 font-bold text-[11px]" title="बड़ा फोटो देखें">
-                          🖼️ देखें
-                        </button>
+                      <td class="p-2.5 text-center whitespace-nowrap">
+                        ${empPhoto && empPhoto !== 'images/avatar_placeholder.png' ? `
+                          <div class="inline-flex flex-col items-center group cursor-pointer" onclick="window.MMS_APP.previewSelfieModal('${empPhoto}', '${empName}', '${r.date} • इन समय: ${r.inTime || '—'} • ${distFormatted}')" title="बड़ा फोटो देखने के लिए क्लिक करें">
+                            <div class="relative">
+                              <img src="${empPhoto}" class="w-12 h-12 rounded-xl object-cover border-2 border-slate-300 shadow-sm group-hover:border-blue-600 group-hover:scale-105 transition transform duration-150 mx-auto" alt="${empName} Selfie" onerror="this.onerror=null; this.src='images/avatar_placeholder.png';">
+                              <span class="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] shadow-sm">🔍</span>
+                            </div>
+                            <span class="text-[9px] text-blue-600 font-bold mt-0.5 group-hover:underline">फोटो देखें</span>
+                          </div>
+                        ` : (r.purged ? `
+                          <span class="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-400 text-[10px] font-mono" title="15 दिन से पुरानी होने पर स्टोरेज बचाने हेतु फोटो ऑटो-डिलीट हो चुकी है">15-दिन पूर्ण<br>(Purged)</span>
+                        ` : `
+                          <span class="text-[10px] text-slate-400 italic">फोटो नहीं</span>
+                        `)}
                       </td>
                       <td class="p-3.5 whitespace-nowrap font-mono font-bold text-slate-800">
                         <div>${r.inTime || '—'}</div>
@@ -7291,16 +7363,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     }
   }
 
-  function previewSelfieImage(url) {
-    const w = window.open('', '_blank');
-    w.document.write(`
-      <html>
-        <head><title>सेल्फी वेरिफिकेशन - Monu Mobile Solution</title></head>
-        <body style="margin:0; background:#0f172a; display:flex; align-items:center; justify-content:center; height:100vh;">
-          <img src="${url}" style="max-width:90%; max-height:90%; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
-        </body>
-      </html>
-    `);
+  function previewSelfieImage(url, empName, info) {
+    previewSelfieModal(url, empName || 'कर्मचारी', info || 'दैनिक उपस्थिति सेल्फी');
   }
 
   function exportAttendanceToExcel() {

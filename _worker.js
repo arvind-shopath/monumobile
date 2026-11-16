@@ -375,6 +375,16 @@ export default {
                 };
               });
             }
+            if (store && store.attendance && Array.isArray(store.attendance)) {
+              const cutoffDateStr = new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0];
+              store.attendance.forEach(rec => {
+                if (rec.date && rec.date < cutoffDateStr && (rec.photo || rec.selfie)) {
+                  rec.photo = null;
+                  rec.selfie = null;
+                  rec.purged = true;
+                }
+              });
+            }
             return jsonResponse({
               success: true,
               source: "enterprise_cache",
@@ -384,6 +394,7 @@ export default {
           }
 
           if (env.DB) {
+            const cutoffDateStr = new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0];
             const [attRows, invRows, jobRows, expRows] = await Promise.all([
               env.DB.prepare("SELECT * FROM attendance ORDER BY created_at DESC LIMIT 100").all(),
               env.DB.prepare("SELECT * FROM invoices ORDER BY created_at DESC LIMIT 100").all(),
@@ -394,7 +405,11 @@ export default {
             const attendance = (attRows.results || []).map(r => ({
               id: r.id, empId: r.emp_id, empName: r.emp_name, branchId: r.branch_id, branchName: r.branch_name,
               date: r.date, inTime: r.in_time, outTime: r.out_time, duration: r.duration, status: r.status,
-              lat: r.lat, lng: r.lng, distance: r.distance, photo: r.photo, createdAt: r.created_at
+              lat: r.lat, lng: r.lng, distance: r.distance,
+              photo: (r.date && r.date < cutoffDateStr) ? null : r.photo,
+              selfie: (r.date && r.date < cutoffDateStr) ? null : r.photo,
+              purged: !!(r.date && r.date < cutoffDateStr),
+              createdAt: r.created_at
             }));
 
             const invoices = (invRows.results || []).map(r => {
@@ -639,6 +654,9 @@ export default {
             if (!a || !a.empId) return jsonResponse({ success: false, error: "Invalid record" }, 400);
 
             const id = a.id || `att_${Date.now()}`;
+            const photoVal = a.photo || a.selfie || null;
+            const cutoffDateStr = new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0];
+
             if (env.DB) {
               try {
                 await env.DB.prepare(`
@@ -653,16 +671,30 @@ export default {
                   id, a.empId, a.empName || a.employeeName || 'Staff', a.branchId || 'branch_hazratganj',
                   a.branchName || '', a.date || new Date().toISOString().split('T')[0], a.inTime || '', a.outTime || '',
                   Number(a.duration) || 0, a.status || 'on-time', Number(a.lat) || 0, Number(a.lng) || 0,
-                  Number(a.distance) || 0, a.photo || null
+                  Number(a.distance) || 0, photoVal
                 ).run();
+
+                // Auto-purge D1 photos older than 15 days
+                await env.DB.prepare("UPDATE attendance SET photo = NULL WHERE date < ?").bind(cutoffDateStr).run();
               } catch(dbErr) { console.warn("save_attendance db error:", dbErr.message); }
             }
 
             if (env.KV) {
               const attList = currentKv.attendance || [];
               const idx = attList.findIndex(item => item.id === id);
-              if (idx >= 0) attList[idx] = { ...attList[idx], ...a, id };
-              else attList.unshift({ ...a, id });
+              const saveItem = { ...a, id, photo: photoVal, selfie: photoVal };
+              if (idx >= 0) attList[idx] = { ...attList[idx], ...saveItem };
+              else attList.unshift(saveItem);
+
+              // 15-Day Auto-Purge: Clean old photos
+              attList.forEach(rec => {
+                if (rec.date && rec.date < cutoffDateStr && (rec.photo || rec.selfie)) {
+                  rec.photo = null;
+                  rec.selfie = null;
+                  rec.purged = true;
+                }
+              });
+
               currentKv.attendance = attList.slice(0, 150);
               await env.KV.put("monu_master_sync", JSON.stringify(currentKv));
             }
