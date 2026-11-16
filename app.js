@@ -1989,10 +1989,32 @@ function filterCategoryDropdown(inputId, query) {
       }
     }
 
-    // Update Header user role
+    // Update Header user role & titles
     const userRoleEl = document.getElementById('header-user-role');
     if (userRoleEl) {
       userRoleEl.textContent = isEn ? 'Admin' : 'एडमिन';
+    }
+
+    const menuBtn = document.getElementById('sidebar-open-btn');
+    if (menuBtn) menuBtn.title = isEn ? 'Menu' : 'मेनू';
+
+    const alertBellBtn = document.getElementById('alert-bell-btn');
+    if (alertBellBtn) alertBellBtn.title = isEn ? 'Alerts' : 'अलर्ट्स';
+
+    // Update Sidebar Brand
+    const sidebarBrand = document.querySelector('#sidebar .uppercase.tracking-wider');
+    if (sidebarBrand) sidebarBrand.textContent = isEn ? 'Control Panel' : 'कंट्रोल पैनल';
+
+    // Update Sidebar User Name & Role in Drawer
+    if (dom && dom.portalUserBadge) {
+      const nameEl = dom.portalUserBadge.querySelector('.font-black');
+      if (nameEl) {
+        nameEl.textContent = isEn ? 'Monu (Admin)' : 'मोनू जी';
+      }
+      const roleEl = dom.portalUserBadge.querySelector('.text-\\[10px\\]') || dom.portalUserBadge.querySelector('.tracking-wider');
+      if (roleEl) {
+        roleEl.textContent = isEn ? 'Super Admin' : 'सुपर एडमिन';
+      }
     }
 
     const publicSiteBtn = document.getElementById('back-to-site-btn');
@@ -2688,7 +2710,7 @@ function filterCategoryDropdown(inputId, query) {
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-base font-black text-slate-900">${__L("📍 शाखा स्थिति व कंट्रोल", "📍 Branch Status & Control")}</h3>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">Geofence</span>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">${__L("जियोफेंस", "Geofence")}</span>
             </div>
           </div>
         </div>
@@ -2705,13 +2727,17 @@ function filterCategoryDropdown(inputId, query) {
               <div class="p-4 rounded-xl border ${bStatus.isOpen ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50'} flex flex-col justify-between gap-3">
                 <div>
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-black text-slate-900">${b.name}</span>
+                    <span class="text-sm font-black text-slate-900">${getBranchName(b.id)}</span>
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1.5 ${bStatus.isOpen ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
                       <span class="w-1.5 h-1.5 rounded-full ${bStatus.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
                       ${bStatus.isOpen ? __L('🟢 खुली है', '🟢 OPEN') : __L('🔴 बंद है', '🔴 CLOSED')}
                     </span>
                   </div>
-                  <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${b.address}</p>
+                  <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${
+    b.id === 'branch_hazratganj' ? __L("216, द्वितीय तल, श्रीराम टावर्स, हजरतगंज, लखनऊ", "216, 2nd Floor, Sree Rama Towers, Hazratganj, Lucknow") :
+    b.id === 'branch_naka' ? __L("नाका हिंडोला मार्केट (निकट गुरुद्वारा), लखनऊ", "Naka Hindola Market (Near Gurudwara), Lucknow") :
+    __L("सरायमीरा, जी.टी. रोड, कन्नौज", "Saraimeera, G.T. Road, Kannauj")
+  }</p>
 
                   <div class="mt-3 grid grid-cols-2 gap-2 text-xs bg-white p-2.5 rounded-lg border border-slate-100">
                     <div>
@@ -2726,7 +2752,12 @@ function filterCategoryDropdown(inputId, query) {
 
                   ${bStatus.isOpen && bStatus.openedBy ? `
                     <div class="mt-2 text-[10px] text-slate-500 flex items-center justify-between bg-emerald-100/50 px-2 py-1 rounded border border-emerald-200/50">
-                      <span>👤 ${__L("खोला:", "Opened by:")} <strong>${bStatus.openedBy}</strong></span>
+                      <span>👤 ${__L("खोला:", "Opened by:")} <strong>${
+    (bStatus.openedBy || '').includes('Monu') ? __L("मोनू जी", "Monu") :
+    (bStatus.openedBy || '').includes('Suraj') ? __L("सूरज वर्मा", "Suraj") :
+    (bStatus.openedBy || '').includes('Vikas') ? __L("विकास पाल", "Vikas") :
+    (bStatus.openedBy || __L("स्टाफ", "Staff"))
+  }</strong></span>
                       <span>⏰ ${bStatus.time || '10:00 AM'}</span>
                     </div>
                   ` : ''}
@@ -2811,8 +2842,17 @@ function filterCategoryDropdown(inputId, query) {
                       <div class="flex items-center gap-2.5">
                         <img src="${emp.photo || 'images/avatar_placeholder.png'}" class="w-7 h-7 rounded-full object-cover border border-slate-200" onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('${emp.name}')">
                         <div>
-                          <strong class="text-slate-900 font-black block">${emp.name}</strong>
-                          <span class="text-[10px] text-slate-400">${emp.roleLabel || emp.role}</span>
+                          <strong class="text-slate-900 font-black block">${
+    (state.portalLang || state.lang || 'hi') === 'en' 
+      ? (emp.nameEn || (emp.name.match(/\(([^)]+)\)/) ? emp.name.match(/\(([^)]+)\)/)[1] : emp.name.replace(/[^a-zA-Z\s]/g, '').trim()) || emp.name)
+      : emp.name.replace(/\s*\([^)]*\)/g, '').trim()
+  }</strong>
+                          <span class="text-[10px] text-slate-400">${
+    emp.role === 'manager' ? __L("ब्रांच मैनेजर", "Branch Manager") :
+    emp.role === 'technician' ? __L("रिपेयरिंग टेक्नीशियन", "Repair Technician") :
+    emp.role === 'frontdesk' ? __L("बिलिंग स्टाफ", "Billing Frontdesk") :
+    __L("स्टाफ", "Staff")
+  }</span>
                         </div>
                       </div>
                     </td>
@@ -2883,13 +2923,13 @@ function filterCategoryDropdown(inputId, query) {
                     <span class="text-[10px] text-slate-500 font-mono">${inv.invoiceNo || inv.id || ''}</span>
                   </div>
                   <div class="text-[10px] text-slate-400 mt-0.5">
-                    ${getBranchName(inv.branchId || 'branch_hazratganj')} • ${inv.paymentMode === 'cash' ? 'नकद' : 'UPI/क्रेडिट'}
+                    ${getBranchName(inv.branchId || 'branch_hazratganj')} • ${inv.paymentMode === 'cash' ? __L("नकद", "Cash") : __L("UPI / ऑनलाइन", "UPI / Online")}
                   </div>
                 </div>
                 <div class="text-right">
                   <div class="font-black text-slate-900 text-sm">₹${Number(inv.totalAmount || inv.subTotal || 0).toLocaleString('en-IN')}</div>
                   <span class="text-[10px] ${inv.due > 0 ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}">
-                    ${inv.due > 0 ? `उधार: ₹${inv.due}` : 'पूर्ण चुकता'}
+                    ${inv.due > 0 ? `${__L("उधार:", "Due:")} ₹${inv.due}` : __L("पूर्ण चुकता", "Paid")}
                   </span>
                 </div>
               </div>
