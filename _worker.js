@@ -36,8 +36,8 @@ export default {
     if (url.pathname === "/api/version") {
       return jsonResponse({
         success: true,
-        version: "9.6",
-        build: "20261116_96",
+        version: "9.8",
+        build: "20261116_98",
         timestamp: Date.now()
       });
     }
@@ -404,8 +404,8 @@ export default {
             return jsonResponse({
               success: true,
               source: "enterprise_cache",
-              version: "9.6",
-              build: "20261116_96",
+              version: "9.8",
+              build: "20261116_98",
               timestamp: new Date().toISOString(),
               data: store
             });
@@ -489,8 +489,8 @@ export default {
             return jsonResponse({
               success: true,
               source: "enterprise_db",
-              version: "9.6",
-              build: "20261116_96",
+              version: "9.8",
+              build: "20261116_98",
               timestamp: new Date().toISOString(),
               data: fullData
             });

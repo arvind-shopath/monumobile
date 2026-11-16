@@ -37,9 +37,12 @@
         if (isUpdating) return;
         try {
           fetch('/api/version?_t=' + Date.now(), { cache: 'no-store' })
-            .then(function(res) { return res.json(); })
+            .then(function(res) {
+              if (!res.ok) throw new Error('status ' + res.status);
+              return res.json();
+            })
             .then(function(data) {
-              if (data && data.build && data.build !== window.MMS_CLIENT_BUILD) {
+              if (data && data.build && data.build > window.MMS_CLIENT_BUILD) {
                 triggerAutoUpdate(data.build);
               }
             })
@@ -49,7 +52,20 @@
 
       function triggerAutoUpdate(newBuild) {
         if (isUpdating) return;
+        if (newBuild <= window.MMS_CLIENT_BUILD) return;
+        
+        // Prevent infinite loops across page loads
+        var lastReload = sessionStorage.getItem('mms_last_reload_build');
+        var now = Date.now();
+        var lastTime = parseInt(sessionStorage.getItem('mms_last_reload_time') || '0', 10);
+        if (lastReload === newBuild && (now - lastTime) < 30000) {
+          console.warn('Suppressing duplicate reload loop for build:', newBuild);
+          return;
+        }
+        
         isUpdating = true;
+        sessionStorage.setItem('mms_last_reload_build', newBuild);
+        sessionStorage.setItem('mms_last_reload_time', String(now));
         console.log('🚀 New MMS Software Build Detected:', newBuild, 'Current:', window.MMS_CLIENT_BUILD);
 
         var banner = document.createElement('div');
@@ -65,7 +81,7 @@
         setTimeout(function() {
           var targetUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?_v=' + newBuild + '&_t=' + Date.now();
           window.location.replace(targetUrl);
-        }, 1000);
+        }, 1200);
       }
 
       window.MMS_TRIGGER_AUTO_UPDATE = triggerAutoUpdate;
@@ -234,7 +250,7 @@
     }
   </script>
 
-    <style>
+      <style>
     /* =========================================================================
        ULTRA SOFT CLAYMORPHIC & SPATIAL DOUBLE-SHADOW DESIGN SYSTEM
        (Matching Reference Image: Warm Ivory Gradient, 3D Pillows, Liquid Depth)
@@ -243,12 +259,12 @@
     /* Warm Ethereal Spatial Background with Multi-point Ambient Radial Lighting */
     body, .clay-bg, #portal-section, #portal-main-scroll {
       background: 
-        radial-gradient(circle at 8% 10%, rgba(255, 243, 224, 0.95) 0%, transparent 35%),
-        radial-gradient(circle at 92% 8%, rgba(218, 235, 255, 0.9) 0%, transparent 40%),
-        radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.75) 0%, transparent 55%),
-        radial-gradient(circle at 88% 85%, rgba(243, 226, 255, 0.85) 0%, transparent 38%),
-        radial-gradient(circle at 12% 85%, rgba(255, 233, 225, 0.8) 0%, transparent 38%),
-        linear-gradient(135deg, #FBF8F2 0%, #F5EFE6 50%, #ECE4D6 100%) !important;
+        radial-gradient(circle at 10% 8%, #FFF4E5 0%, transparent 40%),
+        radial-gradient(circle at 90% 12%, #DCE9FF 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, #FFFFFF 0%, transparent 55%),
+        radial-gradient(circle at 85% 85%, #F5E8FF 0%, transparent 42%),
+        radial-gradient(circle at 12% 88%, #FFEAE2 0%, transparent 42%),
+        linear-gradient(135deg, #FAF6F0 0%, #F3ECE0 50%, #EBE1D0 100%) !important;
       background-attachment: fixed !important;
       color: #0f172a;
     }
@@ -258,22 +274,22 @@
       border-radius: 32px !important;
       border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
       box-shadow: 
-        0 24px 48px -12px rgba(180, 155, 130, 0.28),
-        0 10px 22px -6px rgba(180, 155, 130, 0.16),
-        0 2px 6px rgba(180, 155, 130, 0.08),
-        inset 0 2px 3px rgba(255, 255, 255, 0.95),
-        inset 0 -2px 4px rgba(190, 170, 145, 0.09) !important;
+        0 26px 54px -12px rgba(180, 155, 125, 0.32),
+        0 12px 24px -6px rgba(180, 155, 125, 0.20),
+        0 2px 6px rgba(180, 155, 125, 0.10),
+        inset 0 2px 3px rgba(255, 255, 255, 0.98),
+        inset 0 -2px 4px rgba(190, 168, 140, 0.12) !important;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .clay-card:hover {
       transform: translateY(-2px) !important;
       box-shadow: 
-        0 32px 64px -14px rgba(180, 155, 130, 0.35),
-        0 14px 28px -6px rgba(180, 155, 130, 0.22),
-        0 4px 10px rgba(180, 155, 130, 0.12),
+        0 32px 64px -14px rgba(180, 155, 125, 0.40),
+        0 14px 28px -6px rgba(180, 155, 125, 0.26),
+        0 4px 10px rgba(180, 155, 125, 0.15),
         inset 0 2px 3px rgba(255, 255, 255, 0.98),
-        inset 0 -2px 4px rgba(190, 170, 145, 0.1) !important;
+        inset 0 -2px 4px rgba(190, 168, 140, 0.14) !important;
     }
 
     /* Reference Image Inspired Card Color Variants */
@@ -298,8 +314,8 @@
       color: #FFFFFF !important;
       border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
       box-shadow: 
-        0 28px 60px -12px rgba(79, 70, 229, 0.42),
-        0 10px 24px -5px rgba(79, 70, 229, 0.25),
+        0 28px 60px -12px rgba(79, 70, 229, 0.45),
+        0 10px 24px -5px rgba(79, 70, 229, 0.28),
         inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
     }
 
@@ -308,10 +324,10 @@
       border-radius: 9999px !important;
       border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
       box-shadow: 
-        0 8px 18px -3px rgba(180, 155, 130, 0.22),
-        0 2px 6px rgba(180, 155, 130, 0.1),
-        inset 0 2px 2px rgba(255, 255, 255, 0.95),
-        inset 0 -1.5px 2px rgba(190, 170, 145, 0.12) !important;
+        0 8px 18px -3px rgba(180, 155, 125, 0.25),
+        0 2px 6px rgba(180, 155, 125, 0.12),
+        inset 0 2px 2px rgba(255, 255, 255, 0.98),
+        inset 0 -1.5px 2px rgba(190, 168, 140, 0.14) !important;
     }
 
     /* Floating Frosted Glass Sidebar with Soft Drop Depth */
@@ -321,9 +337,9 @@
       -webkit-backdrop-filter: blur(28px) !important;
       border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
       box-shadow: 
-        0 28px 60px -15px rgba(150, 135, 120, 0.25),
-        0 10px 24px -5px rgba(150, 135, 120, 0.12),
-        inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+        0 28px 60px -15px rgba(150, 135, 120, 0.28),
+        0 10px 24px -5px rgba(150, 135, 120, 0.14),
+        inset 0 1px 2px rgba(255, 255, 255, 0.95) !important;
     }
   
     body {
@@ -465,7 +481,7 @@
             </div>
 
             <!-- Trust Metrics Grid (Express Repair focused) -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-4 border-t border-slate-200/80">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 pt-6 border-t border-amber-900/10">
               <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-sm text-center lg:text-left">
                 <span class="block text-lg sm:text-xl font-black text-blue-700" data-i18n="statRepairs">15,000+ सफल रिपेयर</span>
                 <span class="text-[11px] font-semibold text-slate-500" data-i18n="statRepairsSub">हजरतगंज व लखनऊ में</span>

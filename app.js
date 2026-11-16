@@ -231,10 +231,16 @@ function filterCategoryDropdown(inputId, query) {
         if (!res.ok) return;
         const resData = await res.json();
         if (resData.success && resData.data) {
-        if (resData.build && typeof window.MMS_CLIENT_BUILD !== 'undefined' && resData.build !== window.MMS_CLIENT_BUILD) {
-          if (typeof window.MMS_TRIGGER_AUTO_UPDATE === 'function') {
-            window.MMS_TRIGGER_AUTO_UPDATE(resData.build);
-            return;
+        // Strictly require server build to be newer than client build
+        if (resData.build && typeof window.MMS_CLIENT_BUILD !== 'undefined' && resData.build > window.MMS_CLIENT_BUILD) {
+          const lastReload = sessionStorage.getItem('mms_last_reload_build');
+          const now = Date.now();
+          const lastTime = parseInt(sessionStorage.getItem('mms_last_reload_time') || '0', 10);
+          if (lastReload !== resData.build || (now - lastTime) >= 30000) {
+            if (typeof window.MMS_TRIGGER_AUTO_UPDATE === 'function') {
+              window.MMS_TRIGGER_AUTO_UPDATE(resData.build);
+              return;
+            }
           }
         }
 
@@ -5616,7 +5622,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- 3 Branches Profitability Comparison Table -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="clay-card bg-white/95 rounded-[32px] overflow-hidden p-6 sm:p-7 shadow-lg">
           <div class="p-4 border-b border-slate-100">
             <h4 class="text-sm font-black text-slate-900">🏢 3 शाखाओं का तुलनात्मक लाभ-हानि खाता (Branch-Wise P&L)</h4>
             <p class="text-xs text-slate-500">हजरतगंज (Head Lab), नाका हिंडोला और कन्नौज शाखा (सरायमीरा) का अलग-अलग परफॉर्मेंस</p>
@@ -8246,7 +8252,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
         <!-- Staff List Table -->
         <!-- Staff List: Responsive Desktop Table & Mobile Cards -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="clay-card bg-white/95 rounded-[32px] overflow-hidden p-6 sm:p-7 shadow-lg">
           <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h4 class="text-sm font-black text-slate-900">स्टाफ सूची व कार्य-घंटे गणित (Dynamic Shift & Hourly Rate)</h4>
@@ -8402,7 +8408,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
         </div>
         <!-- Staff Advances Ledger Table -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="clay-card bg-white/95 rounded-[32px] overflow-hidden p-6 sm:p-7 shadow-lg">
           <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h4 class="text-sm font-black text-slate-900">स्टाफ एडवांस व लोन खाता (Staff Advances & EMI Ledger)</h4>
