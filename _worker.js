@@ -36,8 +36,8 @@ export default {
     if (url.pathname === "/api/version") {
       return jsonResponse({
         success: true,
-        version: "10.1",
-        build: "20261116_101",
+        version: "10.3",
+        build: "20261116_103",
         timestamp: Date.now()
       });
     }
@@ -401,11 +401,23 @@ export default {
                 if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
               });
             }
+            if (Array.isArray(store.contacts)) {
+              const D_PHONES = ['9933445566', '9887766554', '9123456789', '9455667788', '9723338321', '9911223344', '9876543210'];
+              const D_NAMES = ['संजय', 'Sanjay', 'राजू', 'Raju', 'अमन', 'Aman', 'मोबाइल हब', 'Mobile Hub', 'अरविंद', 'Arvind', 'अमित', 'Amit'];
+              store.contacts = store.contacts.filter(c => {
+                if (!c) return false;
+                const p = String(c.phone || '');
+                const n = String(c.name || '');
+                if (D_PHONES.some(dp => p.includes(dp))) return false;
+                if (D_NAMES.some(dn => n.includes(dn))) return false;
+                return true;
+              });
+            }
             return jsonResponse({
               success: true,
               source: "enterprise_cache",
-              version: "10.1",
-              build: "20261116_101",
+              version: "10.3",
+              build: "20261116_103",
               timestamp: new Date().toISOString(),
               data: store
             });
@@ -486,11 +498,24 @@ export default {
               await env.KV.put("monu_master_sync", JSON.stringify(fullData));
             }
 
+            if (Array.isArray(fullData.contacts)) {
+              const D_PHONES = ['9933445566', '9887766554', '9123456789', '9455667788', '9723338321', '9911223344', '9876543210'];
+              const D_NAMES = ['संजय', 'Sanjay', 'राजू', 'Raju', 'अमन', 'Aman', 'मोबाइल हब', 'Mobile Hub', 'अरविंद', 'Arvind', 'अमित', 'Amit'];
+              fullData.contacts = fullData.contacts.filter(c => {
+                if (!c) return false;
+                const p = String(c.phone || '');
+                const n = String(c.name || '');
+                if (D_PHONES.some(dp => p.includes(dp))) return false;
+                if (D_NAMES.some(dn => n.includes(dn))) return false;
+                return true;
+              });
+            }
+
             return jsonResponse({
               success: true,
               source: "enterprise_db",
-              version: "10.1",
-              build: "20261116_101",
+              version: "10.3",
+              build: "20261116_103",
               timestamp: new Date().toISOString(),
               data: fullData
             });

@@ -280,7 +280,7 @@ function filterCategoryDropdown(inputId, query) {
               merged.customerPhone = merged.customerPhone || '';
               map.set(key, merged);
             });
-            state.invoices = Array.from(map.values()).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+            state.invoices = Array.from(map.values()).filter(inv => !isDummyRecord(inv)).sort((a,b) => (b.date || '').localeCompare(a.date || ''));
             const newStr = JSON.stringify(state.invoices);
             if (oldStr !== newStr) {
               localStorage.setItem(STORAGE_KEYS.INVOICES, newStr);
@@ -293,7 +293,7 @@ function filterCategoryDropdown(inputId, query) {
             const map = new Map();
             (state.jobs || []).forEach(j => map.set(j.id, j));
             jobs.forEach(j => map.set(j.id, { ...map.get(j.id), ...j }));
-            state.jobs = Array.from(map.values()).sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+            state.jobs = Array.from(map.values()).filter(j => !isDummyRecord(j)).sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
             const newStr = JSON.stringify(state.jobs);
             if (oldStr !== newStr) {
               localStorage.setItem(STORAGE_KEYS.JOBS, newStr);
@@ -363,10 +363,11 @@ function filterCategoryDropdown(inputId, query) {
           }
 
           if (resData.data.contacts && Array.isArray(resData.data.contacts)) {
+            const cleanContacts = resData.data.contacts.filter(c => !isDummyRecord(c));
             const oldStr = JSON.stringify(state.contacts || []);
-            const newStr = JSON.stringify(resData.data.contacts);
+            const newStr = JSON.stringify(cleanContacts);
             if (oldStr !== newStr) {
-              state.contacts = resData.data.contacts;
+              state.contacts = cleanContacts;
               try { localStorage.setItem(STORAGE_KEYS.CONTACTS, newStr); } catch(e) {}
               changed = true;
             }
@@ -2723,7 +2724,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 4: Active Repair Tokens -->
-        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="clay-card clay-card-lilac p-6 rounded-[32px]">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("रिपेयर लोड", "Repair Workload")}</span>
             <span class="h-9 w-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">🔧</span>
@@ -2754,16 +2755,17 @@ function filterCategoryDropdown(inputId, query) {
           </div>
         </div>
 
-        <!-- 3 Branch Cards Grid -->
+        <!-- 3 Branch Cards Grid (Each with Signature Pastel Clay Variant) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           ${branches.map(b => {
             const bStatus = (state.branchStatus && state.branchStatus[b.id]) || { isOpen: false };
             const bInvoices = (state.invoices || []).filter(i => (i.branchId === b.id || (!i.branchId && b.id === 'branch_hazratganj')) && (i.date || '').startsWith(todayStr));
             const bSales = bInvoices.reduce((acc, cur) => acc + (Number(cur.net) || 0), 0);
             const bStaff = (state.attendance || []).filter(a => a.empId !== 'emp_101' && (!a.empName || !a.empName.includes('Monu')) && (a.branchId === b.id || (!a.branchId && b.id === 'branch_hazratganj')) && a.date === todayStr);
+            const branchClayClass = b.id === 'branch_hazratganj' ? 'clay-card-blue' : b.id === 'branch_naka' ? 'clay-card-mint' : 'clay-card-lilac';
 
             return `
-              <div class="p-4 rounded-xl border ${bStatus.isOpen ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-slate-50/50'} flex flex-col justify-between gap-3">
+              <div class="clay-card ${branchClayClass} p-5 rounded-[28px] flex flex-col justify-between gap-3">
                 <div>
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-black text-slate-900">${getBranchName(b.id)}</span>
@@ -4514,23 +4516,23 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     });
 
     container.innerHTML = `
-      <div class="space-y-5">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-7">
+          <div class="clay-card clay-card-blue p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">${__L("कुल उपलब्ध पार्ट्स", "Total Items in Stock")}</span>
-            <span id="inv-stat-count" class="text-xl font-black text-slate-900 font-mono">${totalStockCount} पीस</span>
+            <span id="inv-stat-count" class="text-2xl font-black text-slate-900 font-mono mt-1 block">${totalStockCount} पीस</span>
           </div>
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-mint p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">${__L("इन्वेंट्री लागत वैल्यू", "Inventory Cost Valuation")}</span>
-            <span id="inv-stat-valuation" class="text-xl font-black text-blue-700 font-mono">${formatCurrency(totalStockValuation)}</span>
+            <span id="inv-stat-valuation" class="text-2xl font-black text-blue-700 font-mono mt-1 block">${formatCurrency(totalStockValuation)}</span>
           </div>
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-peach p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">${__L("कम स्टॉक अलर्ट", "Low Stock Alert")}</span>
-            <span id="inv-stat-low" class="text-xl font-black text-amber-600 font-mono">${lowStockCount} आइटम्स</span>
+            <span id="inv-stat-low" class="text-2xl font-black text-amber-600 font-mono mt-1 block">${lowStockCount} आइटम्स</span>
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="clay-card bg-white/95 p-6 sm:p-7 rounded-[32px] space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
             <div class="space-y-1">
               <div class="flex items-center gap-2 flex-wrap">
@@ -5576,24 +5578,24 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
         </div>
 
-        <!-- Metric Badges Row -->
+        <!-- Metric Badges Row (4 Signature Pastel Clay Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-blue p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">${__L("कुल बिक्री", "Total Sales (Gross)")}</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${formatCurrency(grossTotal)}</span>
             <span class="text-[10px] text-slate-400">कुल ${filteredInvoices.length} बिल काटे गए</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-mint p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">${__L("💵 गल्ले में नकद", "💵 Cash in Register")}</span>
             <span class="text-2xl font-black text-emerald-700 font-mono mt-1 block">${formatCurrency(cashTotal)}</span>
             <span class="text-[10px] text-slate-400">आज का काउंटर कैश</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-peach p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">💳 बैंक / UPI (PHONEPE / GPAY)</span>
             <span class="text-2xl font-black text-blue-700 font-mono mt-1 block">${formatCurrency(upiTotal)}</span>
             <span class="text-[10px] text-slate-400">ऑनलाइन खाते में जमा</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-lilac p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">📕 आज का दिया उधार (DUE)</span>
             <span class="text-2xl font-black text-rose-600 font-mono mt-1 block">${formatCurrency(udharTotal)}</span>
             <span class="text-[10px] text-slate-400">खाता-बही में दर्ज</span>
@@ -5601,7 +5603,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Invoices List -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="clay-card bg-white/95 p-6 rounded-[32px] space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h3 class="text-base font-black text-slate-900">${filterLabel}</h3>
@@ -6611,24 +6613,24 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
         </div>
 
-        <!-- Metric Badges Row -->
+        <!-- Metric Badges Row (4 Signature Pastel Clay Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-blue p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">🏪 कुल लोकल दुकानदार (B2B)</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${shopkeepers.length}</span>
             <span class="text-[10px] text-slate-400">नियमित थोक व उधार ग्राहक</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-mint p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">👤 कुल रीटेल ग्राहक (Walk-in)</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${customers.length}</span>
             <span class="text-[10px] text-slate-400">काउंटर व सर्विस ग्राहक</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-peach p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">💰 दुकानदार (B2B) कुल व्यापार</span>
             <span class="text-2xl font-black text-blue-700 font-mono mt-1 block">${formatCurrency(totalB2bVolume)}</span>
             <span class="text-[10px] text-slate-400">थोक व रिपेयरिंग टर्नओवर</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-lilac p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">💵 रीटेल ग्राहक कुल व्यापार</span>
             <span class="text-2xl font-black text-emerald-700 font-mono mt-1 block">${formatCurrency(totalCustVolume)}</span>
             <span class="text-[10px] text-slate-400">काउंटर सेल्स टर्नओवर</span>
@@ -6636,7 +6638,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Filter Sub-Tabs & Live Search -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="clay-card bg-white/95 p-6 rounded-[32px] space-y-4">
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div class="flex items-center gap-2">
               <button 
@@ -9379,24 +9381,24 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
         </div>
 
-        <!-- Metric Badges -->
+        <!-- Metric Badges (4 Signature Pastel Clay Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-peach p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">कुल खर्च (TOTAL OVERHEADS)</span>
             <span class="text-2xl font-black text-rose-600 font-mono mt-1 block">${formatCurrency(totalExpense)}</span>
             <span class="text-[10px] text-slate-400">कुल ${expensesList.length} वाउचर</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-blue p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">🏢 दुकान किराया (RENT)</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${formatCurrency(rentExpenses)}</span>
             <span class="text-[10px] text-slate-400">मासिक फिक्स रेंट</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-mint p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">💡 बिजली व वाईफाई (UTILITIES)</span>
             <span class="text-2xl font-black text-amber-600 font-mono mt-1 block">${formatCurrency(utilExpenses)}</span>
             <span class="text-[10px] text-slate-400">बिजली, फाइबर व मेंटेनेंस</span>
           </div>
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div class="clay-card clay-card-lilac p-5 rounded-[28px]">
             <span class="text-xs font-bold text-slate-500 block">☕ चाय, नाश्ता व टूल रिपेयर</span>
             <span class="text-2xl font-black text-blue-700 font-mono mt-1 block">${formatCurrency(miscExpenses)}</span>
             <span class="text-[10px] text-slate-400">रोजमर्रा के फुटकर खर्च</span>
@@ -9404,7 +9406,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Expense Table -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="clay-card bg-white/95 p-6 rounded-[32px] space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h3 class="text-base font-black text-slate-900">दुकान खर्च वाउचर सूची (Expense Vouchers)</h3>
@@ -11380,7 +11382,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     // Stock Transfer & Invoice Staff Assignment
     renderStockTransferModule,
-    onTransferSkuChange,
+    onTransferSearch,
+    addToTransferCart,
+    updateTransferCartQty,
+    removeFromTransferCart,
     executeStockTransfer,
     assignInvoiceStaff,
     setPosInvoiceDate

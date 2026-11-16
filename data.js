@@ -43,15 +43,15 @@ window.MMS_DATA = {
     instagramUrl: "https://instagram.com"
   },
 
-  // Role Credentials (Real Working Accounts - 3 Accounts Only)
-    users: [
-    { phone: "7905859701", pass: "123456", role: "admin", name: "मोनू जी (Monu - Owner)", branchId: "all" },
-    { phone: "9044115178", pass: "123456", role: "technician", name: "Mini tiwari", branchId: "branch_hazratganj" },
+  // Role Credentials (Real Working Accounts)
+  users: [
+    { phone: "9044115178", pass: "123456", role: "admin", name: "मोनू जी (Monu - Super Admin)", branchId: "all" },
+    { phone: "7905859701", pass: "123456", role: "admin", name: "मोनू जी (Monu - Super Admin)", branchId: "all" },
+    { phone: "8931059701", pass: "123456", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_naka" },
     { phone: "8707641628", pass: "123456", role: "manager", name: "Soniya Kashyap", branchId: "branch_hazratganj" },
     { phone: "9026445293", pass: "123456", role: "technician", name: "Sourab Yadav", branchId: "branch_hazratganj" },
-    { phone: "9044115178", pass: "123456", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" },
-    { phone: "8931059701", pass: "123456", role: "manager", name: "सूरज वर्मा (Suraj - Manager)", branchId: "branch_naka" },
-    { phone: "9955443311", pass: "123456", role: "technician", name: "रवि कुमार (Ravi - Tech Staff)", branchId: "branch_hazratganj" }
+    { phone: "9955443311", pass: "123456", role: "technician", name: "Mini Tiwari", branchId: "branch_hazratganj" },
+    { phone: "9190441151", pass: "123456", role: "technician", name: "विकास पाल (Vikas Pal)", branchId: "branch_kannauj" }
   ],
 
   // Bilingual Localization
