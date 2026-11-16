@@ -33,7 +33,7 @@ window.MMS_DATA = {
     name: "Monu Mobile Solution",
     tagline: "Express Mobile Repair Lab & Retail POS",
     city: "Hazratganj, Lucknow",
-    phone: "7905859701",
+    phone: "9044115178",
     whatsapp: "919044115178",
     email: "monumobilesolution@gmail.com",
     address: "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, Uttar Pradesh 226001",
@@ -214,9 +214,6 @@ window.MMS_DATA = {
       hazratganjLandmark: "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
       nakaAddress: "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग स्टेशन रोड), लखनऊ, उत्तर प्रदेश 226004",
       kannaujAddress: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
-      navHazratganjPhone: "हजरतगंज",
-      navNakaPhone: "नाका",
-      navKannaujPhone: "कन्नौज / WhatsApp",
 
       // Modern Technology & Machinery
       machineryBadge: "✨ विश्वस्तरीय उपकरण व तकनीक",
@@ -454,9 +451,6 @@ window.MMS_DATA = {
       hazratganjLandmark: "(Near Hazratganj Crossing & Ashok Marg, 2nd Floor Sree Rama Towers)",
       nakaAddress: "Naka Hindola Market (Near Gurudwara & Charbagh Station Rd), Lucknow, UP 226004",
       kannaujAddress: "2WHG+7HC, Saraimeera, G.T. Road (Near Bus Station), Kannauj, UP 209727",
-      navHazratganjPhone: "Hazratganj",
-      navNakaPhone: "Naka",
-      navKannaujPhone: "Kannauj / WhatsApp",
 
       // Modern Technology & Machinery
       machineryBadge: "✨ World-Class Tools & Equipment",
@@ -781,7 +775,7 @@ window.MMS_DATA = {
       shortName: "नाका हिंडोला (लखनऊ)",
       city: "लखनऊ",
       phone: "8931059701",
-      whatsapp: "918931059701",
+      whatsapp: "919044115178",
       address: "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग), लखनऊ, उत्तर प्रदेश 226004",
       lat: 26.8370,
       lng: 80.9241,
@@ -798,7 +792,7 @@ window.MMS_DATA = {
       shortName: "कन्नौज (सरायमीरा)",
       city: "कन्नौज",
       phone: "7905859701",
-      whatsapp: "917905859701",
+      whatsapp: "919044115178",
       address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
       landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
       lat: 27.0283,

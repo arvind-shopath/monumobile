@@ -1594,7 +1594,7 @@ function filterCategoryDropdown(inputId, query) {
       dom.trackResultCard.innerHTML = `
         <div class="p-6 text-center text-rose-700 bg-rose-50 rounded-2xl border border-rose-200">
           <p class="font-bold text-sm">❌ कोई रिकॉर्ड नहीं मिला (No Record Found)</p>
-          <p class="text-xs text-slate-600 mt-1">टोकन नंबर या मोबाइल नंबर की जांच करें, या तुरंत कॉल करें: <strong>7905859701</strong></p>
+          <p class="text-xs text-slate-600 mt-1">टोकन नंबर या मोबाइल नंबर की जांच करें, या तुरंत कॉल करें: <strong>9044115178</strong></p>
         </div>
       `;
       return;
@@ -1678,7 +1678,7 @@ function filterCategoryDropdown(inputId, query) {
 
         <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 font-bold">
           <span>अपडेट: ${job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : 'Just now'}</span>
-          <a href="https://wa.me/917905859701?text=${encodeURIComponent('नमस्ते MMS, मेरे रिपेयर टोकन ' + tokenDisplay + ' का क्या अपडेट है?')}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1 shadow-sm">
+          <a href="https://wa.me/919044115178?text=${encodeURIComponent('नमस्ते MMS, मेरे रिपेयर टोकन ' + tokenDisplay + ' का क्या अपडेट है?')}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1 shadow-sm">
             <span>💬 व्हाट्सएप पर स्टेटस पूछें</span>
           </a>
         </div>
@@ -4062,7 +4062,7 @@ function filterCategoryDropdown(inputId, query) {
     const invBranch = state.branches.find(b => b.id === inv.branchId) || state.branches[0];
     const branchTitle = invBranch ? invBranch.name : 'MONU MOBILE SOLUTION';
     const branchAddress = invBranch ? invBranch.address : '216, 2nd Flr, Sree Rama Towers, Ashok Marg, Hazratganj, Lucknow';
-    const branchPhone = invBranch ? invBranch.phone : '7905859701';
+    const branchPhone = invBranch ? invBranch.phone : '9044115178';
     let iframe = document.getElementById('receipt-print-iframe');
     if (!iframe) {
       iframe = document.createElement('iframe');
@@ -4189,7 +4189,7 @@ function filterCategoryDropdown(inputId, query) {
 
         <div class="center" style="font-size: 9px; color: #444; margin-top: 6px;">
           <div>एक्सप्रेस मोबाइल रिपेयरिंग लैब • ओरिजिनल पार्ट्स</div>
-          <div class="bold" style="color: #111; margin-top: 2px;">धन्यवाद! पुनः पधारें • 7905859701</div>
+          <div class="bold" style="color: #111; margin-top: 2px;">धन्यवाद! पुनः पधारें • 9044115178</div>
         </div>
       </body>
       </html>
@@ -4241,7 +4241,7 @@ function filterCategoryDropdown(inputId, query) {
     }
     const branchName = branchObj ? branchObj.name : 'हजरतगंज (मुख्य लैब)';
     const branchAddress = branchObj ? branchObj.address : '216, 2nd Floor, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ';
-    const branchPhone = branchObj ? branchObj.phone : '7905859701';
+    const branchPhone = branchObj ? branchObj.phone : '9044115178';
 
     let itemsList = '';
     if (Array.isArray(inv.items)) {
@@ -4365,7 +4365,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const invBranch = state.branches.find(b => b.id === inv.branchId) || state.branches[0];
     const branchTitle = invBranch ? invBranch.name : 'MONU MOBILE SOLUTION';
     const branchAddress = invBranch ? invBranch.address : '216, 2nd Flr, Sree Rama Towers, Ashok Marg, Hazratganj, Lucknow';
-    const branchPhone = invBranch ? invBranch.phone : '7905859701';
+    const branchPhone = invBranch ? invBranch.phone : '9044115178';
     window.MMS_APP.currentInvoice = inv;
     dom.invoiceContent.innerHTML = `
       <div id="printable-bill" class="bg-white text-slate-900 font-sans p-4 max-w-[320px] mx-auto border border-dashed border-slate-400 rounded-lg text-xs leading-tight">
@@ -5409,7 +5409,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               </thead>
               <tbody class="divide-y divide-slate-100">
                 ${dueInvoices.map(inv => {
-                  const remMsg = encodeURIComponent(`*Monu Mobile Solution - बकाया उधार रिमाइंडर*\n\nप्रिय ${inv.customerName},\nआपके बिल नं ${inv.invoiceNo} का बकाया उधार *${formatCurrency(inv.dueAmount)}* है।\nकृपया दुकान बंद होने से पहले या कल दोपहर तक क्लियर करने का कष्ट करें।\n\n📍 216, श्री रामा टॉवर्स, हजरतगंज, लखनऊ\n📞 संपर्क: 7905859701`);
+                  const remMsg = encodeURIComponent(`*Monu Mobile Solution - बकाया उधार रिमाइंडर*\n\nप्रिय ${inv.customerName},\nआपके बिल नं ${inv.invoiceNo} का बकाया उधार *${formatCurrency(inv.dueAmount)}* है।\nकृपया दुकान बंद होने से पहले या कल दोपहर तक क्लियर करने का कष्ट करें।\n\n📍 216, श्री रामा टॉवर्स, हजरतगंज, लखनऊ\n📞 संपर्क: 9044115178`);
                   return `
                     <tr class="hover:bg-slate-50">
                       <td class="p-2.5 font-mono font-bold text-blue-700">
@@ -5908,7 +5908,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const filteredJobs = (state.jobs || []).filter(j => branchFilter === 'all' || j.branchId === branchFilter || (!j.branchId && branchFilter === 'branch_hazratganj'));
 
     const rowsHtml = filteredJobs.map(job => {
-      const waText = encodeURIComponent('*Monu Mobile Solution - रिपेयर स्टेटस*\n\nप्रिय ' + job.customerName + ',\nआपके मोबाइल (' + job.device + ') का टोकन नं ' + job.token + ' है।\nवर्तमान स्थिति: *' + (job.status === 'ready' ? 'तैयार है - दुकान से ले जाएं' : job.status === 'delivered' ? 'डिलीवर हो चुका है' : 'इंजीनियर काम कर रहे हैं') + '*\n\n📍 दुकान: 216, श्री रामा टॉवर्स, हजरतगंज, लखनऊ\n📞 संपर्क: 7905859701\n🌐 वेबसाइट: https://monumobile.in');
+      const waText = encodeURIComponent('*Monu Mobile Solution - रिपेयर स्टेटस*\n\nप्रिय ' + job.customerName + ',\nआपके मोबाइल (' + job.device + ') का टोकन नं ' + job.token + ' है।\nवर्तमान स्थिति: *' + (job.status === 'ready' ? 'तैयार है - दुकान से ले जाएं' : job.status === 'delivered' ? 'डिलीवर हो चुका है' : 'इंजीनियर काम कर रहे हैं') + '*\n\n📍 दुकान: 216, श्री रामा टॉवर्स, हजरतगंज, लखनऊ\n📞 संपर्क: 9044115178\n🌐 वेबसाइट: https://monumobile.in');
 
       return '<tr class="hover:bg-slate-50">' +
         '<td class="p-2.5 font-mono font-bold text-blue-700">' + job.token + '</td>' +
@@ -8344,7 +8344,6 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const bAddr = document.getElementById('contact-branch-address');
     const bLandmark = document.getElementById('contact-branch-landmark');
     const bTime = document.getElementById('contact-branch-timings');
-    const bPhone = document.getElementById('contact-branch-phone');
     const bGps = document.getElementById('contact-branch-gps');
     const bMapBtn = document.getElementById('contact-map-direct-btn');
     const bIframe = document.getElementById('contact-map-iframe');
@@ -8354,10 +8353,6 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (bAddr) bAddr.textContent = sel.address;
     if (bLandmark) bLandmark.textContent = sel.landmark;
     if (bTime) bTime.textContent = sel.timings;
-    if (bPhone) {
-      bPhone.textContent = sel.phone;
-      bPhone.href = 'tel:' + sel.phone;
-    }
     if (bGps) bGps.textContent = sel.gps;
     if (bMapBtn) bMapBtn.href = sel.directMap;
     if (bIframe) bIframe.src = sel.mapUrl;
@@ -9114,7 +9109,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight">MONU MOBILE SOLUTION</h2>
                 <p class="text-[10px] text-slate-500 font-medium">Head Office: 216, Sree Rama Towers, Hazratganj, Lucknow</p>
-                <p class="text-[10px] text-blue-700 font-bold">मो./WhatsApp: 7905859701</p>
+                <p class="text-[10px] text-blue-700 font-bold">मो./WhatsApp: 9044115178</p>
               </div>
             </div>
             <div class="text-right">
@@ -9287,7 +9282,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   function shareSalarySlipWhatsApp(phone, name, amount) {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     const targetPhone = cleanPhone.startsWith('91') ? cleanPhone : ('91' + cleanPhone);
-    const msg = `*Monu Mobile Solution - मासिक वेतन पर्ची (Salary Slip)*\n\nनमस्ते ${name} जी,\nनवंबर 2026 माह का आपका कुल वेतन विवरण:\n\n💵 शुद्ध देय वेतन (Net Salary): *₹${amount}*\n\nपूरा विवरण देखने के लिए कृपया स्टोर मैनेजर या एडमिन से संपर्क करें। धन्यवाद!\n— मोनू मोबाइल सॉल्यूशन (7905859701)`;
+    const msg = `*Monu Mobile Solution - मासिक वेतन पर्ची (Salary Slip)*\n\nनमस्ते ${name} जी,\nनवंबर 2026 माह का आपका कुल वेतन विवरण:\n\n💵 शुद्ध देय वेतन (Net Salary): *₹${amount}*\n\nपूरा विवरण देखने के लिए कृपया स्टोर मैनेजर या एडमिन से संपर्क करें। धन्यवाद!\n— मोनू मोबाइल सॉल्यूशन (9044115178)`;
 
     window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
@@ -9886,7 +9881,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const branch = state.branches.find(b => b.id === job.branchId) || state.branches[0];
     const branchName = branch ? branch.name : 'हजरतगंज मुख्य लैब';
     const branchAddr = branch ? branch.address : '216, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ';
-    const branchPhone = branch ? branch.phone : '7905859701';
+    const branchPhone = branch ? branch.phone : '9044115178';
 
     let iframe = document.getElementById('receipt-print-iframe');
     if (!iframe) {
