@@ -783,6 +783,7 @@ function filterCategoryDropdown(inputId, query) {
     posCustomer: { name: '', phone: '', type: 'customer' },
     posBillingBranch: localStorage.getItem('mms_pos_branch_v10') || 'branch_hazratganj',
     posPayment: { mode: 'cash', paid: 0, discount: 0 },
+    posInvoiceDate: getTodayDateStr(),
     
     // Active Admin Tab
     activeAdminTab: 'dashboard',
@@ -3050,9 +3051,25 @@ function filterCategoryDropdown(inputId, query) {
     renderPOS();
   }
 
+  
+  function setPosInvoiceDate(dateVal) {
+    const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
+    if (role !== 'admin' && role !== 'manager') {
+      alert('⚠️ बैक-डेट में बिलिंग केवल सुपर एडमिन व ब्रांच मैनेजर के लिए अधिकृत है!');
+      return;
+    }
+    state.posInvoiceDate = dateVal || getTodayDateStr();
+    renderPOS();
+  }
+
   function renderPOS() {
     const container = document.getElementById('tab-view-pos');
     if (!container) return;
+
+    const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
+    const canBackdate = role === 'admin' || role === 'manager';
+    const selectedDate = (canBackdate && state.posInvoiceDate) ? state.posInvoiceDate : getTodayDateStr();
+    const isBackdated = selectedDate !== getTodayDateStr();
 
     const isShopkeeper = state.posCustomer.type === 'shopkeeper';
     const contactsForType = state.contacts.filter(c => isShopkeeper ? c.type === 'shopkeeper' : c.type === 'customer');
@@ -3236,6 +3253,40 @@ function filterCategoryDropdown(inputId, query) {
         <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <h3 class="text-base font-black text-slate-900 pb-2 border-b border-slate-100">${__L("ग्राहक विवरण व बिलिंग सारांश", "Customer Details & Billing Summary")}</h3>
 
+          <!-- 📅 Bill Date Picker (Backdate Register Entry for Admin & Manager) -->
+          <div class="p-3 ${isBackdated ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-300' : 'bg-slate-50 border-slate-200'} rounded-2xl border space-y-1.5 transition">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <label class="text-xs font-black ${isBackdated ? 'text-amber-950 font-black' : 'text-slate-700'} flex items-center gap-1.5">
+                <span>📅</span> <span>${__L("बिल की तारीख (Invoice Date):", "Invoice Date:")}</span>
+              </label>
+              ${canBackdate ? `
+                <div class="flex items-center gap-1.5">
+                  <input type="date" id="pos-invoice-date" value="${selectedDate}" onchange="window.MMS_APP.setPosInvoiceDate(this.value)" class="bg-white border ${isBackdated ? 'border-amber-400 text-amber-950 ring-2 ring-amber-400 font-black' : 'border-slate-300 text-slate-800 font-bold'} font-mono text-xs rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer">
+                  ${isBackdated ? `
+                    <button type="button" onclick="window.MMS_APP.setPosInvoiceDate(getTodayDateStr())" class="px-2 py-1 text-[10px] font-black bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg cursor-pointer transition" title="${__L("आज की तारीख सेट करें", "Reset to today")}">
+                      ↺ ${__L("आज", "Today")}
+                    </button>
+                  ` : ''}
+                </div>
+              ` : `
+                <div class="flex items-center gap-1.5">
+                  <span class="font-mono font-bold text-xs text-slate-700 bg-white border border-slate-200 rounded-lg px-2.5 py-1">${selectedDate}</span>
+                  <span class="text-[10px] text-slate-400 font-bold">🔒 ${__L("लॉक", "Locked")}</span>
+                </div>
+              `}
+            </div>
+            ${isBackdated ? `
+              <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-900 bg-amber-100/90 px-2 py-1 rounded-lg border border-amber-200">
+                <span>⚠️</span> <span>${__L("रजिस्टर बैक-डेट प्रविष्टि: यह बिल चुनी गई तारीख (" + selectedDate + ") के गल्ले व डेली सेल्स में जुड़ेगा", "Backdated Entry: This bill will be recorded under selected date (" + selectedDate + ")")}</span>
+              </div>
+            ` : (canBackdate ? `
+              <p class="text-[10px] text-slate-400 font-medium">${__L("रजिस्टर की पुरानी प्रविष्टि चढ़ाने के लिए तारीख बदलें (केवल एडमिन/मैनेजर)", "Change date to log past register entries (Admin/Manager only)")}</p>
+            ` : `
+              <p class="text-[10px] text-slate-400 font-medium">${__L("साधारण स्टाफ के लिए तारीख लॉक है", "Date is locked for staff")}</p>
+            `)}
+          </div>
+
+
           <!-- Customer Type Toggle: Normal Customer vs Local Shopkeeper -->
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
             <label class="text-xs font-black text-slate-700 block">${__L("ग्राहक का प्रकार चुनें *", "Select Customer Type *")}</label>
@@ -3413,7 +3464,10 @@ function filterCategoryDropdown(inputId, query) {
                 const assigned = inv.assignedStaff || inv.assignedTo || '';
                 return `
                 <tr class="hover:bg-slate-50 transition">
-                  <td class="p-2.5 font-mono font-bold text-blue-700">${invId}</td>
+                  <td class="p-2.5 font-mono font-bold text-blue-700">
+                    <div>${invId}</div>
+                    ${inv.isBackdated ? `<span class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-black bg-amber-100 text-amber-800 border border-amber-300" title="रजिस्टर बैक-डेट प्रविष्टि: ${inv.date}">📅 ${inv.date}</span>` : ''}
+                  </td>
                   <td class="p-2.5 font-bold text-slate-900">${inv.customerName || 'Walk-in Customer'}</td>
                   <td class="p-2.5 font-mono text-slate-600">${inv.customerPhone || 'N/A'}</td>
                   <td class="p-2.5 text-slate-600 max-w-xs truncate">${(inv.items || []).map(i => `${i.name || 'पार्ट्स'} (x${i.qty || 1})`).join(', ') || 'मोबाइल रिपेयरिंग'}</td>
@@ -3424,7 +3478,8 @@ function filterCategoryDropdown(inputId, query) {
                     </span>
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">
-                    <select onchange="window.MMS_APP.assignInvoiceStaff('${invId}', this.value)" class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs rounded-xl px-2 py-1 font-bold cursor-pointer hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                    <select onchange="window.MMS_APP.assignInvoiceStaff,
+    setPosInvoiceDate('${invId}', this.value)" class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs rounded-xl px-2 py-1 font-bold cursor-pointer hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
                       <option value="">👤 इंप्लॉई असाइन करें</option>
                       ${(state.staff || []).map(s => {
                         const isSel = assigned === s.name || (assigned && assigned.includes(s.name));
@@ -3679,11 +3734,18 @@ function filterCategoryDropdown(inputId, query) {
       }
     });
 
+    const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
+    const canBackdate = role === 'admin' || role === 'manager';
+    const billDate = (canBackdate && state.posInvoiceDate) ? state.posInvoiceDate : getTodayDateStr();
+    const isBackdated = billDate !== getTodayDateStr();
+
     const newInvoiceNo = 'MMS-INV-' + (state.invoices.length + 201);
     const invoiceRecord = {
       invoiceNo: newInvoiceNo,
-      date: getTodayDateStr(),
+      date: billDate,
       time: timeStr,
+      isBackdated: isBackdated,
+      recordedAt: new Date().toISOString(),
       udharNote: udharNote,
       customerName: custName,
       customerPhone: custPhone,
@@ -3720,9 +3782,11 @@ function filterCategoryDropdown(inputId, query) {
       dueAmount: dueAmount,
       status: 'pending', // Strictly 'pending' (स्वीकार / रिपेयरिंग चालू) - only changes when staff manually selects
       passcode: 'N/A',
-      createdAt: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      createdAt: billDate + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: billDate,
+      isBackdated: isBackdated,
       updatedAt: 'Just now',
-      notes: `काउंटर बिलिंग (POS) से जनरेटेड इनवॉइस [${newInvoiceNo}]${udharNote ? ` • उधार नोट: ${udharNote}` : ''}`
+      notes: `काउंटर बिलिंग (POS) से जनरेटेड इनवॉइस [${newInvoiceNo}]${isBackdated ? ` • ⚠️ बैक-डेट प्रविष्टि (${billDate})` : ''}${udharNote ? ` • उधार नोट: ${udharNote}` : ''}`
     });
 
     persistData();
@@ -3734,6 +3798,7 @@ function filterCategoryDropdown(inputId, query) {
     state.posCart = [];
     state.posCustomer = { name: '', phone: '', type: 'customer' };
     state.posPayment = { mode: 'cash', paid: 0, discount: 0 };
+    state.posInvoiceDate = getTodayDateStr();
 
     renderPOS();
     showInvoiceModal(invoiceRecord);
