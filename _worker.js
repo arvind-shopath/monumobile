@@ -385,6 +385,11 @@ export default {
                 }
               });
             }
+            if (store && store.inventory && Array.isArray(store.inventory)) {
+              store.inventory.forEach(i => {
+                if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
+              });
+            }
             return jsonResponse({
               success: true,
               source: "enterprise_cache",
@@ -834,6 +839,9 @@ export default {
           if (action === 'sync_inventory') {
             const invList = payload.inventory || payload.data;
             if (Array.isArray(invList) && invList.length > 0) {
+              invList.forEach(i => {
+                if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
+              });
               if (env.KV) {
                 currentKv.inventory = invList;
                 await env.KV.put("monu_master_sync", JSON.stringify(currentKv));

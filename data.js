@@ -387,31 +387,32 @@ window.MMS_DATA = {
     // Pre-seeded SKU Inventory with comprehensive branch categorization
   initialInventory: [
     // ==========================================
-    // 🏢 कन्नौज शाखा (सरायमीरा - स्पेयर पार्ट्स व रिपेयरिंग)
+    // 🏢 लखनऊ हजरतगंज शाखा (मुख्य गोदाम व सेंट्रल लैब - Flagship & Realme Spares)
+    // * नोट: कन्नौज शाखा रियलमी ऑथराइज्ड सर्विस सेंटर होने के कारण वहाँ के पार्ट्स कंपनी से आते हैं, अतः सभी मुख्य इन्वेंट्री हजरतगंज (मेन) में है और यहीं से नाका ट्रांसफर की जाती है।
     // ==========================================
-    { sku: "SCR-R12P-CRV", name: "Realme 12 Pro+ 5G Curved OLED Display Combo (Genuine Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 4200, sellPrice: 6200, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-R11P-CRV", name: "Realme 11 Pro / 11 Pro+ 5G Curved AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-R10P-CRV", name: "Realme 10 Pro+ 5G 120Hz Curved AMOLED Screen", category: "Screen (पूरा फोल्डर)", costPrice: 3400, sellPrice: 4999, stock: 3, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RGT-N5-ORG", name: "Realme GT Neo 5 / GT3 144Hz AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4600, sellPrice: 6800, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RGT-2P", name: "Realme GT 2 Pro 2K LTPO AMOLED Combo (Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 5200, sellPrice: 7500, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-R9P-AMO", name: "Realme 9 Pro+ 5G Super AMOLED Display (In-Display Fingerprint)", category: "Screen (पूरा फोल्डर)", costPrice: 2800, sellPrice: 4200, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RNZ70-AMO", name: "Realme Narzo 70 Pro 5G 120Hz AMOLED Screen Combo", category: "Screen (पूरा फोल्डर)", costPrice: 2600, sellPrice: 3900, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RNZ60-AMO", name: "Realme Narzo 60 / 60 Pro AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 2700, sellPrice: 4100, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RNZ50-OG", name: "Realme Narzo 50 / 50A Prime FHD+ Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1250, sellPrice: 2200, stock: 8, minStock: 3, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RC55-OG", name: "Realme C55 / C53 Mini Capsule FHD+ Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 1100, sellPrice: 1950, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SUB-R67W-VOOC", name: "Realme 67W SuperVOOC Original Charging Sub-board (Type-C IC)", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 360, sellPrice: 850, stock: 12, minStock: 4, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SUB-R80W-FLX", name: "Realme 80W / 120W SuperVOOC Fast Charge Main Flex Cable", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 240, sellPrice: 650, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SUB-R33W-DART", name: "Realme 33W Dart Charge PCB Board & Mic Flex", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 280, sellPrice: 699, stock: 15, minStock: 4, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "BAT-BLP803-ORG", name: "Realme Original Battery BLP803 4500mAh (7 Pro / 8 Pro)", category: "Battery (बैटरी)", costPrice: 750, sellPrice: 1450, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "BAT-BLP923-ORG", name: "Realme Original Battery BLP923 5000mAh (9 Pro / 10 Pro)", category: "Battery (बैटरी)", costPrice: 800, sellPrice: 1550, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "BAT-BLP989-ORG", name: "Realme Genuine Battery BLP989 5000mAh (11 Pro / 11 Pro+)", category: "Battery (बैटरी)", costPrice: 880, sellPrice: 1699, stock: 7, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "BAT-BLP997-ORG", name: "Realme Genuine Battery BLP997 5000mAh (12 Pro / 12 Pro+)", category: "Battery (बैटरी)", costPrice: 950, sellPrice: 1799, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "BAT-BLP827-ORG", name: "Realme Original Battery BLP827 5000mAh (Narzo 30 / 50)", category: "Battery (बैटरी)", costPrice: 720, sellPrice: 1399, stock: 9, minStock: 3, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-11R-AMO", name: "OnePlus 11R 5G 120Hz Super Fluid AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 4800, sellPrice: 6999, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-NORD-CE3", name: "OnePlus Nord CE 3 / CE 3 Lite 5G Fluid Display Assembly", category: "Screen (पूरा फोल्डर)", costPrice: 2200, sellPrice: 3500, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RENO10-CRV", name: "Oppo Reno 10 Pro / Pro+ 5G 3D Curved AMOLED Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4400, sellPrice: 6500, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SCR-RENO8-AMO", name: "Oppo Reno 8 5G Super AMOLED Display Combo (OG)", category: "Screen (पूरा फोल्डर)", costPrice: 2900, sellPrice: 4400, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_kannauj" },
-    { sku: "SUB-OPPO-65W", name: "Oppo 65W SuperVOOC Type-C Charging Flex & Jack Board", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 320, sellPrice: 750, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_kannauj" },
+    { sku: "SCR-R12P-CRV", name: "Realme 12 Pro+ 5G Curved OLED Display Combo (Genuine Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 4200, sellPrice: 6200, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-R11P-CRV", name: "Realme 11 Pro / 11 Pro+ 5G Curved AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 3800, sellPrice: 5600, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-R10P-CRV", name: "Realme 10 Pro+ 5G 120Hz Curved AMOLED Screen", category: "Screen (पूरा फोल्डर)", costPrice: 3400, sellPrice: 4999, stock: 3, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RGT-N5-ORG", name: "Realme GT Neo 5 / GT3 144Hz AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4600, sellPrice: 6800, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RGT-2P", name: "Realme GT 2 Pro 2K LTPO AMOLED Combo (Service Pack)", category: "Screen (पूरा फोल्डर)", costPrice: 5200, sellPrice: 7500, stock: 2, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-R9P-AMO", name: "Realme 9 Pro+ 5G Super AMOLED Display (In-Display Fingerprint)", category: "Screen (पूरा फोल्डर)", costPrice: 2800, sellPrice: 4200, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RNZ70-AMO", name: "Realme Narzo 70 Pro 5G 120Hz AMOLED Screen Combo", category: "Screen (पूरा फोल्डर)", costPrice: 2600, sellPrice: 3900, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RNZ60-AMO", name: "Realme Narzo 60 / 60 Pro AMOLED Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 2700, sellPrice: 4100, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RNZ50-OG", name: "Realme Narzo 50 / 50A Prime FHD+ Display Folder", category: "Screen (पूरा फोल्डर)", costPrice: 1250, sellPrice: 2200, stock: 8, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RC55-OG", name: "Realme C55 / C53 Mini Capsule FHD+ Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 1100, sellPrice: 1950, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SUB-R67W-VOOC", name: "Realme 67W SuperVOOC Original Charging Sub-board (Type-C IC)", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 360, sellPrice: 850, stock: 12, minStock: 4, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SUB-R80W-FLX", name: "Realme 80W / 120W SuperVOOC Fast Charge Main Flex Cable", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 240, sellPrice: 650, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SUB-R33W-DART", name: "Realme 33W Dart Charge PCB Board & Mic Flex", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 280, sellPrice: 699, stock: 15, minStock: 4, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-BLP803-ORG", name: "Realme Original Battery BLP803 4500mAh (7 Pro / 8 Pro)", category: "Battery (बैटरी)", costPrice: 750, sellPrice: 1450, stock: 6, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-BLP923-ORG", name: "Realme Original Battery BLP923 5000mAh (9 Pro / 10 Pro)", category: "Battery (बैटरी)", costPrice: 800, sellPrice: 1550, stock: 8, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-BLP989-ORG", name: "Realme Genuine Battery BLP989 5000mAh (11 Pro / 11 Pro+)", category: "Battery (बैटरी)", costPrice: 880, sellPrice: 1699, stock: 7, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-BLP997-ORG", name: "Realme Genuine Battery BLP997 5000mAh (12 Pro / 12 Pro+)", category: "Battery (बैटरी)", costPrice: 950, sellPrice: 1799, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "BAT-BLP827-ORG", name: "Realme Original Battery BLP827 5000mAh (Narzo 30 / 50)", category: "Battery (बैटरी)", costPrice: 720, sellPrice: 1399, stock: 9, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-11R-AMO", name: "OnePlus 11R 5G 120Hz Super Fluid AMOLED Display Combo", category: "Screen (पूरा फोल्डर)", costPrice: 4800, sellPrice: 6999, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-NORD-CE3", name: "OnePlus Nord CE 3 / CE 3 Lite 5G Fluid Display Assembly", category: "Screen (पूरा फोल्डर)", costPrice: 2200, sellPrice: 3500, stock: 5, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RENO10-CRV", name: "Oppo Reno 10 Pro / Pro+ 5G 3D Curved AMOLED Folder", category: "Screen (पूरा फोल्डर)", costPrice: 4400, sellPrice: 6500, stock: 3, minStock: 1, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SCR-RENO8-AMO", name: "Oppo Reno 8 5G Super AMOLED Display Combo (OG)", category: "Screen (पूरा फोल्डर)", costPrice: 2900, sellPrice: 4400, stock: 4, minStock: 2, unit: "Pcs", branchId: "branch_hazratganj" },
+    { sku: "SUB-OPPO-65W", name: "Oppo 65W SuperVOOC Type-C Charging Flex & Jack Board", category: "Charging (चार्जिंग बोर्ड/जैक)", costPrice: 320, sellPrice: 750, stock: 10, minStock: 3, unit: "Pcs", branchId: "branch_hazratganj" },
 
     // ==========================================
     // 🏢 नाका हिंडोला शाखा (Wholesale Fast-Moving Spares & Lab Consumables)

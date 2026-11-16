@@ -210,6 +210,7 @@ function filterCategoryDropdown(inputId, query) {
         else if (tab === 'sales' && typeof renderDailySales === 'function') renderDailySales();
         else if (tab === 'khata' && typeof renderKhata === 'function') renderKhata();
         else if (tab === 'expenses' && typeof renderExpensesModule === 'function') renderExpensesModule();
+        else if (tab === 'transfer' && typeof renderStockTransferModule === 'function') renderStockTransferModule();
         else if (tab === 'inventory') {
           // In inventory, only update the table body without wiping search box or filters
           if (typeof updateInventoryTableOnly === 'function' && document.getElementById('inventory-table-body')) {
@@ -290,6 +291,9 @@ function filterCategoryDropdown(inputId, query) {
           if (resData.data.inventory && Array.isArray(resData.data.inventory) && resData.data.inventory.length > 0) {
             const oldStr = JSON.stringify(state.inventory || []);
             const newInv = resData.data.inventory;
+            newInv.forEach(i => {
+              if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
+            });
             const newStr = JSON.stringify(newInv);
             if (oldStr !== newStr) {
               state.inventory = newInv;
@@ -486,6 +490,25 @@ function filterCategoryDropdown(inputId, query) {
       }
     },
 
+    async syncInventory(invList) {
+      const list = invList || (typeof state !== 'undefined' ? state.inventory : null);
+      if (typeof fetch === 'undefined' || !Array.isArray(list)) return;
+      try {
+        console.log('⚡ [CloudSync] Syncing inventory to Enterprise Cloud...', list.length);
+        const res = await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sync_inventory', inventory: list })
+        });
+        const d = await res.json();
+        console.log('⚡ [CloudSync] Inventory sync response:', d);
+        this.updateSyncBadge('saved');
+        this.broadcastLocalChange('inventory');
+      } catch(e) {
+        console.warn('Failed syncing inventory to cloud:', e);
+      }
+    },
+
     updateSyncBadge(status) {
       if (typeof document === 'undefined') return;
       const el = document.getElementById('cloud-sync-status-badge');
@@ -593,7 +616,17 @@ function filterCategoryDropdown(inputId, query) {
     advances: JSON.parse(localStorage.getItem(STORAGE_KEYS.ADVANCES) || 'null') || window.MMS_DATA.initialAdvances || [],
     expenses: JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || 'null') || window.MMS_DATA.initialExpenses || [],
 
-    inventory: JSON.parse(localStorage.getItem(STORAGE_KEYS.INVENTORY) || 'null') || window.MMS_DATA.initialInventory,
+    inventory: (() => {
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVENTORY) || 'null') || window.MMS_DATA.initialInventory;
+      // Kannauj is Realme Authorized Service Center (0 local inventory); all main stock belongs to Hazratganj
+      if (Array.isArray(list)) {
+        list.forEach(i => {
+          if (i.branchId === 'branch_kannauj') i.branchId = 'branch_hazratganj';
+        });
+      }
+      return list;
+    })(),
+    stockTransfers: JSON.parse(localStorage.getItem('mms_stock_transfers') || 'null') || [],
     jobs: (() => {
       let jList = JSON.parse(localStorage.getItem(STORAGE_KEYS.JOBS) || 'null');
       if (!Array.isArray(jList) || jList.length === 0) {
@@ -1701,6 +1734,7 @@ function filterCategoryDropdown(inputId, query) {
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
     else if (state.activeAdminTab === 'inventory') renderInventory();
+    else if (state.activeAdminTab === 'transfer') renderStockTransferModule();
     else if (state.activeAdminTab === 'directory') renderDirectoryCRM();
     else if (state.activeAdminTab === 'sales') renderDailySales();
     else if (state.activeAdminTab === 'khata') renderKhataLedger();
@@ -2129,9 +2163,9 @@ function filterCategoryDropdown(inputId, query) {
     }
 
     const allowedTabs = isOwner 
-      ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'balance', 'attendance', 'staff', 'settings']
+      ? ['dashboard', 'pos', 'jobs', 'inventory', 'transfer', 'directory', 'sales', 'khata', 'expenses', 'balance', 'attendance', 'staff', 'settings']
       : isManager 
-        ? ['dashboard', 'pos', 'jobs', 'inventory', 'directory', 'sales', 'khata', 'expenses', 'attendance']
+        ? ['dashboard', 'pos', 'jobs', 'inventory', 'transfer', 'directory', 'sales', 'khata', 'expenses', 'attendance']
         : ['mywork', 'attendance'];
 
     // Enforce allowed tab strictly for all roles
@@ -2234,6 +2268,7 @@ function filterCategoryDropdown(inputId, query) {
       else if (state.activeAdminTab === 'dashboard') renderDashboard();
       else if (state.activeAdminTab === 'pos') renderPOS();
       else if (state.activeAdminTab === 'inventory') renderInventory();
+      else if (state.activeAdminTab === 'transfer') renderStockTransferModule();
       else if (state.activeAdminTab === 'khata') renderKhata();
       else if (state.activeAdminTab === 'sales') renderDailySales();
       else if (state.activeAdminTab === 'balance') renderBalanceSheet();
@@ -3145,13 +3180,17 @@ function filterCategoryDropdown(inputId, query) {
                 <th class="p-2.5">सामान (Items)</th>
                 <th class="p-2.5 text-right">कुल बिल</th>
                 <th class="p-2.5 text-center">भुगतान</th>
+                <th class="p-2.5 text-center">कारीगर / इंप्लॉई</th>
                 <th class="p-2.5 text-center rounded-r-lg">रसीद / WhatsApp</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              ${(state.invoices || []).slice(0, 5).map(inv => `
-                <tr class="hover:bg-slate-50">
-                  <td class="p-2.5 font-mono font-bold text-blue-700">${inv.invoiceNo || inv.billNo || ('MMS-INV-' + (inv.id || ''))}</td>
+              ${(state.invoices || []).slice(0, 8).map(inv => {
+                const invId = inv.invoiceNo || inv.billNo || ('MMS-INV-' + (inv.id || ''));
+                const assigned = inv.assignedStaff || inv.assignedTo || '';
+                return `
+                <tr class="hover:bg-slate-50 transition">
+                  <td class="p-2.5 font-mono font-bold text-blue-700">${invId}</td>
                   <td class="p-2.5 font-bold text-slate-900">${inv.customerName || 'Walk-in Customer'}</td>
                   <td class="p-2.5 font-mono text-slate-600">${inv.customerPhone || 'N/A'}</td>
                   <td class="p-2.5 text-slate-600 max-w-xs truncate">${(inv.items || []).map(i => `${i.name || 'पार्ट्स'} (x${i.qty || 1})`).join(', ') || 'मोबाइल रिपेयरिंग'}</td>
@@ -3161,13 +3200,22 @@ function filterCategoryDropdown(inputId, query) {
                       ${inv.paymentMode || 'Cash'}
                     </span>
                   </td>
+                  <td class="p-2.5 text-center whitespace-nowrap">
+                    <select onchange="window.MMS_APP.assignInvoiceStaff('${invId}', this.value)" class="bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs rounded-xl px-2 py-1 font-bold cursor-pointer hover:bg-indigo-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+                      <option value="">👤 इंप्लॉई असाइन करें</option>
+                      ${(state.staff || []).map(s => {
+                        const isSel = assigned === s.name || (assigned && assigned.includes(s.name));
+                        return `<option value="${s.name}" ${isSel ? 'selected' : ''}>${s.name} (${s.roleLabel || s.role || 'स्टाफ'})</option>`;
+                      }).join('')}
+                    </select>
+                  </td>
                   <td class="p-2.5 text-center">
-                    <button onclick='window.MMS_APP.showExistingInvoice("${inv.invoiceNo || inv.billNo || inv.id}")' class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[11px] font-bold shadow-2xs">
+                    <button onclick='window.MMS_APP.showExistingInvoice("${invId}")' class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer">
                       रसीद देखें
                     </button>
                   </td>
                 </tr>
-              `).join('')}
+              `;}).join('')}
             </tbody>
           </table>
         </div>
@@ -3394,11 +3442,17 @@ function filterCategoryDropdown(inputId, query) {
       });
     }
 
-    // Auto-deduct inventory
+    // Auto-deduct inventory for current store branch
+    const currentBillingBranch = (state.activeBranch && state.activeBranch !== 'all') ? state.activeBranch : 'branch_hazratganj';
     state.posCart.forEach(cartItem => {
-      const inv = state.inventory.find(i => i.sku === cartItem.sku);
+      let inv = state.inventory.find(i => i.sku === cartItem.sku && (i.branchId === currentBillingBranch || !i.branchId));
+      if (!inv) {
+        inv = state.inventory.find(i => i.sku === cartItem.sku);
+      }
       if (inv) {
-        inv.stock = Math.max(0, inv.stock - cartItem.qty);
+        const prevStock = Number(inv.stock || 0);
+        inv.stock = Math.max(0, prevStock - Number(cartItem.qty || 1));
+        console.log(`📉 [Stock Auto-Deduct] ${inv.name} (${inv.sku}): ${prevStock} -> ${inv.stock} (${inv.branchId || currentBillingBranch})`);
       }
     });
 
@@ -3420,6 +3474,8 @@ function filterCategoryDropdown(inputId, query) {
       paymentMode: paymentLabel,
       status: dueAmount === 0 ? 'Paid' : (paidAmount > 0 ? 'Partially Paid' : 'Unpaid (Due)'),
       billedBy: state.currentUser ? `${state.currentUser.role.toUpperCase()} (${state.currentUser.name})` : 'Front Desk',
+      assignedStaff: state.currentUser ? state.currentUser.name : '',
+      assignedTo: state.currentUser ? state.currentUser.name : '',
       udharCleared: dueAmount === 0
     };
 
@@ -3447,6 +3503,9 @@ function filterCategoryDropdown(inputId, query) {
     });
 
     persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.syncInventory) {
+      CloudSync.syncInventory(state.inventory);
+    }
 
     state.posCart = [];
     state.posCustomer = { name: '', phone: '', type: 'customer' };
@@ -3454,6 +3513,38 @@ function filterCategoryDropdown(inputId, query) {
 
     renderPOS();
     showInvoiceModal(invoiceRecord);
+  }
+
+  function assignInvoiceStaff(invoiceId, staffName) {
+    if (!invoiceId) return;
+    const inv = (state.invoices || []).find(i => (i.invoiceNo === invoiceId || i.billNo === invoiceId || i.id === invoiceId || ('MMS-INV-' + i.id) === invoiceId));
+    if (!inv) {
+      alert('इनवॉइस नहीं मिला!');
+      return;
+    }
+    inv.assignedStaff = staffName;
+    inv.assignedTo = staffName;
+
+    // Also update corresponding repair job in state.jobs if exists
+    const job = (state.jobs || []).find(j => j.token === invoiceId || j.id === invoiceId || j.tokenNo === invoiceId);
+    if (job) {
+      job.assignedTo = staffName;
+    }
+
+    persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.pushInvoice) {
+      CloudSync.pushInvoice(inv);
+    }
+    if (job && typeof CloudSync !== "undefined" && CloudSync.pushJob) {
+      CloudSync.pushJob(job);
+    }
+
+    if (staffName) {
+      alert(`✅ इनवॉइस [${invoiceId}] पर कर्मचारी [${staffName}] को असाइन कर दिया गया है!`);
+    } else {
+      alert(`इनवॉइस [${invoiceId}] से असाइनमेंट हटा दिया गया है।`);
+    }
+    renderPOS();
   }
 
   // POS SKU Search click-outside listener
@@ -4105,6 +4196,16 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             </div>
           </div>
 
+          ${branchFilter === 'branch_kannauj' ? `
+            <div class="mb-4 p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center gap-3 text-amber-900 text-xs shadow-2xs">
+              <span class="text-2xl">🏢</span>
+              <div>
+                <strong class="font-black text-sm block">कन्नौज शाखा (Realme ऑथराइज्ड सर्विस सेंटर)</strong>
+                <p class="text-amber-700 mt-0.5">यहाँ के सभी स्पेयर पार्ट्स सीधे कंपनी (Realme) द्वारा अधिकृत रूप से भेजे जाते हैं। मोनू मोबाइल सॉल्यूशन की मुख्य स्पेयर पार्ट्स इन्वेंट्री <strong>हजरतगंज (सेंट्रल लैब व मुख्य वेयरहाउस)</strong> में रखी जाती है और यहीं से <strong>नाका हिंडोला</strong> शाखा को ट्रांसफर की जाती है।</p>
+              </div>
+            </div>
+          ` : ''}
+
           <!-- Category Quick Filter & Search Bar -->
           <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 flex-1 min-w-[240px]">
@@ -4257,6 +4358,288 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   }
 
   
+  // =========================================================================
+  // INTER-BRANCH INVENTORY TRANSFER (हजरतगंज मुख्य गोदाम ➔ नाका हिंडोला)
+  // =========================================================================
+
+  function renderStockTransferModule() {
+    const container = document.getElementById('tab-view-transfer');
+    if (!container) return;
+
+    // Filter parts available in Hazratganj (Central Warehouse)
+    const hazratganjItems = (state.inventory || []).filter(i => 
+      (i.branchId === 'branch_hazratganj' || !i.branchId) && Number(i.stock || 0) > 0
+    );
+
+    // Total parts in Hazratganj and Naka
+    const hgStockTotal = (state.inventory || [])
+      .filter(i => i.branchId === 'branch_hazratganj' || !i.branchId)
+      .reduce((s, i) => s + Number(i.stock || 0), 0);
+    const nakaStockTotal = (state.inventory || [])
+      .filter(i => i.branchId === 'branch_naka')
+      .reduce((s, i) => s + Number(i.stock || 0), 0);
+
+    const transfers = state.stockTransfers || [];
+
+    container.innerHTML = `
+      <div class="space-y-6">
+        <!-- Top Banner -->
+        <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 p-6 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
+                मल्टी-ब्रांच वेयरहाउस ऑपरेशन
+              </span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-500/30 text-blue-200 border border-blue-400/30">
+                हजरतगंज (मेन गोदाम) ➔ नाका हिंडोला
+              </span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black">ट्रांसफर इन्वेंट्री व डिलीवरी चालान (Stock Transfer)</h2>
+            <p class="text-xs text-slate-300">लखनऊ हजरतगंज सेंट्रल वेयरहाउस से नाका हिंडोला शाखा को माल डिस्पैच करें</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-center">
+              <span class="text-[10px] text-emerald-200 uppercase font-bold block">हजरतगंज कुल स्टॉक</span>
+              <span class="text-lg font-black font-mono">${hgStockTotal} पीस</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-center">
+              <span class="text-[10px] text-blue-200 uppercase font-bold block">नाका हिंडोला कुल स्टॉक</span>
+              <span class="text-lg font-black font-mono">${nakaStockTotal} पीस</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kannauj Notice Badge -->
+        <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-900 text-xs">
+          <span class="text-xl">🏢</span>
+          <p><strong>कन्नौज शाखा (Realme ऑथराइज्ड सर्विस सेंटर):</strong> यहाँ के पार्ट्स कंपनी द्वारा सीधे दिए जाते हैं, अतः इन्वेंट्री हजरतगंज (मुख्य गोदाम) में रखी जाती है और यहीं से नाका हिंडोला शाखा को ट्रांसफर होती है।</p>
+        </div>
+
+        <!-- Dispatch Transfer Card -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>📦 नया माल डिस्पैच करें (New Stock Dispatch)</span>
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <!-- Source Branch -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">भेजने वाली शाखा (From - मुख्य गोदाम)</label>
+              <div class="p-2.5 bg-slate-100 rounded-xl font-bold text-slate-800 border border-slate-200 flex items-center gap-2">
+                <span>📍</span>
+                <span>हजरतगंज (श्रीराम टावर - मुख्य गोदाम)</span>
+              </div>
+            </div>
+
+            <!-- Destination Branch -->
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">प्राप्त करने वाली शाखा (To Branch)</label>
+              <div class="p-2.5 bg-emerald-50 rounded-xl font-black text-emerald-900 border border-emerald-200 flex items-center gap-2">
+                <span>🎯</span>
+                <span>नाका हिंडोला शाखा (चारबाग)</span>
+              </div>
+            </div>
+
+            <!-- Select SKU / Product -->
+            <div class="lg:col-span-2">
+              <label class="block font-bold text-slate-700 mb-1.5">पार्ट / SKU चुनें (हजरतगंज में उपलब्ध स्पेयर पार्ट्स) *</label>
+              <select id="trf-sku-select" onchange="window.MMS_APP.onTransferSkuChange(this.value)" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="">-- पार्ट या SKU चुनें (${hazratganjItems.length} उपलब्ध) --</option>
+                ${hazratganjItems.map(item => `
+                  <option value="${item.sku}">
+                    [${item.sku}] ${item.name} • (उपलब्ध: ${item.stock} पीस | लागत: ₹${item.costPrice})
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+          </div>
+
+          <!-- Quantity, Available preview & Note Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-2">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">हजरतगंज में उपलब्ध स्टॉक</label>
+              <div id="trf-available-display" class="p-2.5 bg-blue-50 border border-blue-200 rounded-xl font-mono font-black text-blue-900">
+                कृपया ऊपर से पार्ट चुनें
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">ट्रांसफर मात्रा (Quantity to Dispatch) *</label>
+              <input id="trf-qty-input" type="number" min="1" value="1" placeholder="उदा. 2" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">चालान / डिलीवरी नोट (वैकल्पिक)</label>
+              <input id="trf-note-input" type="text" placeholder="उदा. नाका डिलीवरी चालान #102 / ऑटो से भेजा" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="pt-2 flex justify-end">
+            <button onclick="window.MMS_APP.executeStockTransfer()" class="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-lg transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+              <span>🚚 नाका हिंडोला को स्टॉक ट्रांसफर करें (Confirm Dispatch)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Transfer History Log Table -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+              <h3 class="text-sm font-black text-slate-900">📜 हालिया स्टॉक ट्रांसफर चालान हिस्ट्री (Transfer Logs)</h3>
+              <p class="text-[11px] text-slate-500">हजरतगंज से नाका हिंडोला भेजे गए पार्ट्स का पूरा ऑडिट रिकॉर्ड</p>
+            </div>
+            <span class="text-xs font-mono font-bold text-slate-400">कुल ट्रांसफर: ${transfers.length}</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="bg-slate-100 text-slate-600 font-bold">
+                  <th class="p-2.5 rounded-l-lg">चालान नं</th>
+                  <th class="p-2.5">तारीख व समय</th>
+                  <th class="p-2.5">पार्ट का नाम व SKU</th>
+                  <th class="p-2.5 text-center">मात्रा</th>
+                  <th class="p-2.5">रूट (कहाँ से ➔ कहाँ)</th>
+                  <th class="p-2.5">किसने भेजा (Authorized)</th>
+                  <th class="p-2.5">चालान नोट</th>
+                  <th class="p-2.5 text-center rounded-r-lg">स्थिति</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${transfers.length === 0 ? `
+                  <tr>
+                    <td colspan="8" class="p-6 text-center text-slate-400 font-bold">
+                      अभी तक कोई स्टॉक ट्रांसफर नहीं किया गया है। ऊपर से माल डिस्पैच करें।
+                    </td>
+                  </tr>
+                ` : transfers.map(trf => `
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="p-2.5 font-mono font-bold text-emerald-700">${trf.id}</td>
+                    <td class="p-2.5 whitespace-nowrap text-slate-600 font-mono">${trf.date} • ${trf.time}</td>
+                    <td class="p-2.5">
+                      <strong class="text-slate-900 font-black block">${trf.name}</strong>
+                      <span class="text-[10px] text-blue-600 font-mono">${trf.sku}</span>
+                    </td>
+                    <td class="p-2.5 text-center font-mono font-black text-slate-900">
+                      <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs">
+                        ${trf.qty} पीस
+                      </span>
+                    </td>
+                    <td class="p-2.5 whitespace-nowrap font-bold text-slate-700">
+                      हजरतगंज ➔ नाका हिंडोला
+                    </td>
+                    <td class="p-2.5 text-slate-600 font-bold">${trf.transferredBy}</td>
+                    <td class="p-2.5 text-slate-500">${trf.notes || '—'}</td>
+                    <td class="p-2.5 text-center">
+                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        ✓ ट्रांसफर्ड
+                      </span>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function onTransferSkuChange(sku) {
+    const display = document.getElementById('trf-available-display');
+    const qtyInput = document.getElementById('trf-qty-input');
+    if (!display) return;
+    if (!sku) {
+      display.textContent = 'कृपया ऊपर से पार्ट चुनें';
+      display.className = 'p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-500';
+      return;
+    }
+    const item = (state.inventory || []).find(i => i.sku === sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
+    if (item) {
+      display.innerHTML = `<span class="text-lg font-black text-emerald-700">${item.stock} पीस</span> <span class="text-[11px] text-slate-500 font-normal">(हजरतगंज में)</span>`;
+      display.className = 'p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl font-mono font-bold text-emerald-900';
+      if (qtyInput) {
+        qtyInput.max = item.stock;
+        qtyInput.value = Math.min(1, item.stock);
+      }
+    }
+  }
+
+  function executeStockTransfer() {
+    const skuSelect = document.getElementById('trf-sku-select');
+    const qtyInput = document.getElementById('trf-qty-input');
+    const noteInput = document.getElementById('trf-note-input');
+
+    const sku = skuSelect ? skuSelect.value : '';
+    const qty = qtyInput ? Number(qtyInput.value) : 0;
+    const note = noteInput ? noteInput.value.trim() : '';
+
+    if (!sku) {
+      alert('कृपया ट्रांसफर करने के लिए पार्ट / SKU चुनें!');
+      return;
+    }
+    if (isNaN(qty) || qty <= 0) {
+      alert('कृपया सही ट्रांसफर मात्रा भरें!');
+      return;
+    }
+
+    // 1. Locate item in Hazratganj stock
+    const hgItem = (state.inventory || []).find(i => i.sku === sku && (i.branchId === 'branch_hazratganj' || !i.branchId));
+    if (!hgItem) {
+      alert('यह पार्ट हजरतगंज इन्वेंट्री में नहीं मिला!');
+      return;
+    }
+
+    if (Number(hgItem.stock || 0) < qty) {
+      alert(`हजरतगंज में केवल ${hgItem.stock} पीस उपलब्ध हैं! आप ${qty} पीस ट्रांसफर नहीं कर सकते।`);
+      return;
+    }
+
+    // 2. Deduct from Hazratganj
+    hgItem.stock = Number(hgItem.stock || 0) - qty;
+
+    // 3. Locate or create item in Naka Hindola branch
+    let nakaItem = (state.inventory || []).find(i => i.sku === sku && i.branchId === 'branch_naka');
+    if (nakaItem) {
+      nakaItem.stock = Number(nakaItem.stock || 0) + qty;
+    } else {
+      nakaItem = {
+        ...hgItem,
+        branchId: 'branch_naka',
+        stock: qty
+      };
+      state.inventory.push(nakaItem);
+    }
+
+    // 4. Log transfer
+    const trfRecord = {
+      id: 'TRF-' + Date.now().toString().slice(-6),
+      date: getTodayDateStr(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      sku: hgItem.sku,
+      name: hgItem.name,
+      category: hgItem.category,
+      qty: qty,
+      fromBranch: 'branch_hazratganj',
+      toBranch: 'branch_naka',
+      transferredBy: state.currentUser ? (state.currentUser.name + ' (' + (state.currentUser.role || 'Admin').toUpperCase() + ')') : 'Monu Ji (Admin)',
+      notes: note || 'हजरतगंज ➔ नाका ट्रांसफर चालान'
+    };
+
+    state.stockTransfers = state.stockTransfers || [];
+    state.stockTransfers.unshift(trfRecord);
+    localStorage.setItem('mms_stock_transfers', JSON.stringify(state.stockTransfers));
+
+    // 5. Persist and Sync to Enterprise Cloud
+    persistData();
+    if (typeof CloudSync !== "undefined" && CloudSync.syncInventory) {
+      CloudSync.syncInventory(state.inventory);
+    }
+
+    alert(`✅ सफल! ${qty} पीस [${hgItem.name}] हजरतगंज से घटकर नाका हिंडोला शाखा में ट्रांसफर हो गए हैं।`);
+    renderStockTransferModule();
+  }
+
   // --- Edit SKU / Product Modal (Direct Stock & Rate Correction) ---
   function openEditSKUModal(sku) {
     const item = state.inventory.find(i => i.sku === sku);
@@ -10237,7 +10620,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     finishEmployeeJob,
     renderMyWorkModule,
     setMyWorkStatusFilter,
-    setMyWorkDateFilter
+    setMyWorkDateFilter,
+
+    // Stock Transfer & Invoice Staff Assignment
+    renderStockTransferModule,
+    onTransferSkuChange,
+    executeStockTransfer,
+    assignInvoiceStaff
 
   };
 
