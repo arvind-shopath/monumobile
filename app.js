@@ -706,9 +706,11 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   const state = {
-    currentLang: localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    lang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    currentLang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    portalLang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
     currentUser: JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH) || 'null'),
-    portalLang: localStorage.getItem('mms_portal_lang') || 'en',
+    // portalLang synchronized via state.lang
     activeView: localStorage.getItem(STORAGE_KEYS.ACTIVE_VIEW) || 'portal',
     shopManualStatus: localStorage.getItem(STORAGE_KEYS.SHOP_STATUS) || 'auto',
     activeBranch: localStorage.getItem(STORAGE_KEYS.ACTIVE_BRANCH) || 'all',
@@ -821,6 +823,13 @@ function filterCategoryDropdown(inputId, query) {
     return token;
   }
 
+  
+  // --- Universal Bilingual Localization Helper ---
+  function __L(hi, en) {
+    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
+    return isEn ? en : hi;
+  }
+
   function persistData() {
     try {
       localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(state.inventory));
@@ -849,10 +858,63 @@ function filterCategoryDropdown(inputId, query) {
     return null;
   }
 
+  function updateLanguageSwitcherUI(lang) {
+    const isEn = lang === 'en';
+    // Public Top Bar buttons
+    document.querySelectorAll('.lang-switcher-btn').forEach(btn => {
+      const targetLang = btn.getAttribute('data-lang');
+      if (targetLang === lang) {
+        btn.className = 'lang-switcher-btn px-2.5 py-1 rounded-md text-xs font-black bg-blue-600 text-white shadow-sm transition';
+      } else {
+        btn.className = 'lang-switcher-btn px-2.5 py-1 rounded-md text-xs font-bold text-slate-300 hover:text-white transition';
+      }
+    });
+
+    // Portal Header buttons
+    const btnEn = document.getElementById('btn-portal-lang-en');
+    const btnHi = document.getElementById('btn-portal-lang-hi');
+    if (btnEn && btnHi) {
+      if (isEn) {
+        btnEn.className = 'px-2 py-0.5 rounded-md text-[10px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnHi.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+      } else {
+        btnHi.className = 'px-2 py-0.5 rounded-md text-[10px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnEn.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+      }
+    }
+  }
+
   function setLanguage(newLang) {
+    state.lang = newLang;
     state.currentLang = newLang;
-    localStorage.setItem(STORAGE_KEYS.LANG, newLang);
-    renderAll();
+    state.portalLang = newLang;
+    try {
+      localStorage.setItem('mms_lang', newLang);
+      localStorage.setItem(STORAGE_KEYS.LANG, newLang);
+      localStorage.setItem('mms_portal_lang', newLang);
+    } catch(e) {}
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = newLang;
+    }
+
+    updateLanguageSwitcherUI(newLang);
+    renderTextTranslations();
+    applyPortalLanguageUI();
+    renderPortalShopControl();
+    renderPortalBranchSwitcher();
+
+    // Re-render active view
+    if (state.activeView === 'portal' && state.currentUser) {
+      if (typeof switchPortalTab === 'function') switchPortalTab(state.activeAdminTab);
+    } else {
+      renderAll();
+      if (typeof switchContactBranch === 'function') switchContactBranch(window._lastContactBranch || 'hazratganj');
+    }
+  }
+
+  function setPortalLanguage(lang) {
+    setLanguage(lang);
   }
 
   // --- Formatters ---
@@ -1624,25 +1686,27 @@ function filterCategoryDropdown(inputId, query) {
       autoTime: "Auto Time",
 
       // Navigation Groups
-      navCore: "Overview & KPIs",
-      navOps: "Store Operations & Billing",
-      navFinance: "Finance & Accounts",
-      navHr: "Staff & Attendance",
+      navCore: "OVERVIEW & KPIS",
+      navOps: "STORE OPERATIONS & BILLING",
+      navFinance: "FINANCE & ACCOUNTS",
+      navHr: "STAFF & ATTENDANCE",
 
       // Tabs
-      tabDashboard: "Dashboard (KPIs)",
-      tabPos: "POS Billing (Counter)",
-      tabJobs: "Repair Job Sheets (Tokens)",
-      tabInventory: "Inventory & Spare SKU",
+      tabDashboard: "Dashboard",
+      tabPos: "POS Billing",
+      tabJobs: "Repair Job Sheets",
+      tabInventory: "Inventory & Spare Parts",
+      tabTransfer: "Stock Transfer (HG ➔ Naka)",
       tabDirectory: "Customer & Merchant CRM",
-      tabSales: "Daily Sales & Cash Register",
+      tabSales: "Daily Sales & Register",
       tabKhata: "Credit Ledger (Khata)",
       tabExpenses: "Store Expenses",
-      tabBalance: "Balance Sheet & P&L (Admin)",
+      tabBalance: "Balance Sheet & P&L",
       tabAttendance: "Selfie & GPS Attendance",
       tabStaff: "Staff HR & Salaries",
       tabSettings: "Branch & GPS Settings",
       tabSettingsEmp: "Settings (Profile & KYC)",
+      tabMyWork: "My Assigned Work",
 
       // Dashboard
       dashBannerTag: "Store Operations, Sales & Staff Monitoring",
@@ -1679,49 +1743,49 @@ function filterCategoryDropdown(inputId, query) {
       // Attendance
       attPunchInBtn: "📸 Duty Punch In",
       attPunchOutBtn: "🛑 Duty Punch Out",
-      attRepunchInBtn: "🟢 Punch In Again",
+      attRepunchInBtn: "🟢 Resume Duty (Punch In)",
       attTodayWork: "Today's Work Hours",
-      attMonthWork: "This Month Total",
-      attRecentHistory: "Recent Attendance Records",
+      attMonthWork: "Total Work This Month",
+      attRecentHistory: "Recent Attendance Logs",
       attDate: "Date",
       attEmployee: "Employee Name",
       attBranch: "Branch",
       attSelfie: "Selfie",
-      attInTime: "Punch In (IN)",
-      attOutTime: "Punch Out (OUT)",
-      attHours: "Hours Worked",
+      attInTime: "Punch In Time",
+      attOutTime: "Punch Out Time",
+      attHours: "Work Hours",
       attGpsLoc: "GPS Location",
       attStatus: "Status",
-      attAction: "Admin Action",
-      attInside: "Inside Store",
-      attOutside: "Outside Store",
+      attAdminAction: "Admin Action",
+      attInside: "At Store",
+      attOutside: "Out of Store",
       attApproved: "Approved",
       attPending: "Pending Approval",
-      attRejected: "Rejected (0.0 hrs)",
+      attRejected: "Rejected",
       attApproveBtn: "Approve",
       attRejectBtn: "Reject",
 
       // CRM
       crmMerchants: "🏪 Local Merchants (B2B)",
-      crmCustomers: "👤 Regular Customers (Walk-in)",
-      crmTotalB2b: "Total B2B Volume",
-      crmTotalRetail: "Total Retail Volume",
+      crmCustomers: "👤 Walk-in Customers",
+      crmTotalB2b: "Merchant (B2B) Total Revenue",
+      crmTotalRetail: "Retail Customer Total Revenue",
       crmSearchPlaceholder: "Search by name or mobile number...",
-      crmExportExcel: "Download Excel (CSV)",
+      crmExportExcel: "Download Excel Report",
 
       // POS
-      posTitle: "Counter POS Billing & Cart",
-      posBillingStore: "Billing Store:",
-      posSkuSearch: "Search SKU or Part Name (Battery, Screen, Combo, Glass...)",
-      posAddNewSku: "➕ Add New SKU",
+      posTitle: "POS Counter Billing & Cart",
+      posBillingStore: "Billing Branch:",
+      posSkuSearch: "Type part name, model or SKU...",
+      posAddNewSku: "➕ Add New SKU / Part",
       posCustName: "Customer Name *",
-      posCustPhone: "Mobile Number (WhatsApp Bill) *",
+      posCustPhone: "Mobile Number (For WhatsApp Bill) *",
       posDiscount: "Discount ₹",
-      posPaid: "Advance / Paid ₹",
+      posPaid: "Paid / Advance ₹",
       posDue: "Remaining Due ₹",
-      posGenerateBill: "Generate Invoice & WhatsApp Bill",
+      posGenerateBill: "Generate Bill & WhatsApp Receipt",
 
-      // Daily Sales
+      // Sales
       salesTitle: "Daily Sales & Cash Register",
       salesToday: "⚡ Today",
       salesYesterday: "📅 Yesterday",
@@ -1746,37 +1810,43 @@ function filterCategoryDropdown(inputId, query) {
       closeStore: "बंद रखें",
       autoTime: "ऑटो टाइम",
 
+      // Navigation Groups
       navCore: "डैशबोर्ड व ओवरव्यू",
       navOps: "दुकान ऑपरेशंस & बिलिंग",
       navFinance: "फाइनेंस, गल्ला व एकाउंट्स",
       navHr: "कर्मचारी, अटेंडेंस व पेरोल",
 
-      tabDashboard: "मुख्य डैशबोर्ड (KPIs)",
-      tabPos: "POS बिलिंग (काउंटर)",
+      // Tabs
+      tabDashboard: "मुख्य डैशबोर्ड",
+      tabPos: "काउंटर बिलिंग (POS)",
       tabJobs: "रिपेयर जॉब-शीट (टोकन)",
-      tabInventory: "इन्वेंट्री & स्पेयर SKU",
+      tabInventory: "इन्वेंट्री व स्पेयर पार्ट्स",
+      tabTransfer: "ट्रांसफर इन्वेंट्री (हजरतगंज ➔ नाका)",
       tabDirectory: "ग्राहक व दुकानदार CRM",
-      tabSales: "डेली सेल्स & गल्ला",
-      tabKhata: "उधार खाता-बही (Khata)",
-      tabExpenses: "दुकान खर्च (Expenses)",
-      tabBalance: "बैलेंस शीट & P&L (एडमिन)",
-      tabAttendance: "सेल्फी व GPS अटेंडेंस",
-      tabStaff: "कर्मचारी व सैलरी (HR)",
-      tabSettings: "सिस्टम व शाखा सेटिंग्स",
-      tabSettingsEmp: "सेटिंग्स (Profile & KYC)",
+      tabSales: "डेली सेल्स व गल्ला",
+      tabKhata: "उधार खाता-बही",
+      tabExpenses: "दुकान खर्च",
+      tabBalance: "बैलेंस शीट व लाभ-हानि",
+      tabAttendance: "सेल्फी व GPS हाजिरी",
+      tabStaff: "कर्मचारी व सैलरी",
+      tabSettings: "शाखा व GPS सेटिंग्स",
+      tabSettingsEmp: "सेटिंग्स (प्रोफाइल व KYC)",
+      tabMyWork: "मेरा काम (असाइन्ड जॉब)",
 
+      // Dashboard
       dashBannerTag: "दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग",
       dashBannerDesc: "शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रियल-टाइम हिसाब।",
       dashCreateBillBtn: "🛒 नया बिल बनाएं",
       dashCheckAttBtn: "👥 हाजिरी चेक करें",
 
-      kpiSales: "आज की कुल बिक्री (SALES)",
+      // KPIs
+      kpiSales: "आज की कुल बिक्री",
       kpiStaff: "उपस्थित कर्मचारी & लेट",
-      kpiCredit: "आज का नया उधार (CREDIT)",
+      kpiCredit: "आज का नया उधार",
       kpiJobs: "लैब रिपेयर लोड",
       kpiCash: "नकद:",
       kpiOnline: "UPI:",
-      kpiStandardTime: "मानक टाइम: 10:30 AM",
+      kpiStandardTime: "मानक समय: 10:30 AM",
       kpiOnlyB2b: "केवल B2B दुकानदार",
       kpiActivePhones: "चालू फोन",
       kpiDeliveryPending: "डिलीवरी बाकी:",
@@ -1784,19 +1854,21 @@ function filterCategoryDropdown(inputId, query) {
       kpiViewKhata: "खाता-बही →",
       kpiViewJobs: "जॉब टोकन →",
 
+      // Geofence & Store Control
       storeStatusTitle: "शाखा लाइव स्थिति व GPS-सत्यापित स्टोर कंट्रोल",
       storeStatusSub: "प्रबंधक केवल दुकान की वास्तविक लोकेशन (10m के दायरे) में खड़े होकर ही दुकान 'ओपन' कर सकते हैं।",
-      shopOpen: "खुली है (OPEN)",
-      shopClosed: "बंद है (CLOSED)",
+      shopOpen: "खुली है",
+      shopClosed: "बंद है",
       todaySales: "आज की सेल",
       presentStaff: "उपस्थित स्टाफ",
       openedBy: "खोला:",
       openShopBtn: "📍 दुकान खोलें (GPS Verified)",
       closeShopBtn: "🛑 दुकान बंद करें",
 
-      attPunchInBtn: "📸 हाजिरी लगाएं (Duty Punch In)",
-      attPunchOutBtn: "🛑 ड्यूटी ऑफ करें (Duty Punch Out)",
-      attRepunchInBtn: "🟢 दोबारा ड्यूटी ऑन (Punch In) करें",
+      // Attendance
+      attPunchInBtn: "📸 हाजिरी लगाएं (Punch In)",
+      attPunchOutBtn: "🛑 ड्यूटी ऑफ करें (Punch Out)",
+      attRepunchInBtn: "🟢 दोबारा ड्यूटी ऑन करें",
       attTodayWork: "आज का कार्य समय",
       attMonthWork: "इस महीने कुल काम",
       attRecentHistory: "हालिया हाजिरी रिकॉर्ड",
@@ -1804,47 +1876,50 @@ function filterCategoryDropdown(inputId, query) {
       attEmployee: "कर्मचारी का नाम",
       attBranch: "शाखा",
       attSelfie: "सेल्फी",
-      attInTime: "इन-टाइम (IN)",
-      attOutTime: "आउट-टाइम (OUT)",
+      attInTime: "इन-टाइम",
+      attOutTime: "आउट-टाइम",
       attHours: "कुल कार्य-घंटे",
       attGpsLoc: "GPS लोकेशन",
-      attStatus: "स्थिति (Status)",
+      attStatus: "स्थिति",
       attAdminAction: "एडमिन एक्शन",
       attInside: "दुकान पर",
       attOutside: "दुकान से बाहर",
-      attApproved: "स्वीकृत (Approved)",
+      attApproved: "स्वीकृत",
       attPending: "पेंडिंग अप्रूवल",
-      attRejected: "अस्वीकृत (Rejected)",
+      attRejected: "अस्वीकृत",
       attApproveBtn: "स्वीकृत करें",
       attRejectBtn: "अस्वीकृत करें",
 
+      // CRM
       crmMerchants: "🏪 लोकल दुकानदार (B2B)",
-      crmCustomers: "👤 नॉर्मल कस्टमर (Walk-in)",
+      crmCustomers: "👤 सामान्य ग्राहक (Walk-in)",
       crmTotalB2b: "दुकानदार (B2B) कुल व्यापार",
       crmTotalRetail: "रीटेल ग्राहक कुल व्यापार",
       crmSearchPlaceholder: "नाम या मोबाइल नंबर से खोजें...",
       crmExportExcel: "एक्सेल में डाउनलोड करें",
 
-      posTitle: "काउंटर बिलिंग (POS & Cart)",
+      // POS
+      posTitle: "काउंटर बिलिंग व कार्ट",
       posBillingStore: "बिलिंग दुकान:",
       posSkuSearch: "पार्ट, मॉडल या SKU नाम टाइप करें...",
-      posAddNewSku: "➕ नया SKU / पार्ट जोड़ें",
+      posAddNewSku: "➕ नया पार्ट जोड़ें",
       posCustName: "ग्राहक का नाम *",
-      posCustPhone: "मोबाइल नंबर (WhatsApp Bill के लिए) *",
-      posDiscount: "छूट (Discount) ₹",
+      posCustPhone: "मोबाइल नंबर (WhatsApp बिल हेतु) *",
+      posDiscount: "छूट (₹)",
       posPaid: "जमा / एडवांस रकम ₹",
-      posDue: "बकाया (Remaining Due) ₹",
+      posDue: "बकाया रकम ₹",
       posGenerateBill: "बिल व WhatsApp रसीद बनाएं",
 
-      salesTitle: "डेली सेल्स व गल्ला मिलान (Daily Sales & Cash Register)",
-      salesToday: "⚡ आज (Today)",
-      salesYesterday: "📅 कल (Yesterday)",
+      // Sales
+      salesTitle: "डेली सेल्स व गल्ला मिलान",
+      salesToday: "⚡ आज",
+      salesYesterday: "📅 कल",
       salesMonth: "🗓️ इस महीने",
-      salesAll: "📜 सभी (All Time)",
-      salesGross: "कुल बिक्री (GROSS)",
-      salesCash: "गल्ले में नकद (CASH)",
+      salesAll: "📜 सभी",
+      salesGross: "कुल बिक्री",
+      salesCash: "गल्ले में नकद",
       salesBank: "बैंक / UPI",
-      salesDue: "आज का दिया उधार (DUE)"
+      salesDue: "आज का दिया उधार"
     }
   };
 
@@ -1893,9 +1968,26 @@ function filterCategoryDropdown(inputId, query) {
       }
     }
 
-    // Update Header greeting
+    // Update Header greeting & Role
     const greetingEl = document.getElementById('header-greeting');
-    if (greetingEl) greetingEl.textContent = pT('greeting');
+    if (greetingEl) greetingEl.textContent = isEn ? 'Hello,' : 'नमस्ते,';
+
+    const headerSyncBadge = document.getElementById('cloud-sync-status-badge');
+    if (headerSyncBadge) {
+      headerSyncBadge.innerHTML = isEn 
+        ? '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ Live App:</span> Sync Active'
+        : '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ लाइव ऐप:</span> सिंक सक्रिय';
+    }
+
+    const quickBillBtn = document.getElementById('btn-header-quick-bill');
+    if (quickBillBtn) quickBillBtn.innerHTML = isEn ? '+ New Invoice' : '+ बिल';
+    const quickTokenBtn = document.getElementById('btn-header-quick-token');
+    if (quickTokenBtn) quickTokenBtn.innerHTML = isEn ? '+ New Token' : '+ टोकन';
+
+    const publicSiteBtn = document.getElementById('btn-portal-public-site');
+    if (publicSiteBtn) publicSiteBtn.textContent = isEn ? 'Public Website' : 'पब्लिक वेबसाइट';
+    const portalLogoutBtn = document.getElementById('btn-portal-logout');
+    if (portalLogoutBtn) portalLogoutBtn.textContent = isEn ? 'Sign Out' : 'लॉगआउट';
 
     // Update Sidebar Navigation Button Labels
     const tabMap = {
@@ -2356,7 +2448,7 @@ function filterCategoryDropdown(inputId, query) {
       userNameEl.textContent = displayName;
       
       const role = (state.currentUser.role || 'Admin').toLowerCase();
-      let roleHtml = role === 'admin' ? 'सुपर एडमिन (Owner)' : role === 'manager' ? 'ब्रांच मैनेजर' : 'स्टाफ';
+      let roleHtml = role === 'admin' ? __L('सुपर एडमिन (Owner)', 'Super Admin (Owner)') : role === 'manager' ? __L('ब्रांच मैनेजर', 'Branch Manager') : __L('स्टाफ', 'Staff');
       if (role === 'manager' && state.managerOffDutyAccess) {
         roleHtml = `
           <span class="flex items-center gap-1.5 flex-wrap">
@@ -2374,7 +2466,7 @@ function filterCategoryDropdown(inputId, query) {
           userRoleEl.textContent = roleHtml;
         }
       }
-      if (greetingEl) greetingEl.textContent = 'नमस्ते,';
+      if (greetingEl) greetingEl.textContent = __L('नमस्ते,', 'Hello,');
     }
 
     // Ensure shop control and branch switcher update
@@ -2477,7 +2569,7 @@ function filterCategoryDropdown(inputId, query) {
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
-              ${curBranch === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(curBranch)}
+              ${curBranch === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(curBranch)}
             </span>
             <span class="text-xs text-slate-400">• आज का लाइव कंट्रोल डैशबोर्ड</span>
           </div>
@@ -2972,9 +3064,9 @@ function filterCategoryDropdown(inputId, query) {
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
               <div class="flex flex-wrap items-center gap-3">
-                <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">काउंटर बिलिंग (POS & Cart)</h3>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">${__L("काउंटर बिलिंग व कार्ट", "POS Counter Billing & Cart")}</h3>
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-md border-2 border-blue-400">
-                  <span class="text-xs font-bold text-blue-200">🏢 बिलिंग दुकान:</span>
+                  <span class="text-xs font-bold text-blue-200">🏢 ${__L("बिलिंग दुकान:", "Billing Store:")}</span>
                   <span class="text-sm font-black text-amber-300 tracking-wide">${getBranchName((state.posBillingBranch && state.posBillingBranch !== 'all') ? state.posBillingBranch : (state.activeBranch && state.activeBranch !== 'all') ? state.activeBranch : 'branch_hazratganj')}</span>
                   <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="ml-1 bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold rounded-lg px-2 py-0.5 border-none outline-none cursor-pointer">
                     <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">हजरतगंज (Head Lab)</option>
@@ -2983,10 +3075,10 @@ function filterCategoryDropdown(inputId, query) {
                   </select>
                 </div>
               </div>
-              <p class="text-xs text-slate-500">लाइव SKU सर्च करें, नया पार्ट जोड़ें या कस्टम सर्विस चार्ज लगाएं</p>
+              <p class="text-xs text-slate-500">${__L("लाइव पार्ट सर्च करें, नया पार्ट जोड़ें या कस्टम रिपेयर सर्विस चार्ज लगाएं", "Live SKU search, quick part add, and custom repair labor charges")}</p>
             </div>
             <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-              ⚡ ऑटो-स्टॉक डिडक्शन चालू
+              ${__L("⚡ ऑटो-स्टॉक डिडक्शन चालू", "⚡ Auto-Stock Deduction Active")}
             </span>
           </div>
 
@@ -2994,10 +3086,10 @@ function filterCategoryDropdown(inputId, query) {
           <div class="mb-4 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
             <div class="flex items-center justify-between mb-1.5">
               <label class="text-xs font-black text-slate-800 flex items-center gap-1.5">
-                <span>🔍 SKU सर्च या टाइप करें (Type to Search) *</span>
+                <span>🔍 ${__L("पार्ट या SKU सर्च करें *", "Search Part or SKU *")}</span>
               </label>
               <button type="button" onclick="window.MMS_APP.openQuickSkuAdd('')" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-black shadow-sm transition flex items-center gap-1">
-                <span>➕ नया SKU / पार्ट जोड़ें</span>
+                <span>➕ ${__L("नया पार्ट जोड़ें", "Add New SKU")}</span>
               </button>
             </div>
             
@@ -3005,7 +3097,7 @@ function filterCategoryDropdown(inputId, query) {
               <input 
                 id="pos-sku-search-input" 
                 type="text" 
-                placeholder="पार्ट, मॉडल या SKU नाम टाइप करें (उदा. Battery, iPhone, OnePlus, Screen, Combo, Redmi...)" 
+                placeholder="${__L("पार्ट, मॉडल या SKU नाम टाइप करें (उदा. Battery, iPhone, Screen...)", "Type part name, model or SKU (e.g. Battery, iPhone, Screen...)")}" 
                 class="w-full text-xs font-bold p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer" 
                 oninput="window.MMS_APP.filterSkuSearch(this.value)"
                 onclick="window.MMS_APP.filterSkuSearch(this.value)"
@@ -3066,10 +3158,10 @@ function filterCategoryDropdown(inputId, query) {
           <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
             <span class="text-xs font-black text-slate-700 block mb-2">या कस्टम रिपेयर सर्विस / लेबर चार्ज जोड़ें:</span>
             <div class="flex gap-2">
-              <input id="pos-custom-name" type="text" placeholder="उदा. सिर्फ ग्लास चेंज लेबर / IC Fitting" class="w-2/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-medium">
-              <input id="pos-custom-rate" type="number" placeholder="रेट ₹" class="w-1/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono">
+              <input id="pos-custom-name" type="text" placeholder="${__L("उदा. सिर्फ ग्लास चेंज लेबर / IC फिटिंग", "e.g. Glass Change Labor / IC Fitting")}" class="w-2/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-medium">
+              <input id="pos-custom-rate" type="number" placeholder="${__L("रेट ₹", "Rate ₹")}" class="w-1/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono">
               <button id="pos-add-custom-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold whitespace-nowrap transition">
-                + जोड़ें
+                ${__L("+ जोड़ें", "+ Add")}
               </button>
             </div>
           </div>
@@ -3077,26 +3169,26 @@ function filterCategoryDropdown(inputId, query) {
           <!-- Current Cart Table with Inline Editable Rate & Quantity -->
           <div>
             <h4 class="text-xs font-black text-slate-800 mb-2 flex items-center justify-between">
-              <span>🛒 कार्ट में जुड़े सामान (Cart Items)</span>
-              <span class="text-[11px] text-blue-600 font-bold">* रेट पर क्लिक करके आप कीमत सीधे बदल सकते हैं</span>
+              <span>🛒 ${__L("कार्ट में जुड़े सामान", "Items in Cart")}</span>
+              <span class="text-[11px] text-blue-600 font-bold">${__L("* रेट पर क्लिक करके आप कीमत सीधे बदल सकते हैं", "* Click on rate to edit price directly")}</span>
             </h4>
             
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead>
                   <tr class="bg-slate-100 text-slate-600 font-bold">
-                    <th class="p-2.5 rounded-l-lg">विवरण (Item)</th>
-                    <th class="p-2.5">रेट (Editable ₹)</th>
-                    <th class="p-2.5 text-center">मात्रा</th>
-                    <th class="p-2.5 text-right">कुल</th>
-                    <th class="p-2.5 text-center rounded-r-lg">हटाएं</th>
+                    <th class="p-2.5 rounded-l-lg">${__L("सामान / पार्ट", "Item / Part")}</th>
+                    <th class="p-2.5">${__L("रेट (₹)", "Rate (₹)")}</th>
+                    <th class="p-2.5 text-center">${__L("मात्रा", "Qty")}</th>
+                    <th class="p-2.5 text-right">${__L("कुल", "Total")}</th>
+                    <th class="p-2.5 text-center rounded-r-lg">${__L("हटाएं", "Action")}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   ${state.posCart.length === 0 ? `
                     <tr>
                       <td colspan="5" class="p-6 text-center text-slate-400 font-medium">
-                        कार्ट अभी खाली है! ऊपर से कोई पार्ट या सर्विस जोड़ें।
+                        ${__L("कार्ट अभी खाली है! ऊपर से कोई पार्ट या सर्विस जोड़ें।", "Cart is empty! Add a part or service above.")}
                       </td>
                     </tr>
                   ` : state.posCart.map((item, idx) => `
@@ -3142,18 +3234,18 @@ function filterCategoryDropdown(inputId, query) {
 
         <!-- Right: Customer Type, Saved Shopkeeper Directory, Payment & Checkout -->
         <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h3 class="text-base font-black text-slate-900 pb-2 border-b border-slate-100">ग्राहक प्रकार व बिलिंग सारांश</h3>
+          <h3 class="text-base font-black text-slate-900 pb-2 border-b border-slate-100">${__L("ग्राहक विवरण व बिलिंग सारांश", "Customer Details & Billing Summary")}</h3>
 
           <!-- Customer Type Toggle: Normal Customer vs Local Shopkeeper -->
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-            <label class="text-xs font-black text-slate-700 block">ग्राहक का प्रकार चुनें (Customer Type) *</label>
+            <label class="text-xs font-black text-slate-700 block">${__L("ग्राहक का प्रकार चुनें *", "Select Customer Type *")}</label>
             <div class="grid grid-cols-2 gap-2">
               <button 
                 type="button" 
                 onclick="window.MMS_APP.setCustomerType('customer')"
                 class="py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 ${!isShopkeeper ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'}"
               >
-                <span>👤 नॉर्मल ग्राहक (Walk-in)</span>
+                <span>👤 ${__L("सामान्य ग्राहक (Walk-in)", "Walk-in Customer")}</span>
               </button>
 
               <button 
@@ -3161,7 +3253,7 @@ function filterCategoryDropdown(inputId, query) {
                 onclick="window.MMS_APP.setCustomerType('shopkeeper')"
                 class="py-2.5 px-3 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 ${isShopkeeper ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'}"
               >
-                <span>🏪 लोकल दुकानदार / B2B</span>
+                <span>🏪 ${__L("लोकल दुकानदार / B2B", "Local Merchant / B2B")}</span>
               </button>
             </div>
 
@@ -3174,7 +3266,7 @@ function filterCategoryDropdown(inputId, query) {
           <div class="space-y-3">
             <div class="relative">
               <label class="block text-xs font-bold text-slate-700 mb-1">
-                ${isShopkeeper ? 'दुकानदार / दुकान का नाम *' : 'ग्राहक का नाम *'}
+                ${isShopkeeper ? __L("दुकानदार / दुकान का नाम *", "Merchant / Shop Name *") : __L("ग्राहक का नाम *", "Customer Name *")}
               </label>
               <input 
                 id="pos-cust-name" 
@@ -3191,7 +3283,7 @@ function filterCategoryDropdown(inputId, query) {
             </div>
 
             <div class="relative">
-              <label class="block text-xs font-bold text-slate-700 mb-1">मोबाइल नंबर (WhatsApp Bill के लिए) *</label>
+              <label class="block text-xs font-bold text-slate-700 mb-1">${__L("मोबाइल नंबर (WhatsApp बिल हेतु) *", "Mobile Number (For WhatsApp Bill) *")}</label>
               <input 
                 id="pos-cust-phone" 
                 type="tel" 
@@ -3210,12 +3302,12 @@ function filterCategoryDropdown(inputId, query) {
           <!-- Calculation Box -->
           <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
             <div class="flex justify-between text-slate-600 font-semibold">
-              <span>सब-टोटल (Subtotal):</span>
+              <span>${__L("सब-टोटल:", "Subtotal:")}</span>
               <span id="pos-subtotal" class="font-mono font-bold">${formatCurrency(calculateCartSubtotal())}</span>
             </div>
 
             <div class="flex items-center justify-between text-slate-600 font-semibold">
-              <span>डिस्काउंट (Discount):</span>
+              <span>${__L("डिस्काउंट (छूट):", "Discount:")}</span>
               <div class="flex items-center gap-1">
                 <span class="text-xs">₹</span>
                 <input id="pos-discount-input" type="number" value="${state.posPayment.discount || 0}" class="w-20 p-1 text-right bg-white border border-slate-300 rounded text-xs font-bold font-mono">
@@ -3223,24 +3315,24 @@ function filterCategoryDropdown(inputId, query) {
             </div>
 
             <div class="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-200">
-              <span>कुल बिल (Net Payable):</span>
+              <span>${__L("कुल देय बिल:", "Net Payable:")}</span>
               <span id="pos-net-total" class="font-mono text-blue-700 text-base font-black">${formatCurrency(calculateCartNet())}</span>
             </div>
           </div>
 
           <!-- Payment Mode Selection -->
           <div class="space-y-2">
-            <label class="block text-xs font-bold text-slate-700">भुगतान माध्यम (Payment Mode)</label>
+            <label class="block text-xs font-bold text-slate-700">${__L("भुगतान माध्यम", "Payment Mode")}</label>
             
             <div class="grid grid-cols-2 gap-2 text-xs">
               <button type="button" onclick="window.MMS_APP.setPosPaymentMode('cash')" class="p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${state.posPayment.mode === 'cash' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-                💵 100% नकद (Cash)
+                💵 ${__L("100% नकद", "100% Cash")}
               </button>
               <button type="button" onclick="window.MMS_APP.setPosPaymentMode('upi')" class="p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${state.posPayment.mode === 'upi' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-                📱 100% ऑनलाइन (UPI)
+                📱 ${__L("100% ऑनलाइन (UPI)", "100% Online (UPI)")}
               </button>
               <button type="button" onclick="window.MMS_APP.setPosPaymentMode('advance')" class="p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${state.posPayment.mode === 'advance' ? 'bg-amber-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-                ⏳ एडवांस पेमेंट (Advance)
+                ⏳ ${__L("एडवांस भुगतान", "Advance Payment")}
               </button>
               <button 
                 type="button" 
@@ -3248,7 +3340,7 @@ function filterCategoryDropdown(inputId, query) {
                 ${!isShopkeeper ? 'disabled title="उधार केवल लोकल दुकानदार के लिए मान्य है"' : ''}
                 class="p-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${state.posPayment.mode === 'full_udhar' ? 'bg-rose-600 text-white shadow-sm' : (isShopkeeper ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100' : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50')}"
               >
-                📕 पूरा उधार (क्रेडिट)
+                📕 ${__L("पूरा उधार (खाता)", "Full Credit (Udhar)")}
               </button>
             </div>
 
@@ -3288,9 +3380,9 @@ function filterCategoryDropdown(inputId, query) {
           <div class="pt-4 border-t border-slate-100">
             <button id="pos-complete-btn" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span>बिल पक्का करें व इनवॉइस काटें (Complete Bill)</span>
+              <span>${__L("बिल पक्का करें व इनवॉइस जारी करें", "Confirm Bill & Generate Invoice")}</span>
             </button>
-            <p class="text-[10px] text-slate-400 text-center mt-1.5">* बिल पूरा होते ही इन्वेंट्री से स्टॉक अपने-आप घट जाएगा और ग्राहक/दुकानदार हमेशा के लिए सेव हो जाएंगे</p>
+            <p class="text-[10px] text-slate-400 text-center mt-1.5">${__L("* बिल पूरा होते ही इन्वेंट्री से स्टॉक घट जाएगा और ग्राहक रिकॉर्ड सुरक्षित रहेगा", "* Stock will auto-deduct from inventory on billing and customer record is saved")}</p>
           </div>
         </div>
       </div>
@@ -3298,21 +3390,21 @@ function filterCategoryDropdown(inputId, query) {
       <!-- Recent Bills Quick Feed in POS -->
       <div class="mt-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
         <h3 class="text-sm font-black text-slate-800 mb-3 flex items-center justify-between">
-          <span>🧾 हाल ही में काटे गए बिल (Recent Counter Invoices)</span>
-          <span class="text-xs text-blue-600 font-bold">कुल: ${state.invoices.length} बिल</span>
+          <span>🧾 ${__L("हाल ही में जारी बिल", "Recent Counter Invoices")}</span>
+          <span class="text-xs text-blue-600 font-bold">${__L("कुल:", "Total:")} ${state.invoices.length} ${__L("बिल", "Invoices")}</span>
         </h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead>
               <tr class="bg-slate-100 text-slate-600 font-bold">
-                <th class="p-2.5 rounded-l-lg">इनवॉइस नं</th>
-                <th class="p-2.5">ग्राहक / दुकानदार</th>
-                <th class="p-2.5">मोबाइल</th>
-                <th class="p-2.5">सामान (Items)</th>
-                <th class="p-2.5 text-right">कुल बिल</th>
-                <th class="p-2.5 text-center">भुगतान</th>
-                <th class="p-2.5 text-center">कारीगर / इंप्लॉई</th>
-                <th class="p-2.5 text-center rounded-r-lg">रसीद / WhatsApp</th>
+                <th class="p-2.5 rounded-l-lg">${__L("इनवॉइस नं", "Invoice No")}</th>
+                <th class="p-2.5">${__L("ग्राहक / दुकानदार", "Customer / Merchant")}</th>
+                <th class="p-2.5">${__L("मोबाइल", "Mobile")}</th>
+                <th class="p-2.5">${__L("सामान (पार्ट्स)", "Items")}</th>
+                <th class="p-2.5 text-right">${__L("कुल बिल", "Total Bill")}</th>
+                <th class="p-2.5 text-center">${__L("भुगतान", "Payment")}</th>
+                <th class="p-2.5 text-center">${__L("कारीगर / इंप्लॉई", "Technician / Staff")}</th>
+                <th class="p-2.5 text-center rounded-r-lg">${__L("रसीद / WhatsApp", "Receipt / WhatsApp")}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -4296,15 +4388,15 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       <div class="space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs font-bold text-slate-500 block">कुल उपलब्ध पार्ट्स (Items in Stock)</span>
+            <span class="text-xs font-bold text-slate-500 block">${__L("कुल उपलब्ध पार्ट्स", "Total Items in Stock")}</span>
             <span id="inv-stat-count" class="text-xl font-black text-slate-900 font-mono">${totalStockCount} पीस</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs font-bold text-slate-500 block">इन्वेंट्री लागत वैल्यू (At Cost Price)</span>
+            <span class="text-xs font-bold text-slate-500 block">${__L("इन्वेंट्री लागत वैल्यू", "Inventory Cost Valuation")}</span>
             <span id="inv-stat-valuation" class="text-xl font-black text-blue-700 font-mono">${formatCurrency(totalStockValuation)}</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="text-xs font-bold text-slate-500 block">कम स्टॉक अलर्ट (Low Stock)</span>
+            <span class="text-xs font-bold text-slate-500 block">${__L("कम स्टॉक अलर्ट", "Low Stock Alert")}</span>
             <span id="inv-stat-low" class="text-xl font-black text-amber-600 font-mono">${lowStockCount} आइटम्स</span>
           </div>
         </div>
@@ -4313,17 +4405,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
             <div class="space-y-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="text-base font-black text-slate-900">इन्वेंट्री व SKU स्टॉक लिस्ट</h3>
+                <h3 class="text-base font-black text-slate-900">${__L("इन्वेंट्री व SKU स्टॉक लिस्ट", "Inventory & SKU Stock List")}</h3>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-200">
-                  ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                  ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
                 </span>
               </div>
-              <p class="text-xs text-slate-500">20+ कैटेगरीज में सभी स्पेयर पार्ट्स का लाइव स्टॉक, खरीद व बिक्री दर</p>
+              <p class="text-xs text-slate-500">${__L("20+ श्रेणियों में स्पेयर पार्ट्स का लाइव स्टॉक, खरीद व बिक्री दर", "Live stock, cost & selling prices of spare parts across 20+ categories")}</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               ${renderBranchFilterBar(branchFilter)}
               <button onclick="window.MMS_APP.openNewSKUModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0 transition active:scale-95 cursor-pointer">
-                <span>➕ नया पार्ट / SKU जोड़ें</span>
+                <span>➕ ${__L("नया पार्ट / SKU जोड़ें", "Add New SKU / Part")}</span>
               </button>
             </div>
           </div>
@@ -4342,12 +4434,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 flex-1 min-w-[240px]">
               <span class="text-slate-400 font-bold">🔍</span>
-              <input type="text" id="inv-search-query" value="${state.invSearchQuery || ''}" oninput="window.MMS_APP.setInventorySearch(this.value)" placeholder="पार्ट, SKU या मॉडल सर्च करें (उदा. iPhone 13, Realme 12, OLED, Battery...)" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <input type="text" id="inv-search-query" value="${state.invSearchQuery || ''}" oninput="window.MMS_APP.setInventorySearch(this.value)" placeholder="${__L("पार्ट, SKU या मॉडल सर्च करें (उदा. iPhone 13, Realme 12, OLED, Battery...)", "Search part, SKU or model (e.g. iPhone 13, Realme 12, OLED, Battery...)")}" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="font-bold text-slate-500 shrink-0">📂 कैटेगरी:</span>
+              <span class="font-bold text-slate-500 shrink-0">📂 ${__L("कैटेगरी:", "Category:")}</span>
               <select id="inv-category-filter" onchange="window.MMS_APP.setInventoryCategoryFilter(this.value)" class="p-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="all" ${(!state.invCatFilter || state.invCatFilter === 'all') ? 'selected' : ''}>🏢 सभी कैटेगरी (All Categories)</option>
+                <option value="all" ${(!state.invCatFilter || state.invCatFilter === 'all') ? 'selected' : ''}>${__L("🏢 सभी कैटेगरी", "🏢 All Categories")}</option>
                 ${MMS_SPARE_CATEGORIES.map(c => `
                   <option value="${c.id}" ${state.invCatFilter === c.id ? 'selected' : ''}>${c.icon} ${c.name}</option>
                 `).join('')}
@@ -4359,13 +4451,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <table class="w-full text-left text-xs">
               <thead>
                 <tr class="bg-slate-100 text-slate-600 font-bold">
-                  <th class="p-2.5 rounded-l-lg">SKU कोड</th>
-                  <th class="p-2.5">पार्ट का नाम व मॉडल</th>
-                  <th class="p-2.5">कैटेगरी</th>
-                  <th class="p-2.5 text-right">खरीद लागत</th>
-                  <th class="p-2.5 text-right">बिक्री रेट</th>
-                  <th class="p-2.5 text-center">स्टॉक</th>
-                  <th class="p-2.5 text-center rounded-r-lg">एक्शन</th>
+                  <th class="p-2.5 rounded-l-lg">${__L("SKU कोड", "SKU Code")}</th>
+                  <th class="p-2.5">${__L("पार्ट का नाम व मॉडल", "Part Name & Model")}</th>
+                  <th class="p-2.5">${__L("कैटेगरी", "Category")}</th>
+                  <th class="p-2.5 text-right">${__L("खरीद लागत", "Cost Price")}</th>
+                  <th class="p-2.5 text-right">${__L("बिक्री रेट", "Selling Price")}</th>
+                  <th class="p-2.5 text-center">${__L("स्टॉक", "Stock")}</th>
+                  <th class="p-2.5 text-center rounded-r-lg">${__L("एक्शन", "Action")}</th>
                 </tr>
               </thead>
               <tbody id="inventory-table-body" class="divide-y divide-slate-100">
@@ -4520,22 +4612,22 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <div class="space-y-1">
             <div class="flex items-center gap-2 mb-1">
               <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
-                मल्टी-ब्रांच वेयरहाउस ऑपरेशन
+                ${__L("मल्टी-ब्रांच वेयरहाउस ऑपरेशन", "Multi-Branch Warehouse Operations")}
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-500/30 text-blue-200 border border-blue-400/30">
-                हजरतगंज (मेन गोदाम) ➔ नाका हिंडोला
+                ${__L("हजरतगंज (मेन गोदाम) ➔ नाका हिंडोला", "Hazratganj (Main Warehouse) ➔ Naka Hindola")}
               </span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-black">ट्रांसफर इन्वेंट्री व डिलीवरी चालान (Stock Transfer)</h2>
-            <p class="text-xs text-slate-300">लखनऊ हजरतगंज सेंट्रल वेयरहाउस से नाका हिंडोला शाखा को माल डिस्पैच करें</p>
+            <h2 class="text-xl sm:text-2xl font-black">${__L("ट्रांसफर इन्वेंट्री व डिलीवरी चालान", "Stock Transfer & Dispatch Challan")}</h2>
+            <p class="text-xs text-slate-300">${__L("लखनऊ हजरतगंज सेंट्रल वेयरहाउस से नाका हिंडोला शाखा को माल डिस्पैच करें", "Dispatch spare parts from Hazratganj Central Warehouse to Naka Hindola branch")}</p>
           </div>
           <div class="flex items-center gap-3">
             <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-center">
-              <span class="text-[10px] text-emerald-200 uppercase font-bold block">हजरतगंज कुल स्टॉक</span>
+              <span class="text-[10px] text-emerald-200 uppercase font-bold block">${__L("हजरतगंज कुल स्टॉक", "Hazratganj Total Stock")}</span>
               <span class="text-lg font-black font-mono">${hgStockTotal} पीस</span>
             </div>
             <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-center">
-              <span class="text-[10px] text-blue-200 uppercase font-bold block">नाका हिंडोला कुल स्टॉक</span>
+              <span class="text-[10px] text-blue-200 uppercase font-bold block">${__L("नाका हिंडोला कुल स्टॉक", "Naka Hindola Total Stock")}</span>
               <span class="text-lg font-black font-mono">${nakaStockTotal} पीस</span>
             </div>
           </div>
@@ -4550,13 +4642,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <!-- Dispatch Transfer Card -->
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
           <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-            <span>📦 नया माल डिस्पैच करें (New Stock Dispatch)</span>
+            <span>📦 ${__L("नया माल डिस्पैच करें", "Dispatch New Stock")}</span>
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <!-- Source Branch -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1.5">भेजने वाली शाखा (From - मुख्य गोदाम)</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("भेजने वाली शाखा (मुख्य गोदाम)", "Source Branch (Main Warehouse)")}</label>
               <div class="p-2.5 bg-slate-100 rounded-xl font-bold text-slate-800 border border-slate-200 flex items-center gap-2">
                 <span>📍</span>
                 <span>हजरतगंज (श्रीराम टावर - मुख्य गोदाम)</span>
@@ -4565,7 +4657,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
             <!-- Destination Branch -->
             <div>
-              <label class="block font-bold text-slate-700 mb-1.5">प्राप्त करने वाली शाखा (To Branch)</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("प्राप्त करने वाली शाखा", "Destination Branch")}</label>
               <div class="p-2.5 bg-emerald-50 rounded-xl font-black text-emerald-900 border border-emerald-200 flex items-center gap-2">
                 <span>🎯</span>
                 <span>नाका हिंडोला शाखा (चारबाग)</span>
@@ -4574,7 +4666,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
             <!-- Select SKU / Product -->
             <div class="lg:col-span-2">
-              <label class="block font-bold text-slate-700 mb-1.5">पार्ट / SKU चुनें (हजरतगंज में उपलब्ध स्पेयर पार्ट्स) *</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("पार्ट / SKU चुनें (हजरतगंज में उपलब्ध पार्ट्स) *", "Select Part / SKU (Available in Hazratganj) *")}</label>
               <select id="trf-sku-select" onchange="window.MMS_APP.onTransferSkuChange(this.value)" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 <option value="">-- पार्ट या SKU चुनें (${hazratganjItems.length} उपलब्ध) --</option>
                 ${hazratganjItems.map(item => `
@@ -4589,26 +4681,26 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <!-- Quantity, Available preview & Note Row -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-2">
             <div>
-              <label class="block font-bold text-slate-700 mb-1.5">हजरतगंज में उपलब्ध स्टॉक</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("हजरतगंज में उपलब्ध स्टॉक", "Stock in Hazratganj")}</label>
               <div id="trf-available-display" class="p-2.5 bg-blue-50 border border-blue-200 rounded-xl font-mono font-black text-blue-900">
-                कृपया ऊपर से पार्ट चुनें
+                ${__L("कृपया ऊपर से पार्ट चुनें", "Please select a part above")}
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1.5">ट्रांसफर मात्रा (Quantity to Dispatch) *</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("ट्रांसफर मात्रा *", "Transfer Quantity *")}</label>
               <input id="trf-qty-input" type="number" min="1" value="1" placeholder="उदा. 2" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono font-bold text-slate-900 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 mb-1.5">चालान / डिलीवरी नोट (वैकल्पिक)</label>
+              <label class="block font-bold text-slate-700 mb-1.5">${__L("चालान / डिलीवरी नोट (वैकल्पिक)", "Challan / Dispatch Note (Optional)")}</label>
               <input id="trf-note-input" type="text" placeholder="उदा. नाका डिलीवरी चालान #102 / ऑटो से भेजा" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
           </div>
 
           <div class="pt-2 flex justify-end">
             <button onclick="window.MMS_APP.executeStockTransfer()" class="w-full sm:w-auto px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-lg transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
-              <span>🚚 नाका हिंडोला को स्टॉक ट्रांसफर करें (Confirm Dispatch)</span>
+              <span>🚚 ${__L("नाका हिंडोला को स्टॉक ट्रांसफर करें", "Confirm Dispatch to Naka Hindola")}</span>
             </button>
           </div>
         </div>
@@ -4617,8 +4709,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 class="text-sm font-black text-slate-900">📜 हालिया स्टॉक ट्रांसफर चालान हिस्ट्री (Transfer Logs)</h3>
-              <p class="text-[11px] text-slate-500">हजरतगंज से नाका हिंडोला भेजे गए पार्ट्स का पूरा ऑडिट रिकॉर्ड</p>
+              <h3 class="text-sm font-black text-slate-900">📜 ${__L("हालिया ट्रांसफर चालान हिस्ट्री", "Recent Stock Transfer Logs")}</h3>
+              <p class="text-[11px] text-slate-500">${__L("हजरतगंज से नाका हिंडोला भेजे गए पार्ट्स का पूरा ऑडिट रिकॉर्ड", "Complete audit log of spare parts transferred from Hazratganj to Naka Hindola")}</p>
             </div>
             <span class="text-xs font-mono font-bold text-slate-400">कुल ट्रांसफर: ${transfers.length}</span>
           </div>
@@ -4956,9 +5048,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="bg-gradient-to-r from-amber-500 to-rose-600 text-white p-5 rounded-2xl shadow-lg flex flex-wrap items-center justify-between gap-4">
           <div class="space-y-1">
             <div class="flex items-center gap-2">
-              <span class="text-xs uppercase font-bold text-amber-100 block">मार्केट में कुल फंसा हुआ उधार (Accounts Receivable)</span>
+              <span class="text-xs uppercase font-bold text-amber-100 block">${__L("मार्केट में कुल बकाया उधार", "Total Market Outstanding Credit")}</span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-white/20 text-white border border-white/30">
-                ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
               </span>
             </div>
             <span class="text-2xl sm:text-3xl font-black font-mono">${formatCurrency(totalMarketDue)}</span>
@@ -5151,11 +5243,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 तारीख व अवधि फिल्टर
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
               </span>
               <span class="text-xs text-blue-200 font-bold">• चयनित: ${filterLabel}</span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-black">डेली सेल्स व गल्ला मिलान (Daily Sales & Cash Register)</h3>
+            <h3 class="text-xl sm:text-2xl font-black">${__L("डेली सेल्स व गल्ला मिलान", "Daily Sales & Cash Register")}</h3>
             <p class="text-xs text-blue-200">आज, कल, इस महीने या किसी भी तारीख का गल्ला, नकद, यूपीआई व उधार तुरंत देखें</p>
           </div>
 
@@ -5163,12 +5255,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             ${renderBranchFilterBarDark(branchFilter)}
             <!-- Date Filter Buttons -->
             <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white/10 backdrop-blur rounded-xl border border-white/20 text-xs">
-              <button onclick="window.MMS_APP.setSalesFilter('today')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'today' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">⚡ आज (Today)</button>
-              <button onclick="window.MMS_APP.setSalesFilter('yesterday')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'yesterday' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">📅 कल (Yesterday)</button>
-              <button onclick="window.MMS_APP.setSalesFilter('month')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'month' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ इस महीने</button>
-              <button onclick="window.MMS_APP.setSalesFilter('all')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'all' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">📜 सभी (All Time)</button>
+              <button onclick="window.MMS_APP.setSalesFilter('today')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'today' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">⚡ ${__L("आज", "Today")}</button>
+              <button onclick="window.MMS_APP.setSalesFilter('yesterday')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'yesterday' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">📅 ${__L("कल", "Yesterday")}</button>
+              <button onclick="window.MMS_APP.setSalesFilter('month')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'month' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ ${__L("इस महीने", "This Month")}</button>
+              <button onclick="window.MMS_APP.setSalesFilter('all')" class="px-3 py-1.5 rounded-lg font-black transition ${currentFilterType === 'all' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}">📜 ${__L("सभी", "All Time")}</button>
               <div class="flex items-center gap-1 pl-2 border-l border-white/20">
-                <span class="text-[10px] text-blue-200">तारीख चुनें:</span>
+                <span class="text-[10px] text-blue-200">${__L("तारीख चुनें:", "Select Date:")}</span>
                 <input type="date" value="${state.salesFilter.customDate || todayStr}" onchange="window.MMS_APP.setSalesCustomDate(this.value)" class="bg-white text-slate-900 px-2 py-0.5 rounded-lg text-xs font-mono font-bold border-none outline-none cursor-pointer">
               </div>
             </div>
@@ -5178,12 +5270,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <!-- Metric Badges Row -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs font-bold text-slate-500 block">कुल बिक्री (GROSS)</span>
+            <span class="text-xs font-bold text-slate-500 block">${__L("कुल बिक्री", "Total Sales (Gross)")}</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${formatCurrency(grossTotal)}</span>
             <span class="text-[10px] text-slate-400">कुल ${filteredInvoices.length} बिल काटे गए</span>
           </div>
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs font-bold text-slate-500 block">💵 गल्ले में नकद (CASH)</span>
+            <span class="text-xs font-bold text-slate-500 block">${__L("💵 गल्ले में नकद", "💵 Cash in Register")}</span>
             <span class="text-2xl font-black text-emerald-700 font-mono mt-1 block">${formatCurrency(cashTotal)}</span>
             <span class="text-[10px] text-slate-400">आज का काउंटर कैश</span>
           </div>
@@ -5355,22 +5447,22 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <!-- 4 Core Financial KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-bold text-slate-500 block">कुल बिक्री (Total Sales)</span>
+            <span class="font-bold text-slate-500 block">${__L("कुल बिक्री", "Total Sales")}</span>
             <span class="text-xl font-black text-slate-900 font-mono mt-1 block">${formatCurrency(totalRevenue)}</span>
             <span class="text-[10px] text-emerald-600 font-bold block mt-0.5">काउंटर व रिपेयर टोकन</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-bold text-slate-500 block">पार्ट्स खरीद लागत (COGS)</span>
+            <span class="font-bold text-slate-500 block">${__L("पार्ट्स खरीद लागत (COGS)", "Cost of Goods Sold (COGS)")}</span>
             <span class="text-xl font-black text-rose-600 font-mono mt-1 block">${formatCurrency(totalCogs)}</span>
             <span class="text-[10px] text-slate-400 block mt-0.5">स्पेयर पार्ट्स व फोल्डर खरीद</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-bold text-slate-500 block">सकल लाभ (Gross Profit)</span>
+            <span class="font-bold text-slate-500 block">${__L("सकल लाभ", "Gross Profit")}</span>
             <span class="text-xl font-black text-blue-700 font-mono mt-1 block">${formatCurrency(grossProfit)}</span>
             <span class="text-[10px] text-blue-600 font-bold block mt-0.5">${profitMargin}% ग्रॉस मार्जिन</span>
           </div>
           <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="font-bold text-slate-500 block">कुल दुकान खर्च (Overheads)</span>
+            <span class="font-bold text-slate-500 block">${__L("कुल दुकान खर्च", "Total Overhead Expenses")}</span>
             <span class="text-xl font-black text-amber-600 font-mono mt-1 block">${formatCurrency(totalOverheadExpenses)}</span>
             <span class="text-[10px] text-slate-400 block mt-0.5">रेंट, बिल, सैलरी व पैंट्री</span>
           </div>
@@ -5516,7 +5608,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             '</div>'
           ) : (
             '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer">' +
-              '⚠️ अभी असाइन नहीं' +
+              '${__L("⚠️ अभी असाइन नहीं", "⚠️ Unassigned")}' +
             '</button>'
           )) +
         '</td>' +
@@ -5525,18 +5617,18 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         '<td class="p-2.5 text-right font-mono text-emerald-700 font-bold">' + formatCurrency(job.advancePaid) + '</td>' +
         '<td class="p-2.5 text-center">' +
           '<select onchange="window.MMS_APP.updateJobStatus(\'' + job.token + '\', this.value)" class="bg-white border border-slate-300 text-xs font-bold rounded p-1">' +
-            '<option value="received"' + (job.status === 'received' ? ' selected' : '') + '>स्वीकार (Received)</option>' +
-            '<option value="in_progress"' + (job.status === 'in_progress' ? ' selected' : '') + '>काम चालू (In Progress)</option>' +
-            '<option value="ready"' + (job.status === 'ready' ? ' selected' : '') + '>तैयार (Ready)</option>' +
-            '<option value="delivered"' + (job.status === 'delivered' ? ' selected' : '') + '>डिलीवर (Delivered)</option>' +
+            '<option value="received"' + (job.status === 'received' ? ' selected' : '') + '>${__L("स्वीकार", "Received")}</option>' +
+            '<option value="in_progress"' + (job.status === 'in_progress' ? ' selected' : '') + '>${__L("काम चालू", "In Progress")}</option>' +
+            '<option value="ready"' + (job.status === 'ready' ? ' selected' : '') + '>${__L("तैयार", "Ready")}</option>' +
+            '<option value="delivered"' + (job.status === 'delivered' ? ' selected' : '') + '>${__L("डिलीवर", "Delivered")}</option>' +
           '</select>' +
         '</td>' +
         '<td class="p-2.5 text-right">' +
           '<div class="flex items-center justify-end gap-1.5">' +
             '<a href="https://wa.me/91' + job.customerPhone.replace(/[^0-9]/g, '') + '?text=' + waText + '" target="_blank" class="p-1 text-emerald-600 hover:text-emerald-700 font-bold" title="WhatsApp पर स्टेटस भेजें">💬 WA</a>' +
             '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg text-[10px]" title="काम असाइन करें या टाइमलाइन देखें">⚡ असाइन</button>' + 
-            '<button onclick="window.MMS_APP.printJobToken(\'' + job.token + '\')" class="p-1 text-blue-600 hover:text-blue-800 font-bold" title="टोकन पर्ची प्रिंट करें">🖨️ प्रिंट</button>' +
-            '<button onclick="window.MMS_APP.deleteJobOrInvoice(\'' + job.token + '\')" class="p-1 text-rose-600 hover:text-rose-800 font-bold" title="टोकन हटाएं">🗑️</button>' +
+            '<button onclick="window.MMS_APP.printJobToken(\'' + job.token + '\')" class="p-1 text-blue-600 hover:text-blue-800 font-bold" title="${__L("टोकन पर्ची प्रिंट करें", "Print Token Receipt")}">${__L("🖨️ प्रिंट", "🖨️ Print")}</button>' +
+            '<button onclick="window.MMS_APP.deleteJobOrInvoice(\'' + job.token + '\')" class="p-1 text-rose-600 hover:text-rose-800 font-bold" title="${__L("टोकन हटाएं", "Delete Token")}">${__L("🗑️ हटाएं", "🗑️ Delete")}</button>' +
           '</div>' +
         '</td>' +
       '</tr>';
@@ -5547,17 +5639,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div class="space-y-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <h3 class="text-base font-black text-slate-900">रिपेयर जॉब-शीट व टोकन लिस्ट (Job Cards)</h3>
+              <h3 class="text-base font-black text-slate-900">${__L("रिपेयर जॉब-शीट व टोकन लिस्ट", "Repair Job Sheets & Token List")}</h3>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-200">
-                ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
               </span>
             </div>
-            <p class="text-xs text-slate-500">ग्राहकों के रिपेयरिंग मोबाइल, पैटर्न लॉक और टोकन स्टेटस</p>
+            <p class="text-xs text-slate-500">${__L("ग्राहकों के रिपेयरिंग मोबाइल, पैटर्न लॉक और टोकन स्टेटस", "Live customer repair devices, passcodes and token status")}</p>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             ${renderBranchFilterBar(branchFilter)}
             <button onclick="window.MMS_APP.openNewJobModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5 shrink-0">
-              <span>➕ नया रिपेयर टोकन बनाएं</span>
+              <span>➕ ${__L("नया रिपेयर टोकन बनाएं", "Create New Repair Token")}</span>
             </button>
           </div>
         </div>
@@ -5566,9 +5658,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <table class="w-full text-left text-xs">
             <thead>
               <tr class="bg-slate-100 text-slate-600 font-bold">
-                <th class="p-2.5 rounded-l-lg">टोकन नं</th>
-                <th class="p-2.5">ग्राहक व मोबाइल</th>
-                <th class="p-2.5">डिवाइस / मॉडल</th>
+                <th class="p-2.5 rounded-l-lg">${__L("टोकन नं", "Token No")}</th>
+                <th class="p-2.5">${__L("ग्राहक व मोबाइल", "Customer & Mobile")}</th>
+                <th class="p-2.5">${__L("डिवाइस / मॉडल", "Device / Model")}</th>
                 <th class="p-2.5">समस्या</th>
                 <th class="p-2.5 text-center">असाइन कर्मचारी (Assigned To)</th>
                 <th class="p-2.5">लॉक</th>
@@ -6469,7 +6561,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       state.activeBranch = userBranch;
       container.innerHTML = `
         <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-          <span>🏢 अधिकृत शाखा:</span>
+          <span>🏢 ${__L("अधिकृत शाखा:", "Assigned Branch:")}</span>
         </span>
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-900 font-black text-xs border border-blue-200 shadow-2xs">
           <span>📍</span> ${getBranchName(userBranch)} (${isManager ? 'मैनेजर' : 'स्टाफ'})
@@ -6482,7 +6574,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const curBranch = state.activeBranch || 'all';
     container.innerHTML = `
       <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-        <span>🏢 सुपर एडमिन शाखा व्यू:</span>
+        <span>🏢 ${__L("सुपर एडमिन शाखा व्यू:", "Super Admin Branch View:")}</span>
       </span>
       <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-blue-300 text-blue-950 text-xs font-black rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
         <option value="all" ${curBranch === 'all' ? 'selected' : ''}>🌐 सभी शाखाएं (Master All Branches)</option>
@@ -6554,12 +6646,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   
   function getBranchName(branchId) {
-    if (!branchId || branchId === 'all') return 'सभी शाखाएं (All Branches)';
-    if (branchId === 'branch_hazratganj') return 'हजरतगंज (श्रीराम टावर)';
-    if (branchId === 'branch_naka' || branchId === 'branch_naka') return 'नाका हिंडोला (लखनऊ)';
-    if (branchId === 'branch_kannauj' || branchId === 'branch_kannauj') return 'कन्नौज (सरायमीरा)';
+    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
+    if (!branchId || branchId === 'all') return isEn ? 'All Branches' : 'सभी शाखाएं';
+    if (branchId === 'branch_hazratganj') return isEn ? 'Hazratganj (Sree Rama Towers)' : 'हजरतगंज (श्रीराम टावर)';
+    if (branchId === 'branch_naka') return isEn ? 'Naka Hindola (Lucknow)' : 'नाका हिंडोला (लखनऊ)';
+    if (branchId === 'branch_kannauj') return isEn ? 'Kannauj (Saraimeera)' : 'कन्नौज (सरायमीरा)';
     const b = (state.branches || []).find(x => x.id === branchId);
-    return b ? b.name : branchId;
+    return b ? (isEn ? (b.nameEn || b.name) : b.name) : branchId;
   }
 
 
@@ -6828,12 +6921,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             ${!todayPunch ? `
               <!-- हाजिरी नहीं लगी: केवल ड्यूटी ऑन बटन -->
               <button onclick="window.MMS_APP.openPunchModal('in')" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-sm font-black shadow-lg transition active:scale-95 flex items-center justify-center gap-2 mx-auto cursor-pointer">
-                <span>📸 हाजिरी लगाएं (Duty Punch In)</span>
+                <span>📸 ${__L("हाजिरी लगाएं (Punch In)", "Duty Punch In")}</span>
               </button>
             ` : isPunchedIn ? `
               <!-- ड्यूटी चालू है: केवल ड्यूटी ऑफ बटन -->
               <button onclick="window.MMS_APP.openPunchModal('out')" class="w-full sm:w-auto px-8 py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-sm font-black shadow-xl transition active:scale-95 flex items-center justify-center gap-2 mx-auto animate-pulse cursor-pointer">
-                <span>🛑 ड्यूटी ऑफ करें (Duty Punch Out)</span>
+                <span>🛑 ${__L("ड्यूटी ऑफ करें (Punch Out)", "Duty Punch Out")}</span>
               </button>
             ` : `
               <!-- ड्यूटी ऑफ हो चुकी है: केवल दोबारा ऑन करने का बटन (दोनों कभी एक साथ नहीं आएंगे) -->
@@ -6953,7 +7046,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 स्टाफ अटेंडेंस मॉनिटरिंग
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
               </span>
               <span class="text-xs text-blue-200 font-bold">• ${dateFilterLabel}</span>
             </div>
@@ -6971,8 +7064,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white/10 backdrop-blur rounded-xl border border-white/20 text-xs">
               <button onclick="window.MMS_APP.setAttendanceDateFilter('today')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'today' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">⚡ आज</button>
               <button onclick="window.MMS_APP.setAttendanceDateFilter('yesterday')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'yesterday' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">📅 कल</button>
-              <button onclick="window.MMS_APP.setAttendanceDateFilter('month')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'month' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ इस महीने</button>
-              <button onclick="window.MMS_APP.setAttendanceDateFilter('all')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'all' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">📜 सभी (All Time)</button>
+              <button onclick="window.MMS_APP.setAttendanceDateFilter('month')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'month' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ ${__L("इस महीने", "This Month")}</button>
+              <button onclick="window.MMS_APP.setAttendanceDateFilter('all')" class="px-2.5 py-1 rounded-lg font-black transition ${attDateFilter === 'all' ? 'bg-white text-blue-950 shadow-sm' : 'text-white hover:bg-white/20'}">📜 ${__L("सभी", "All Time")}</button>
               <div class="flex items-center gap-1 pl-2 border-l border-white/20">
                 <span class="text-[10px] text-blue-200">तारीख:</span>
                 <input type="date" value="${state.attendanceCustomDate || todayStr}" onchange="window.MMS_APP.setAttendanceCustomDate(this.value)" class="bg-white text-slate-900 px-2 py-0.5 rounded-lg text-xs font-mono font-bold border-none outline-none cursor-pointer">
@@ -6984,11 +7077,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         <!-- Metric Badges Row -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">आज उपस्थित कर्मचारी (PRESENT)</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">${__L("आज उपस्थित कर्मचारी", "Present Staff Today")}</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${records.length} <span class="text-xs text-emerald-600 font-normal">(${approvedRecords.length} स्वीकृत)</span></span>
           </div>
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">स्वीकृति हेतु पेंडिंग (PENDING)</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">${__L("स्वीकृति हेतु पेंडिंग", "Pending Approval")}</span>
             <span class="text-2xl font-black text-amber-600 font-mono mt-1 block">${pendingRecords.length} <span class="text-xs text-slate-400 font-normal">एक्शन आवश्यक</span></span>
           </div>
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
@@ -7948,35 +8041,37 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   
   function switchContactBranch(branchKey) {
+    window._lastContactBranch = branchKey;
+    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
     const bData = {
       hazratganj: {
-        badge: "मुख्य लैब व हेड ऑफिस",
-        title: "श्रीराम टावर हजरतगंज, लखनऊ",
+        badge: isEn ? "Head Lab & Main Office" : "मुख्य लैब व हेड ऑफिस",
+        title: isEn ? "Sree Rama Towers Hazratganj, Lucknow" : "श्रीराम टावर हजरतगंज, लखनऊ",
         address: "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001",
-        landmark: "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
-        timings: "12:00 PM - 09:00 PM (रोजाना खुला)",
+        landmark: isEn ? "(Near Hazratganj Crossing & Ashok Marg, 2nd Floor Sree Rama Towers)" : "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
+        timings: isEn ? "12:00 PM - 09:00 PM (Open Daily)" : "12:00 PM - 09:00 PM (रोजाना खुला)",
         phone: "7905859701",
         gps: "Lat 26.850138°, Long 80.948449°",
         mapUrl: "https://maps.google.com/maps?q=26.850138,80.948449&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=26.850138,80.948449"
       },
       naka: {
-        badge: "नाका हिंडोला शाखा (लखनऊ)",
-        title: "नाका हिंडोला मार्केट, लखनऊ",
-        address: "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग स्टेशन रोड), लखनऊ, उत्तर प्रदेश 226004",
-        landmark: "(चारबाग रेलवे स्टेशन से मात्र 500 मीटर, गुरुद्वारा रोड नाका हिंडोला)",
-        timings: "12:00 PM - 09:00 PM (रोजाना खुला)",
+        badge: isEn ? "Naka Hindola Branch (Lucknow)" : "नाका हिंडोला शाखा (लखनऊ)",
+        title: isEn ? "Naka Hindola Market, Lucknow" : "नाका हिंडोला मार्केट, लखनऊ",
+        address: isEn ? "Naka Hindola Market (Near Gurudwara & Charbagh Station Rd), Lucknow, UP 226004" : "नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग स्टेशन रोड), लखनऊ, उत्तर प्रदेश 226004",
+        landmark: isEn ? "(Just 500m from Charbagh Railway Station, Gurudwara Road)" : "(चारबाग रेलवे स्टेशन से मात्र 500 मीटर, गुरुद्वारा रोड नाका हिंडोला)",
+        timings: isEn ? "12:00 PM - 09:00 PM (Open Daily)" : "12:00 PM - 09:00 PM (रोजाना खुला)",
         phone: "8931059701",
         gps: "Lat 26.8370°N, Long 80.9241°E",
         mapUrl: "https://maps.google.com/maps?q=26.8370,80.9241&t=&z=16&ie=UTF8&iwloc=&output=embed",
         directMap: "https://maps.google.com/?q=26.8370,80.9241"
       },
       kannauj: {
-        badge: "कन्नौज शाखा (सरायमीरा)",
-        title: "सरायमीरा, जी.टी. रोड, कन्नौज",
-        address: "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
-        landmark: "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
-        timings: "10:00 AM - 06:00 PM (सोमवार - शनिवार)",
+        badge: isEn ? "Kannauj Branch (Saraimeera)" : "कन्नौज शाखा (सरायमीरा)",
+        title: isEn ? "Saraimeera, G.T. Road, Kannauj" : "सरायमीरा, जी.टी. रोड, कन्नौज",
+        address: isEn ? "2WHG+7HC, Saraimeera, G.T. Road (Near Bus Station), Kannauj, UP 209727" : "2WHG+7HC, सरायमीरा (Saraimeera), जी.टी. रोड, कन्नौज, उत्तर प्रदेश 209727",
+        landmark: isEn ? "(Saraimeera Crossing, Main G.T. Road Kannauj)" : "(सरायमीरा चौराहा, मुख्य जी.टी. रोड कन्नौज)",
+        timings: isEn ? "10:00 AM - 07:00 PM (Monday - Saturday)" : "10:00 AM - 07:00 PM (सोमवार - शनिवार)",
         phone: "9044115178",
         gps: "Lat 27.0283°N, Long 79.926383°E",
         mapUrl: "https://maps.google.com/maps?q=27.0283,79.926383&t=&z=16&ie=UTF8&iwloc=&output=embed",
@@ -9028,22 +9123,22 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 दुकान खर्च ट्रैकर
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '🏢 सभी 3 शाखाएं (All Stores)' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
               </span>
             </div>
-            <h3 class="text-xl font-black">दुकान खर्च (Overhead Expenses)</h3>
-            <p class="text-xs text-slate-300 mt-0.5">किराया, बिजली, इंटरनेट, चाय-नाश्ता, मशीन व टूल मरम्मत खर्च का संपूर्ण हिसाब</p>
+            <h3 class="text-xl font-black">${__L("दुकान खर्च", "Store Overhead Expenses")}</h3>
+            <p class="text-xs text-slate-300 mt-0.5">${__L("किराया, बिजली, इंटरनेट, चाय-नाश्ता, मशीन व टूल मरम्मत खर्च का संपूर्ण हिसाब", "Complete accounting of rent, electricity, internet, pantry, tools and machine repair")}</p>
           </div>
 
           <div class="flex flex-col gap-2.5 items-end">
             ${renderBranchFilterBarDark(branchFilter)}
             <!-- Date Filters for Expenses -->
             <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white/10 backdrop-blur rounded-xl border border-white/20 text-xs">
-              <button onclick="window.MMS_APP.setExpenseDateFilter('month')" class="px-2.5 py-1 rounded-lg font-black transition ${expenseDateFilter === 'month' ? 'bg-white text-rose-950 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ इस महीने</button>
+              <button onclick="window.MMS_APP.setExpenseDateFilter('month')" class="px-2.5 py-1 rounded-lg font-black transition ${expenseDateFilter === 'month' ? 'bg-white text-rose-950 shadow-sm' : 'text-white hover:bg-white/20'}">🗓️ ${__L("इस महीने", "This Month")}</button>
               <button onclick="window.MMS_APP.setExpenseDateFilter('today')" class="px-2.5 py-1 rounded-lg font-black transition ${expenseDateFilter === 'today' ? 'bg-white text-rose-950 shadow-sm' : 'text-white hover:bg-white/20'}">⚡ आज</button>
-              <button onclick="window.MMS_APP.setExpenseDateFilter('all')" class="px-2.5 py-1 rounded-lg font-black transition ${expenseDateFilter === 'all' ? 'bg-white text-rose-950 shadow-sm' : 'text-white hover:bg-white/20'}">📜 सभी (All Time)</button>
+              <button onclick="window.MMS_APP.setExpenseDateFilter('all')" class="px-2.5 py-1 rounded-lg font-black transition ${expenseDateFilter === 'all' ? 'bg-white text-rose-950 shadow-sm' : 'text-white hover:bg-white/20'}">📜 ${__L("सभी", "All Time")}</button>
               <button onclick="window.MMS_APP.openAddExpenseModal()" class="ml-1 px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-black shadow-md flex items-center gap-1 transition">
-                <span>➕ नया खर्च दर्ज करें</span>
+                <span>➕ ${__L("नया खर्च दर्ज करें", "Add New Expense")}</span>
               </button>
             </div>
           </div>
