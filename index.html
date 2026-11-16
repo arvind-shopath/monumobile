@@ -10,7 +10,7 @@
   <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
   <script>
     (function() {
-      window.MMS_CLIENT_BUILD = "20261116_104";
+      window.MMS_CLIENT_BUILD = "20261116_105";
 
       // 1. Kill mobile bfcache (back-forward frozen cache)
       window.addEventListener('pageshow', function(e) {
@@ -108,7 +108,7 @@
         if (u && u !== 'null' && v !== 'public') {
           var s = document.createElement('style');
           s.id = 'instant-auth-cloak';
-          s.textContent = '#public-section, .public-shell-element, #public-footer { display: none !important; } #portal-section { display: flex !important; } #portal-section header { display: flex !important; }';
+          s.textContent = '#public-section, .public-shell-element, #public-footer { display: none !important; }';
           document.head.appendChild(s);
         }
       } catch(e) {}
@@ -431,7 +431,7 @@
       <!-- Header CTAs & Prominent Language Switcher -->
       <div class="flex items-center gap-2 sm:gap-3">
         <div class="auth-pill-container"></div>
-        <button class="open-login-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-sm cursor-pointer" onclick="if(window.MMS_APP){if(window.MMS_APP.getCurrentUser&&window.MMS_APP.getCurrentUser()){window.MMS_APP.showPortal();}else{window.MMS_APP.openLoginModal();}}else{document.getElementById('login-modal').classList.remove('hidden');}">
+        <button class="open-login-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-sm cursor-pointer" onclick="if(window.MMS_APP&&window.MMS_APP.openLoginModal){window.MMS_APP.openLoginModal();}else{document.getElementById('login-modal').classList.remove('hidden');document.getElementById('login-modal').style.display='flex';}">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
           <span data-i18n="staffLogin">लॉगिन</span>
         </button>
@@ -1895,7 +1895,7 @@
           <div>
             <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 pb-1 border-b border-slate-200 inline-block" data-i18n="footerStaffTitle">स्टाफ व मैनेजमेंट</h4>
             <p class="text-xs text-slate-600 mb-4 leading-relaxed font-medium" data-i18n="footerStaffDesc">POS बिलिंग, इन्वेंट्री व खाता-बही के लिए लॉगिन करें:</p>
-            <button type="button" class="open-login-btn px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs transition shadow-md shadow-blue-600/25 flex items-center gap-2 cursor-pointer" onclick="if(window.MMS_APP){if(window.MMS_APP.getCurrentUser&&window.MMS_APP.getCurrentUser()){window.MMS_APP.showPortal();}else{window.MMS_APP.openLoginModal();}}else{document.getElementById('login-modal').classList.remove('hidden');}">
+            <button type="button" class="open-login-btn px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs transition shadow-md shadow-blue-600/25 flex items-center gap-2 cursor-pointer" onclick="if(window.MMS_APP&&window.MMS_APP.openLoginModal){window.MMS_APP.openLoginModal();}else{document.getElementById('login-modal').classList.remove('hidden');document.getElementById('login-modal').style.display='flex';}">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
               <span data-i18n="footerLoginBtn">लॉगिन पोर्टल ↗</span>
             </button>
@@ -1965,7 +1965,7 @@
   <!-- ========================================================================= -->
 
   <!-- LOGIN MODAL -->
-  <div id="login-modal" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+  <div id="login-modal" style="display: none;" class="modal-backdrop fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-2xl relative">
       <button type="button" onclick="window.MMS_APP.closeLoginModal()" class="close-modal-btn absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-black text-lg transition shadow-xs cursor-pointer" title="बंद करें">✕</button>
       

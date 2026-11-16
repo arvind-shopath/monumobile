@@ -1303,16 +1303,25 @@ function filterCategoryDropdown(inputId, query) {
 
   function showPortal() {
     if (!state.currentUser) {
+      const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH);
+      if (savedUser && savedUser !== 'null') {
+        try { state.currentUser = JSON.parse(savedUser); } catch(e) {}
+      }
+    }
+    if (!state.currentUser) {
       openModal(dom.loginModal);
       return;
     }
-    // Force close login modal if open
+    // Force close and completely hide login modal
     const lm = (dom && dom.loginModal) || document.getElementById('login-modal');
     if (lm) {
       lm.classList.add('hidden');
       lm.classList.remove('flex');
       lm.style.display = 'none';
     }
+    // Remove cloak if present
+    const cloak = document.getElementById('instant-auth-cloak');
+    if (cloak) cloak.remove();
     localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
     state.activeView = 'portal';
 
@@ -9667,8 +9676,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
     // Public / Portal Toggle Button in Top Bar
     const openLoginBtns = document.querySelectorAll('.open-login-btn');
-    openLoginBtns.forEach(b => b.addEventListener('click', () => {
-      if (state.currentUser) {
+    openLoginBtns.forEach(b => b.addEventListener('click', (e) => {
+      if (e) e.preventDefault();
+      const user = state.currentUser || JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH) || 'null');
+      if (user) {
+        state.currentUser = user;
         showPortal();
       } else {
         openModal(dom.loginModal);
@@ -9782,14 +9794,14 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     cacheDom();
     bindEvents();
 
-    // Check Persistent Auth & View FIRST to completely eliminate page flash
+    // Check Persistent Auth & View
     const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH);
     const savedView = localStorage.getItem(STORAGE_KEYS.ACTIVE_VIEW);
 
-    if (savedUser && savedUser !== 'null' && savedView !== 'public') {
+    // 1. Always restore user session if present in localStorage
+    if (savedUser && savedUser !== 'null') {
       try {
         state.currentUser = JSON.parse(savedUser);
-        // Merge with latest saved staff record to ensure live name, phone, password, photo are active
         const matchedEmp = (state.staff || []).find(s => 
           (state.currentUser.id && s.id === state.currentUser.id) ||
           (state.currentUser.phone && s.phone === state.currentUser.phone) ||
@@ -9799,12 +9811,17 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           state.currentUser = { ...state.currentUser, ...matchedEmp };
           localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
         }
-        renderAuthPill();
-        showPortal();
       } catch (err) {
         console.error('Auth parse error:', err);
-        showPublicSite();
       }
+    }
+
+    // 2. Render user pill in header (shows "🟢 Monu Ji (Portal)" if authenticated)
+    renderAuthPill();
+
+    // 3. Navigate to active view
+    if (state.currentUser && savedView !== 'public') {
+      showPortal();
     } else {
       showPublicSite();
     }
@@ -11202,7 +11219,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       }
     },
     openLoginModal: () => {
-      if (state.currentUser) {
+      const user = state.currentUser || JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH) || 'null');
+      if (user) {
+        state.currentUser = user;
         showPortal();
         return;
       }
