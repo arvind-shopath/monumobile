@@ -834,8 +834,8 @@ function filterCategoryDropdown(inputId, query) {
   
   // --- Universal Bilingual Localization Helper ---
   function __L(hi, en) {
-    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
-    return isEn ? en : hi;
+    const current = state.portalLang || state.lang || state.currentLang || 'hi';
+    return current === 'en' ? en : hi;
   }
 
   function persistData() {
@@ -922,1041 +922,37 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function setPortalLanguage(lang) {
-    setLanguage(lang);
-  }
-
-  // --- Formatters ---
-  function formatCurrency(amount) {
-    return '₹' + Number(amount || 0).toLocaleString('en-IN');
-  }
-
-  function getTodayDateStr() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  }
-
-  // --- DOM Elements Cache ---
-  let dom = {};
-
-  
-  // Auto cache DOM immediately if document is ready
-  if (typeof document !== 'undefined' && document.body) {
-    try { cacheDom(); } catch(e) {}
-  }
-
-  function cacheDom() {
-    dom = {
-      loginModal: document.getElementById('login-modal'),
-      loginForm: document.getElementById('login-form'),
-      loginPhone: document.getElementById('login-phone'),
-      loginPass: document.getElementById('login-pass'),
-      loginError: document.getElementById('login-error'),
-      logoutBtn: document.getElementById('logout-btn'),
-      
-      // Portal View vs Public View
-      publicSection: document.getElementById('public-section'),
-      portalSection: document.getElementById('portal-section'),
-      portalUserBadge: document.getElementById('portal-user-badge'),
-      portalShopControl: document.getElementById('portal-shop-status-control'),
-      portalTabs: document.querySelectorAll('.portal-tab-btn'),
-      portalViews: document.querySelectorAll('.portal-tab-view'),
-      
-      // Estimator
-      estBrandSelect: document.getElementById('est-brand'),
-      estModelSelect: document.getElementById('est-model'),
-      estIssueSelect: document.getElementById('est-issue'),
-      estCostOutput: document.getElementById('est-cost-output'),
-      estTimeOutput: document.getElementById('est-time-output'),
-      estWarrantyOutput: document.getElementById('est-warranty-output'),
-      estBookWaBtn: document.getElementById('est-book-wa-btn'),
-      
-      // Tracker
-      trackInput: document.getElementById('track-input'),
-      trackSearchBtn: document.getElementById('track-search-btn'),
-      trackResultCard: document.getElementById('track-result-card'),
-      
-      // Lead Modal
-      leadModal: document.getElementById('lead-modal'),
-      leadForm: document.getElementById('lead-form'),
-      
-      // Invoice Print Modal
-      invoiceModal: document.getElementById('invoice-print-modal'),
-      invoiceContent: document.getElementById('invoice-render-area'),
-      
-      // Restock Modal
-      restockModal: document.getElementById('restock-modal'),
-      restockForm: document.getElementById('restock-form'),
-      restockSkuTitle: document.getElementById('restock-sku-title'),
-      restockSkuInput: document.getElementById('restock-sku-input'),
-      restockQtyInput: document.getElementById('restock-qty-input'),
-      
-      // Receive Payment Modal (Khata)
-      receivePaymentModal: document.getElementById('receive-payment-modal'),
-      rcvCustomerName: document.getElementById('rcv-customer-name'),
-      rcvInvoiceNo: document.getElementById('rcv-invoice-no'),
-      rcvCurrentDue: document.getElementById('rcv-current-due'),
-      rcvAmountInput: document.getElementById('rcv-amount-input'),
-      rcvSubmitBtn: document.getElementById('rcv-submit-btn'),
-      
-      // New Job Modal
-      newJobModal: document.getElementById('new-job-modal'),
-      newJobForm: document.getElementById('new-job-form')
-    };
-  }
-
-  // --- Shop Manual / Automatic Open & Close Status ---
-  function updateShopOpenStatus() {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
-
-    // 10:30 AM = 630 mins, 08:30 PM = 1230 mins
-    const autoOpen = (totalMinutes >= 630 && totalMinutes <= 1230);
-    const manualMode = state.shopManualStatus || localStorage.getItem(STORAGE_KEYS.SHOP_STATUS) || 'auto';
-
-    let isOpen = autoOpen;
-    let statusLabelHi = '🟢 दुकान खुली है (Open Now)';
-    let statusLabelEn = '🟢 Open Now';
-
-    if (manualMode === 'force_open') {
-      isOpen = true;
-      statusLabelHi = '🟢 दुकान खुली है (Manual Open)';
-      statusLabelEn = '🟢 Open Now (Manual)';
-    } else if (manualMode === 'force_closed') {
-      isOpen = false;
-      statusLabelHi = '🔴 दुकान अभी बंद है (Manual Closed)';
-      statusLabelEn = '🔴 Closed Now (Manual)';
-    } else {
-      // Auto
-      if (!autoOpen) {
-        statusLabelHi = '🔴 दुकान अभी बंद है (कल 10:30 AM खुलेगी)';
-        statusLabelEn = '🔴 Closed (Opens 10:30 AM)';
-      }
-    }
-
-    const isHi = state.currentLang === 'hi';
-
-    // Top notification bar indicator
-    const topBarEl = document.getElementById('top-bar-shop-status');
-    if (topBarEl) {
-      if (isOpen) {
-        topBarEl.innerHTML = `
-          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-black text-[11px] border border-emerald-500/40">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>${isHi ? statusLabelHi : statusLabelEn}</span>
-          </span>
-        `;
-      } else {
-        topBarEl.innerHTML = `
-          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold text-[11px] border border-rose-500/40">
-            <span class="h-2 w-2 rounded-full bg-rose-400"></span>
-            <span>${isHi ? statusLabelHi : statusLabelEn}</span>
-          </span>
-        `;
-      }
-    }
-
-    // All section badges & location card
-    document.querySelectorAll('.shop-status-badge, .live-shop-status-text').forEach(el => {
-      if (isOpen) {
-        el.innerHTML = `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-2xs">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>${isHi ? statusLabelHi : statusLabelEn}</span>
-          </span>
-        `;
-      } else {
-        el.innerHTML = `
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
-            <span class="h-2 w-2 rounded-full bg-rose-500"></span>
-            <span>${isHi ? statusLabelHi : statusLabelEn}</span>
-          </span>
-        `;
-      }
-    });
-
-    renderPortalShopControl();
-  }
-
-  function setShopManualStatus(newMode) {
-    state.shopManualStatus = newMode;
-    localStorage.setItem(STORAGE_KEYS.SHOP_STATUS, newMode);
-    updateShopOpenStatus();
-  }
-
-  function renderPortalShopControl() {
-    const ctrl = document.getElementById('portal-shop-status-control');
-    if (!ctrl) return;
-    const role = state.currentUser ? (state.currentUser.role || 'employee').toLowerCase() : 'employee';
-    if (role !== 'admin' && role !== 'manager') {
-      ctrl.innerHTML = '';
-      ctrl.style.display = 'none';
-      return;
-    }
-    ctrl.style.display = 'flex';
-    const mode = state.shopManualStatus || localStorage.getItem(STORAGE_KEYS.SHOP_STATUS) || 'auto';
-
-    ctrl.innerHTML = `
-      <span class="text-[10px] uppercase font-black text-slate-500 px-1">दुकान स्थिति:</span>
-      <button type="button" onclick="window.MMS_APP.setShopStatus('force_open')" title="दुकान को हमेशा खुली दिखाएं" class="px-2 py-1 rounded-lg text-[11px] font-black transition flex items-center gap-1 ${mode === 'force_open' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'}">
-        <span>🟢 खुली रखें</span>
-      </button>
-      <button type="button" onclick="window.MMS_APP.setShopStatus('force_closed')" title="दुकान को अभी बंद दिखाएं (लंच/छुट्टी/रात)" class="px-2 py-1 rounded-lg text-[11px] font-black transition flex items-center gap-1 ${mode === 'force_closed' ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'}">
-        <span>🔴 बंद रखें</span>
-      </button>
-      <button type="button" onclick="window.MMS_APP.setShopStatus('auto')" title="घड़ी के अनुसार (10:30 AM - 8:30 PM)" class="px-2 py-1 rounded-lg text-[11px] font-black transition flex items-center gap-1 ${mode === 'auto' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'}">
-        <span>⏱️ ऑटो टाइम</span>
-      </button>
-    `;
-  }
-
-  // --- Text & Language Render ---
-  function renderTextTranslations() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const val = t(key);
-      if (val !== undefined && val !== null) {
-        if (typeof val === 'string' && val.includes('<') && val.includes('>')) {
-          el.innerHTML = val;
-        } else {
-          el.textContent = val;
-        }
-      }
-    });
-
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      el.placeholder = t(key);
-    });
-
-    document.querySelectorAll('.lang-switcher-btn').forEach(b => {
-      const targetLang = b.getAttribute('data-lang');
-      if (targetLang === state.currentLang) {
-        b.className = 'lang-switcher-btn px-2.5 py-1 rounded-md text-xs font-black bg-blue-600 text-white shadow-sm transition';
-      } else {
-        b.className = 'lang-switcher-btn px-2.5 py-1 rounded-md text-xs font-bold text-slate-300 hover:text-white transition';
-      }
-    });
-
-    updateEstimatorIssueOptions();
-  }
-
-  // --- Auth & Staff Session Management ---
-  function renderAuthPill() {
-    const pillContainers = document.querySelectorAll('.auth-pill-container');
-    const openLoginBtns = document.querySelectorAll('.open-login-btn');
-
-    if (state.currentUser) {
-      openLoginBtns.forEach(b => {
-        b.innerHTML = `
-          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>${state.currentUser.name} (${state.currentLang === 'hi' ? 'पोर्टल' : 'Portal'})</span>
-        `;
-        b.className = 'open-login-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-black text-xs transition shadow-sm';
-      });
-
-      pillContainers.forEach(pc => {
-        pc.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-              <span>${state.currentUser.name}</span>
-            </span>
-          </div>
-        `;
-      });
-
-      if (dom.portalUserBadge) {
-        dom.portalUserBadge.innerHTML = `
-          <div class="flex items-center gap-2.5 w-full">
-            <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
-              ${state.currentUser.name ? state.currentUser.name.charAt(0) : 'U'}
-            </div>
-            <div class="min-w-0 flex-1 sidebar-text-label">
-              <div class="text-xs font-black text-white truncate">${state.currentUser.name ? state.currentUser.name.replace(/\s*\([^)]*\)/g, '').trim() : 'User'}</div>
-              <div class="text-[10px] text-blue-400 uppercase font-bold tracking-wider">${(state.currentUser.role || 'admin').toLowerCase() === 'admin' ? 'सुपर एडमिन (Owner)' : (state.currentUser.role || '').toLowerCase() === 'manager' ? 'ब्रांच मैनेजर' : 'स्टाफ'}</div>
-            </div>
-          </div>
-        `;
-      }
-    } else {
-      openLoginBtns.forEach(b => {
-        b.innerHTML = `
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-          <span data-i18n="staffLogin">${state.currentLang === 'hi' ? 'लॉगिन' : 'Login'}</span>
-        `;
-        b.className = 'open-login-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition shadow-sm';
-      });
-
-      pillContainers.forEach(pc => { pc.innerHTML = ''; });
-    }
-  }
-
-  function handleLogin(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    const phoneEl = (dom && dom.loginPhone) || document.getElementById('login-phone');
-    const passEl = (dom && dom.loginPass) || document.getElementById('login-pass');
-    const modal = (dom && dom.loginModal) || document.getElementById('login-modal');
-    const errEl = (dom && dom.loginError) || document.getElementById('login-error');
-    const formEl = (dom && dom.loginForm) || document.getElementById('login-form');
-
-    const rawPhone = (phoneEl && phoneEl.value ? phoneEl.value : '').trim();
-    const cleanPhone = rawPhone.replace(/[^0-9]/g, '').slice(-10);
-    const pass = (passEl && passEl.value ? passEl.value : '').trim();
-
-    // Pull latest staff list with fallback to window.MMS_DATA.staff
-    let staffList = state.staff;
-    if (!Array.isArray(staffList) || staffList.length === 0 || !staffList.some(s => s.phone === '9044115178')) {
-      staffList = (window.MMS_DATA && window.MMS_DATA.staff) || [];
-      state.staff = staffList;
-      try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(staffList)); } catch(err) {}
-    }
-
-    const allUsers = [...staffList, ...(window.MMS_DATA.users || [])];
-    const matched = allUsers.find(u => {
-      const uPhone = String(u.phone || '').replace(/[^0-9]/g, '').slice(-10);
-      if (uPhone !== cleanPhone) return false;
-
-      // Priority 1: Match the exact custom password set by Admin Monu
-      const uPass = String(u.pass || '').trim();
-      const matchCustom = uPass && (pass === uPass || pass.toLowerCase() === uPass.toLowerCase());
-
-      // Priority 2: Fallback for convenience (last 6 digits, master keys)
-      const last6 = cleanPhone.slice(-6);
-      const defaultPass = 'Mms@' + last6;
-      const matchFallback = pass.toLowerCase() === defaultPass.toLowerCase() ||
-                            pass === last6 ||
-                            pass === '123456' ||
-                            pass === 'admin123' ||
-                            pass === 'monu123' ||
-                            pass === 'mms123' ||
-                            pass === 'staff123' ||
-                            pass === '1234';
-
-      return matchCustom || matchFallback;
-    });
-
-    if (matched) {
-      state.currentUser = matched;
-      localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(matched));
-      localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
-      if (modal) { closeModal(modal); modal.style.display = 'none'; modal.classList.add('hidden'); }
-      if (errEl) errEl.classList.add('hidden');
-      if (formEl) formEl.reset();
-      renderAuthPill();
-      showPortal();
-    } else {
-      if (errEl) {
-        errEl.textContent = state.currentLang === 'hi' 
-          ? 'गलत मोबाइल नंबर या पासवर्ड! कृपया सही विवरण भरें।' 
-          : 'Invalid mobile number or password!';
-        errEl.classList.remove('hidden');
-      }
-    }
-  }
-
-  function handleLogout() {
-    state.currentUser = null;
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
-    localStorage.removeItem(STORAGE_KEYS.ACTIVE_TAB);
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'public');
-    const cloak = document.getElementById('instant-auth-cloak');
-    if (cloak && cloak.remove) cloak.remove();
-    renderAuthPill();
-    showPublicSite();
-  }
-
-  function showPortal() {
-    if (!state.currentUser) {
-      openModal(dom.loginModal);
-      return;
-    }
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
-    state.activeView = 'portal';
-
-    // Clear hash if it refers to public sections (e.g. #services, #branches)
-    if (window.location.hash && window.location.hash !== '#portal') {
-      try {
-        history.replaceState(null, '', window.location.pathname);
-      } catch (e) {}
-    }
-
-    // Hide ALL public shell elements
-    document.querySelectorAll('.public-shell-element').forEach(el => el.classList.add('hidden'));
-    if (dom.publicSection) dom.publicSection.classList.add('hidden');
-    
-    // Show dedicated staff portal
-    if (dom.publicSection) {
-      dom.publicSection.classList.add('hidden');
-      dom.publicSection.style.display = 'none';
-    }
-    if (dom.portalSection) {
-      dom.portalSection.classList.remove('hidden');
-      dom.portalSection.style.display = 'flex';
-    }
-    document.body.classList.add('h-screen', 'overflow-hidden');
-    document.documentElement.classList.add('h-screen', 'overflow-hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    renderPortal();
-    renderPortalShopControl();
-  }
-
-  function showPublicSite() {
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'public');
-    state.activeView = 'public';
-
-    const cloak = document.getElementById('instant-auth-cloak');
-    if (cloak) cloak.remove();
-
-    if (dom.portalSection) {
-      dom.portalSection.classList.add('hidden');
-      dom.portalSection.style.display = 'none';
-    }
-    if (dom.publicSection) {
-      dom.publicSection.classList.remove('hidden');
-      dom.publicSection.style.display = 'block';
-    }
-    document.querySelectorAll('.public-shell-element').forEach(el => el.classList.remove('hidden'));
-    document.body.classList.remove('h-screen', 'overflow-hidden');
-    document.documentElement.classList.remove('h-screen', 'overflow-hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // --- Estimator Logic ---
-  const issueTranslations = {
-    hi: [
-      { val: 'glass', text: 'केवल टच / ग्लास क्रैक - OCA चेंज (Only Outer Glass Broken)' },
-      { val: 'screen', text: 'स्क्रीन / पूरा डिस्प्ले कॉम्बो डैमेज (Combo Folder Broken)' },
-      { val: 'battery', text: 'बैटरी जल्दी खत्म / हेल्थ लो (Battery Drain / Backup)' },
-      { val: 'charging', text: 'चार्जिंग नहीं हो रही / जैक खराब (Charging Port / Jack)' },
-      { val: 'audio', text: 'माइक / स्पीकर / कॉल आवाज समस्या (Mic / Loudspeaker)' },
-      { val: 'backglass', text: 'बैक ग्लास क्रैक (Back Glass Broken)' },
-      { val: 'motherboard', text: 'मदरबोर्ड / डेड फोन / शॉर्टिंग (Motherboard IC / Dead)' }
-    ],
-    en: [
-      { val: 'glass', text: 'Outer Glass Cracked / Touch Working (OCA Lamination)' },
-      { val: 'screen', text: 'Display Screen / Combo Folder Broken' },
-      { val: 'battery', text: 'Battery Draining Fast / Low Health Backup' },
-      { val: 'charging', text: 'Charging Port Damaged / Not Charging Jack' },
-      { val: 'audio', text: 'Mic / Speaker / In-Call Voice Issue' },
-      { val: 'backglass', text: 'Back Glass Panel Cracked / Housing' },
-      { val: 'motherboard', text: 'Motherboard IC Level / Dead Phone Fix' }
-    ]
-  };
-
-  function updateEstimatorIssueOptions() {
-    if (!dom.estIssueSelect) return;
-    const currentVal = dom.estIssueSelect.value || 'glass';
-    const lang = state.currentLang === 'en' ? 'en' : 'hi';
-    const list = issueTranslations[lang] || issueTranslations.hi;
-    dom.estIssueSelect.innerHTML = list.map(item => `
-      <option value="${item.val}" ${item.val === currentVal ? 'selected' : ''}>${item.text}</option>
-    `).join('');
-  }
-
-  function initEstimator() {
-    if (!dom.estBrandSelect) return;
-    const prevBrand = dom.estBrandSelect.value;
-    const prevModel = dom.estModelSelect ? dom.estModelSelect.value : null;
-    const brands = window.MMS_DATA.estimatorData.brands;
-    dom.estBrandSelect.innerHTML = brands.map(b => `<option value="${b.id}" ${b.id === prevBrand ? 'selected' : ''}>${b.name}</option>`).join('');
-    if (prevBrand) dom.estBrandSelect.value = prevBrand;
-    updateEstimatorIssueOptions();
-    onBrandChange(prevModel);
-  }
-
-  function onBrandChange(preservedModel = null) {
-    if (!dom.estBrandSelect) return;
-    const selectedBrandId = dom.estBrandSelect.value;
-    const brand = window.MMS_DATA.estimatorData.brands.find(b => b.id === selectedBrandId);
-    if (!brand) return;
-
-    const targetModel = preservedModel && brand.models.includes(preservedModel) ? preservedModel : brand.models[0];
-    dom.estModelSelect.innerHTML = brand.models.map(m => `<option value="${m}" ${m === targetModel ? 'selected' : ''}>${m}</option>`).join('');
-    onIssueOrModelChange();
-  }
-
-  function onIssueOrModelChange() {
-    if (!dom.estBrandSelect || !dom.estModelSelect || !dom.estIssueSelect) return;
-    const selectedBrandId = dom.estBrandSelect.value;
-    const selectedModel = dom.estModelSelect.value;
-    const selectedIssue = dom.estIssueSelect.value;
-    const brand = window.MMS_DATA.estimatorData.brands.find(b => b.id === selectedBrandId);
-    if (!brand) return;
-
-    const issueInfo = brand.issues[selectedIssue] || {
-      cost: "₹899 - ₹2,500",
-      time: "30 Mins",
-      warranty: "Express Repair",
-      note: "Express genuine repair"
-    };
-
-    dom.estCostOutput.textContent = issueInfo.cost;
-    dom.estTimeOutput.textContent = issueInfo.time;
-    dom.estWarrantyOutput.textContent = issueInfo.warranty;
-
-    const brandName = brand.name;
-    const issueName = dom.estIssueSelect.options[dom.estIssueSelect.selectedIndex] 
-      ? dom.estIssueSelect.options[dom.estIssueSelect.selectedIndex].text 
-      : selectedIssue;
-    
-    // Customer to Shop: NO website link in WhatsApp text!
-    const msg = `नमस्ते Monu Mobile Solution! मुझे अपने ${brandName} (${selectedModel}) के लिए [${issueName}] रिपेयर करवाना है। अनुमानित रेट ${issueInfo.cost} देखा। कृपया बताएं कि कब ला सकता हूँ?`;
-    
-    dom.estBookWaBtn.href = `https://wa.me/${window.MMS_DATA.storeInfo.whatsapp}?text=${encodeURIComponent(msg)}`;
-  }
-
-  // --- Tracker Status Lookup ---
-    async function searchJobStatus(directVal) {
-    const val = (directVal || (dom.trackInput ? dom.trackInput.value : '') || '').trim().toUpperCase();
-    if (!val) {
-      alert(state.currentLang === 'hi' ? 'कृपया अपना टोकन नंबर या मोबाइल नंबर डालें!' : 'Please enter Job Token or Mobile Number!');
-      return;
-    }
-
-    if (dom.trackResultCard) {
-      dom.trackResultCard.classList.remove('hidden');
-      dom.trackResultCard.innerHTML = `
-        <div class="p-6 text-center text-slate-600 bg-slate-50 rounded-2xl border border-slate-200">
-          <p class="font-bold text-sm flex items-center justify-center gap-2">
-            <span class="inline-block w-3 h-3 rounded-full bg-blue-500 animate-ping"></span>
-            सर्वर पर स्टेटस खोजा जा रहा है (Searching Cloud Server)...
-          </p>
-        </div>
-      `;
-    }
-
-    const cleanInput = val.replace(/[^0-9]/g, '');
-
-    // 1. Check local state.jobs
-    let job = (state.jobs || []).find(j => {
-      const matchToken = (j.token && j.token.toUpperCase() === val) || (j.tokenNo && j.tokenNo.toUpperCase() === val) || (j.id && j.id.toUpperCase() === val);
-      const matchPhone = cleanInput.length >= 10 && (j.customerPhone || '').replace(/[^0-9]/g, '').includes(cleanInput);
-      return matchToken || matchPhone;
-    });
-
-    // 2. Check local state.invoices (e.g. MMS-INV-205)
-    if (!job && state.invoices) {
-      const inv = state.invoices.find(i => {
-        const matchBill = (i.billNo && i.billNo.toUpperCase() === val) || (i.invoiceNo && i.invoiceNo.toUpperCase() === val) || (i.id && i.id.toUpperCase() === val);
-        const matchPhone = cleanInput.length >= 10 && (i.customerPhone || '').replace(/[^0-9]/g, '').includes(cleanInput);
-        return matchBill || matchPhone;
-      });
-      if (inv) {
-        const firstItem = inv.items && inv.items[0] ? inv.items[0] : null;
-        job = {
-          token: inv.billNo || inv.invoiceNo || inv.id,
-          tokenNo: inv.billNo || inv.invoiceNo || inv.id,
-          customerName: inv.customerName,
-          customerPhone: inv.customerPhone,
-          brand: 'स्मार्टफोन',
-          model: firstItem ? (firstItem.name || firstItem.item) : 'रिपेयर पार्ट्स व सर्विस',
-          problem: 'काउंटर बिल / रिपेयर पार्ट्स व सर्विस (POS Invoice)',
-          estCost: inv.total || inv.totalAmount || 0,
-          finalCost: inv.net || inv.totalAmount || 0,
-          paid: inv.paid || inv.paidAmount || 0,
-          due: inv.due || inv.dueAmount || 0,
-          status: (inv.due || inv.dueAmount || 0) > 0 ? 'in-progress' : 'ready',
-          branchName: inv.branchName || 'हजरतगंज (मुख्य लैब)'
-        };
-      }
-    }
-
-    // 3. If not found locally, query Cloud Server API: /api/track?q=...
-    if (!job && typeof fetch !== 'undefined') {
-      try {
-        const res = await fetch('/api/track?q=' + encodeURIComponent(val) + '&t=' + Date.now());
-        if (res.ok) {
-          const resData = await res.json();
-          if (resData.success && resData.found && resData.job) {
-            job = resData.job;
-          }
-        }
-      } catch(err) {
-        console.warn('Cloud track fetch error:', err);
-      }
-    }
-
-    // 4. Standard Verified Demo Fallback (Guarantees zero-blank response during live demos)
-    if (!job) {
-      const LOCAL_DEMO_LOOKUP = {
-        'MMS-1001': {
-          token: 'MMS-1001',
-          tokenNo: 'MMS-1001',
-          customerName: 'राजेश वर्मा',
-          customerPhone: '9876543210',
-          brand: 'Apple',
-          model: 'iPhone 13 OLED Display (OEM Premium)',
-          problem: 'डिस्प्ले क्रैक / टच काम नहीं कर रहा (Original Screen Replacement)',
-          estCost: 4500,
-          finalCost: 4500,
-          paid: 2000,
-          due: 2500,
-          status: 'in-progress',
-          branchName: 'हजरतगंज (मुख्य लैब, श्रीराम टॉवर)'
-        },
-        'MMS-1002': {
-          token: 'MMS-1002',
-          tokenNo: 'MMS-1002',
-          customerName: 'अमित कुमार',
-          customerPhone: '9839012345',
-          brand: 'Samsung',
-          model: 'Galaxy S22 Ultra',
-          problem: 'चार्जिंग पोर्ट व मदरबोर्ड IC रिपेयर (Type-C Sub-board)',
-          estCost: 2800,
-          finalCost: 2800,
-          paid: 2800,
-          due: 0,
-          status: 'ready',
-          branchName: 'नाका हिंडोला शाखा (लखनऊ)'
-        },
-        'MMS-1003': {
-          token: 'MMS-1003',
-          tokenNo: 'MMS-1003',
-          customerName: 'दिलीप कुमार',
-          customerPhone: '9450987654',
-          brand: 'OnePlus',
-          model: 'OnePlus 11R 5G',
-          problem: 'ओरिजिनल बैटरी रिप्लेसमेंट & बैक ग्लास OCA लेमिनेशन',
-          estCost: 2200,
-          finalCost: 2200,
-          paid: 2200,
-          due: 0,
-          status: 'delivered',
-          branchName: 'कन्नौज शाखा (सरायमीरा)'
-        }
-      };
-      if (LOCAL_DEMO_LOOKUP[val]) {
-        job = LOCAL_DEMO_LOOKUP[val];
-      } else if (cleanInput === '9876543210') {
-        job = LOCAL_DEMO_LOOKUP['MMS-1001'];
-      } else if (cleanInput === '9839012345') {
-        job = LOCAL_DEMO_LOOKUP['MMS-1002'];
-      } else if (cleanInput === '9450987654') {
-        job = LOCAL_DEMO_LOOKUP['MMS-1003'];
-      }
-    }
-
-    if (!dom.trackResultCard) return;
-
-    if (!job) {
-      dom.trackResultCard.innerHTML = `
-        <div class="p-6 text-center text-rose-700 bg-rose-50 rounded-2xl border border-rose-200">
-          <p class="font-bold text-sm">❌ कोई रिकॉर्ड नहीं मिला (No Record Found)</p>
-          <p class="text-xs text-slate-600 mt-1">टोकन नंबर या मोबाइल नंबर की जांच करें, या तुरंत कॉल करें: <strong>7905859701</strong></p>
-        </div>
-      `;
-      return;
-    }
-
-    const badgeColor = job.status === 'delivered' ? 'bg-emerald-100 text-emerald-800' 
-      : job.status === 'ready' ? 'bg-blue-100 text-blue-800' 
-      : 'bg-amber-100 text-amber-800';
-
-    const statusHindi = job.status === 'delivered' ? 'कस्टमर को दे दिया गया (Delivered)' 
-      : job.status === 'ready' ? 'तैयार है - दुकान से प्राप्त करें (Ready for Pickup)' 
-      : 'रिपेयरिंग चालू है (In Progress)';
-
-    const tokenDisplay = job.token || job.tokenNo || job.id || val;
-    const estCost = Number(job.estCost || job.finalCost || 0);
-    const advancePaid = Number(job.paid || job.paidAmount || (job.status === 'delivered' ? estCost : 0));
-    const remainingDue = Number(job.due || job.dueAmount || Math.max(0, estCost - advancePaid));
-
-    dom.trackResultCard.innerHTML = `
-      <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200">
-          <div>
-            <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">टोकन / जॉब नंबर:</span>
-            <h3 class="text-lg font-black text-slate-900">${tokenDisplay}</h3>
-          </div>
-          <span class="px-3 py-1 rounded-full text-xs font-black ${badgeColor}">
-            ${statusHindi}
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div>
-            <p class="text-slate-500 font-semibold">ग्राहक का नाम: <strong class="text-slate-900">${job.customerName || 'Walk-in'}</strong></p>
-            <p class="text-slate-500 font-semibold mt-1">समस्या: <strong class="text-slate-900">${job.problem || 'जनरल रिपेयरिंग'}</strong></p>
-            <p class="text-slate-500 font-semibold mt-1">एडवांस जमा: <strong class="text-slate-900">₹${advancePaid.toLocaleString('en-IN')}</strong></p>
-          </div>
-          <div>
-            <p class="text-slate-500 font-semibold">डिवाइस / मॉडल: <strong class="text-slate-900">${(job.brand ? job.brand + ' ' : '') + (job.model || '')}</strong></p>
-            <p class="text-slate-500 font-semibold mt-1">अनुमानित खर्च: <strong class="text-emerald-700 font-bold">₹${estCost.toLocaleString('en-IN')}</strong></p>
-            <p class="text-slate-500 font-semibold mt-1">शेष बकाया: <strong class="text-rose-700 font-bold">₹${remainingDue.toLocaleString('en-IN')}</strong></p>
-          </div>
-        </div>
-
-        <!-- Live 4-Step Customer Tracking Timeline -->
-        <div class="pt-3 border-t border-slate-200 space-y-2">
-          <span class="text-[11px] font-black text-slate-700 uppercase tracking-wider block">लाइव रिपेयर टाइमलाइन (Live Tracking Progress):</span>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px]">
-            <!-- Step 1: Received -->
-            <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-              <span class="block text-base mb-0.5">📱</span>
-              <strong class="block font-black">1. रिसीव्ड / बिल</strong>
-              <span class="text-[9px] text-emerald-700 block mt-0.5">${job.receivedByName || 'MMS Front Desk'}</span>
-              <span class="text-[8px] text-slate-500 block">${job.receivedAt || job.createdAt || 'दर्ज हुआ'}</span>
-            </div>
-
-            <!-- Step 2: Assigned -->
-            <div class="p-2 rounded-xl ${job.assignedTo ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
-              <span class="block text-base mb-0.5">👤</span>
-              <strong class="block font-black">2. काम असाइन</strong>
-              <span class="text-[9px] font-bold block mt-0.5">${job.assignedTo || 'प्रक्रियाधीन'}</span>
-              <span class="text-[8px] text-slate-500 block">${job.assignedAt ? job.assignedAt.slice(0, 16) : 'लाइन में'}</span>
-            </div>
-
-            <!-- Step 3: In Progress -->
-            <div class="p-2 rounded-xl ${(job.status === 'in-progress' || job.status === 'in_progress' || job.status === 'ready' || job.status === 'delivered') ? 'bg-amber-50 border border-amber-200 text-amber-900 font-bold animate-pulse' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
-              <span class="block text-base mb-0.5">🔧</span>
-              <strong class="block font-black">3. रिपेयरिंग चालू</strong>
-              <span class="text-[9px] block mt-0.5">${job.startedAt ? job.startedAt.slice(0, 16) : ((job.status === 'in-progress' || job.status === 'in_progress') ? 'लैब में चालू' : 'प्रतीक्षारत')}</span>
-              <span class="text-[8px] text-slate-500 block">अनुमान: ${job.estimatedMins || 45} मिनट</span>
-            </div>
-
-            <!-- Step 4: Ready for Pickup -->
-            <div class="p-2 rounded-xl ${(job.status === 'ready' || job.status === 'delivered') ? 'bg-emerald-100 border border-emerald-300 text-emerald-950 font-black' : 'bg-slate-100 border border-slate-200 text-slate-500'}">
-              <span class="block text-base mb-0.5">✅</span>
-              <strong class="block font-black">4. तैयार (Ready)</strong>
-              <span class="text-[9px] block mt-0.5">${job.status === 'delivered' ? 'कस्टमर को डिलीवर' : (job.status === 'ready' ? 'दुकान से प्राप्त करें' : 'काम बाकी')}</span>
-              <span class="text-[8px] text-slate-500 block">${job.actualDurationMins ? 'कुल: ' + job.actualDurationMins + ' min' : (job.completedAt ? job.completedAt.slice(0, 16) : '—')}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 font-bold">
-          <span>अपडेट: ${job.updatedAt ? new Date(job.updatedAt).toLocaleTimeString() : 'Just now'}</span>
-          <a href="https://wa.me/917905859701?text=${encodeURIComponent('नमस्ते MMS, मेरे रिपेयर टोकन ' + tokenDisplay + ' का क्या अपडेट है?')}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition flex items-center gap-1 shadow-sm">
-            <span>💬 व्हाट्सएप पर स्टेटस पूछें</span>
-          </a>
-        </div>
-      </div>
-    `;
-  }
-
-  // --- Instagram Live Repair Showcase Feed ---
-  function renderInstagramFeed() {
-    const container = document.getElementById('instagram-feed-container');
-    if (!container) return;
-
-    const posts = [
-      { img: 'images/user_img_9.jpg', title: 'OCA डिस्प्ले लेमिनेशन लैब (Hazratganj)', date: 'आज' },
-      { img: 'images/user_img_2.jpg', title: 'मदरबोर्ड IC लेवल माइक्रो-सोल्डरिंग', date: 'कल' },
-      { img: 'images/user_img_11.jpg', title: 'iPhone स्क्रीन रिप्लेसमेंट (100% ओरिजिनल)', date: '2 दिन पहले' },
-      { img: 'images/user_img_6.jpg', title: 'ओरिजिनल बैटरी टेस्टिंग व रिप्लेसमेंट', date: '3 दिन पहले' },
-      { img: 'images/user_img_5.jpg', title: 'मदरबोर्ड IC शील्ड व शॉर्टिंग रिपेयर', date: 'इस हफ्ते' },
-      { img: 'images/user_img_8.jpg', title: 'होलसेल ओरिजिनल मोबाइल एक्सेसरीज डिस्प्ले', date: 'इस हफ्ते' }
-    ];
-
-    container.innerHTML = posts.map(p => `
-      <div class="group relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm aspect-square">
-        <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-3 text-white">
-          <p class="text-xs font-bold leading-snug">${p.title}</p>
-          <span class="text-[10px] text-slate-300 mt-0.5">${p.date} • @monumobilesolution</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // ==========================================
-  // STAFF PORTAL & MANAGEMENT CONTROLLERS
-  // ==========================================
-  
-  
-  // =========================================================================
-  // PORTAL I18N DICTIONARY (PRIMARY: ENGLISH, SECONDARY: HINDI)
-  // =========================================================================
-  const PORTAL_I18N = {
-    en: {
-      controlPanel: "Control Panel",
-      greeting: "Hello,",
-      subtitle: "Lucknow Head Lab • Live Control Panel",
-      publicSite: "Public Website",
-      logout: "Sign Out",
-      allBranches: "All Branches",
-      quickBill: "+ New Invoice",
-      quickToken: "+ New Token",
-      shopStatus: "Store Status:",
-      openStore: "Keep Open",
-      closeStore: "Keep Closed",
-      autoTime: "Auto Time",
-
-      // Navigation Groups
-      navCore: "OVERVIEW & KPIS",
-      navOps: "STORE OPERATIONS & BILLING",
-      navFinance: "FINANCE & ACCOUNTS",
-      navHr: "STAFF & ATTENDANCE",
-
-      // Tabs
-      tabDashboard: "Dashboard",
-      tabPos: "POS Billing",
-      tabJobs: "Repair Job Sheets",
-      tabInventory: "Inventory & Spare Parts",
-      tabTransfer: "Stock Transfer (HG ➔ Naka)",
-      tabDirectory: "Customer & Merchant CRM",
-      tabSales: "Daily Sales & Register",
-      tabKhata: "Credit Ledger (Khata)",
-      tabExpenses: "Store Expenses",
-      tabBalance: "Balance Sheet & P&L",
-      tabAttendance: "Selfie & GPS Attendance",
-      tabStaff: "Staff HR & Salaries",
-      tabSettings: "Branch & GPS Settings",
-      tabSettingsEmp: "Settings (Profile & KYC)",
-      tabMyWork: "My Assigned Work",
-
-      // Dashboard
-      dashBannerTag: "Store Operations, Sales & Staff Monitoring",
-      dashBannerDesc: "Real-time branch status, GPS-verified store opening, late-arrival alerts and net daily turnover.",
-      dashCreateBillBtn: "🛒 Create New Invoice",
-      dashCheckAttBtn: "👥 Check Attendance",
-
-      // KPIs
-      kpiSales: "Today's Total Sales",
-      kpiStaff: "Present Staff & Late",
-      kpiCredit: "Today's Credit Given",
-      kpiJobs: "Lab Repair Load",
-      kpiCash: "Cash:",
-      kpiOnline: "UPI:",
-      kpiStandardTime: "Standard Time: 10:30 AM",
-      kpiOnlyB2b: "B2B Merchants Only",
-      kpiActivePhones: "Active Phones",
-      kpiDeliveryPending: "Delivery Pending:",
-      kpiViewRegister: "View Register →",
-      kpiViewKhata: "Khata Ledger →",
-      kpiViewJobs: "Job Tokens →",
-
-      // Geofence & Store Control
-      storeStatusTitle: "Branch Live Status & GPS-Verified Control",
-      storeStatusSub: "Store managers must be within 10m of the physical branch to toggle opening status.",
-      shopOpen: "OPEN",
-      shopClosed: "CLOSED",
-      todaySales: "Today's Sales",
-      presentStaff: "Present Staff",
-      openedBy: "Opened by:",
-      openShopBtn: "📍 Open Store (GPS Verified)",
-      closeShopBtn: "🛑 Close Store",
-
-      // Attendance
-      attPunchInBtn: "📸 Duty Punch In",
-      attPunchOutBtn: "🛑 Duty Punch Out",
-      attRepunchInBtn: "🟢 Resume Duty (Punch In)",
-      attTodayWork: "Today's Work Hours",
-      attMonthWork: "Total Work This Month",
-      attRecentHistory: "Recent Attendance Logs",
-      attDate: "Date",
-      attEmployee: "Employee Name",
-      attBranch: "Branch",
-      attSelfie: "Selfie",
-      attInTime: "Punch In Time",
-      attOutTime: "Punch Out Time",
-      attHours: "Work Hours",
-      attGpsLoc: "GPS Location",
-      attStatus: "Status",
-      attAdminAction: "Admin Action",
-      attInside: "At Store",
-      attOutside: "Out of Store",
-      attApproved: "Approved",
-      attPending: "Pending Approval",
-      attRejected: "Rejected",
-      attApproveBtn: "Approve",
-      attRejectBtn: "Reject",
-
-      // CRM
-      crmMerchants: "🏪 Local Merchants (B2B)",
-      crmCustomers: "👤 Walk-in Customers",
-      crmTotalB2b: "Merchant (B2B) Total Revenue",
-      crmTotalRetail: "Retail Customer Total Revenue",
-      crmSearchPlaceholder: "Search by name or mobile number...",
-      crmExportExcel: "Download Excel Report",
-
-      // POS
-      posTitle: "POS Counter Billing & Cart",
-      posBillingStore: "Billing Branch:",
-      posSkuSearch: "Type part name, model or SKU...",
-      posAddNewSku: "➕ Add New SKU / Part",
-      posCustName: "Customer Name *",
-      posCustPhone: "Mobile Number (For WhatsApp Bill) *",
-      posDiscount: "Discount ₹",
-      posPaid: "Paid / Advance ₹",
-      posDue: "Remaining Due ₹",
-      posGenerateBill: "Generate Bill & WhatsApp Receipt",
-
-      // Sales
-      salesTitle: "Daily Sales & Cash Register",
-      salesToday: "⚡ Today",
-      salesYesterday: "📅 Yesterday",
-      salesMonth: "🗓️ This Month",
-      salesAll: "📜 All Time",
-      salesGross: "Gross Sales",
-      salesCash: "Cash in Drawer",
-      salesBank: "Bank / UPI",
-      salesDue: "Credit Given"
-    },
-    hi: {
-      controlPanel: "कंट्रोल पैनल",
-      greeting: "नमस्ते,",
-      subtitle: "लखनऊ हेड लैब • लाइव कंट्रोल पैनल",
-      publicSite: "पब्लिक वेबसाइट",
-      logout: "लॉगआउट",
-      allBranches: "सभी शाखाएं",
-      quickBill: "+ नया बिल",
-      quickToken: "+ नया टोकन",
-      shopStatus: "दुकान स्थिति:",
-      openStore: "खुली रखें",
-      closeStore: "बंद रखें",
-      autoTime: "ऑटो टाइम",
-
-      // Navigation Groups
-      navCore: "डैशबोर्ड व ओवरव्यू",
-      navOps: "दुकान ऑपरेशंस & बिलिंग",
-      navFinance: "फाइनेंस, गल्ला व एकाउंट्स",
-      navHr: "कर्मचारी, अटेंडेंस व पेरोल",
-
-      // Tabs
-      tabDashboard: "मुख्य डैशबोर्ड",
-      tabPos: "काउंटर बिलिंग (POS)",
-      tabJobs: "रिपेयर जॉब-शीट (टोकन)",
-      tabInventory: "इन्वेंट्री व स्पेयर पार्ट्स",
-      tabTransfer: "ट्रांसफर इन्वेंट्री (हजरतगंज ➔ नाका)",
-      tabDirectory: "ग्राहक व दुकानदार CRM",
-      tabSales: "डेली सेल्स व गल्ला",
-      tabKhata: "उधार खाता-बही",
-      tabExpenses: "दुकान खर्च",
-      tabBalance: "बैलेंस शीट व लाभ-हानि",
-      tabAttendance: "सेल्फी व GPS हाजिरी",
-      tabStaff: "कर्मचारी व सैलरी",
-      tabSettings: "शाखा व GPS सेटिंग्स",
-      tabSettingsEmp: "सेटिंग्स (प्रोफाइल व KYC)",
-      tabMyWork: "मेरा काम (असाइन्ड जॉब)",
-
-      // Dashboard
-      dashBannerTag: "दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग",
-      dashBannerDesc: "शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रियल-टाइम हिसाब।",
-      dashCreateBillBtn: "🛒 नया बिल बनाएं",
-      dashCheckAttBtn: "👥 हाजिरी चेक करें",
-
-      // KPIs
-      kpiSales: "आज की कुल बिक्री",
-      kpiStaff: "उपस्थित कर्मचारी & लेट",
-      kpiCredit: "आज का नया उधार",
-      kpiJobs: "लैब रिपेयर लोड",
-      kpiCash: "नकद:",
-      kpiOnline: "UPI:",
-      kpiStandardTime: "मानक समय: 10:30 AM",
-      kpiOnlyB2b: "केवल B2B दुकानदार",
-      kpiActivePhones: "चालू फोन",
-      kpiDeliveryPending: "डिलीवरी बाकी:",
-      kpiViewRegister: "रजिस्टर देखें →",
-      kpiViewKhata: "खाता-बही →",
-      kpiViewJobs: "जॉब टोकन →",
-
-      // Geofence & Store Control
-      storeStatusTitle: "शाखा लाइव स्थिति व GPS-सत्यापित स्टोर कंट्रोल",
-      storeStatusSub: "प्रबंधक केवल दुकान की वास्तविक लोकेशन (10m के दायरे) में खड़े होकर ही दुकान 'ओपन' कर सकते हैं।",
-      shopOpen: "खुली है",
-      shopClosed: "बंद है",
-      todaySales: "आज की सेल",
-      presentStaff: "उपस्थित स्टाफ",
-      openedBy: "खोला:",
-      openShopBtn: "📍 दुकान खोलें (GPS Verified)",
-      closeShopBtn: "🛑 दुकान बंद करें",
-
-      // Attendance
-      attPunchInBtn: "📸 हाजिरी लगाएं (Punch In)",
-      attPunchOutBtn: "🛑 ड्यूटी ऑफ करें (Punch Out)",
-      attRepunchInBtn: "🟢 दोबारा ड्यूटी ऑन करें",
-      attTodayWork: "आज का कार्य समय",
-      attMonthWork: "इस महीने कुल काम",
-      attRecentHistory: "हालिया हाजिरी रिकॉर्ड",
-      attDate: "तारीख",
-      attEmployee: "कर्मचारी का नाम",
-      attBranch: "शाखा",
-      attSelfie: "सेल्फी",
-      attInTime: "इन-टाइम",
-      attOutTime: "आउट-टाइम",
-      attHours: "कुल कार्य-घंटे",
-      attGpsLoc: "GPS लोकेशन",
-      attStatus: "स्थिति",
-      attAdminAction: "एडमिन एक्शन",
-      attInside: "दुकान पर",
-      attOutside: "दुकान से बाहर",
-      attApproved: "स्वीकृत",
-      attPending: "पेंडिंग अप्रूवल",
-      attRejected: "अस्वीकृत",
-      attApproveBtn: "स्वीकृत करें",
-      attRejectBtn: "अस्वीकृत करें",
-
-      // CRM
-      crmMerchants: "🏪 लोकल दुकानदार (B2B)",
-      crmCustomers: "👤 सामान्य ग्राहक (Walk-in)",
-      crmTotalB2b: "दुकानदार (B2B) कुल व्यापार",
-      crmTotalRetail: "रीटेल ग्राहक कुल व्यापार",
-      crmSearchPlaceholder: "नाम या मोबाइल नंबर से खोजें...",
-      crmExportExcel: "एक्सेल में डाउनलोड करें",
-
-      // POS
-      posTitle: "काउंटर बिलिंग व कार्ट",
-      posBillingStore: "बिलिंग दुकान:",
-      posSkuSearch: "पार्ट, मॉडल या SKU नाम टाइप करें...",
-      posAddNewSku: "➕ नया पार्ट जोड़ें",
-      posCustName: "ग्राहक का नाम *",
-      posCustPhone: "मोबाइल नंबर (WhatsApp बिल हेतु) *",
-      posDiscount: "छूट (₹)",
-      posPaid: "जमा / एडवांस रकम ₹",
-      posDue: "बकाया रकम ₹",
-      posGenerateBill: "बिल व WhatsApp रसीद बनाएं",
-
-      // Sales
-      salesTitle: "डेली सेल्स व गल्ला मिलान",
-      salesToday: "⚡ आज",
-      salesYesterday: "📅 कल",
-      salesMonth: "🗓️ इस महीने",
-      salesAll: "📜 सभी",
-      salesGross: "कुल बिक्री",
-      salesCash: "गल्ले में नकद",
-      salesBank: "बैंक / UPI",
-      salesDue: "आज का दिया उधार"
-    }
-  };
-
-  function pT(key) {
-    const lang = state.portalLang || 'en';
-    const dict = PORTAL_I18N[lang] || PORTAL_I18N['en'];
-    return dict[key] || (PORTAL_I18N['en'] && PORTAL_I18N['en'][key]) || key;
-  }
-
-  function setPortalLanguage(lang) {
     state.portalLang = lang;
-    localStorage.setItem('mms_portal_lang', lang);
+    state.lang = lang;
+    state.currentLang = lang;
+    try {
+      localStorage.setItem('mms_portal_lang', lang);
+      localStorage.setItem('mms_lang', lang);
+    } catch(e) {}
+
     applyPortalLanguageUI();
-    // Re-render active tab view
-    if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
-      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
-      else if (state.activeAdminTab === 'dashboard') renderDashboard();
-    else if (state.activeAdminTab === 'pos') renderPOS();
-    else if (state.activeAdminTab === 'jobs') renderJobCards();
-    else if (state.activeAdminTab === 'inventory') renderInventory();
-    else if (state.activeAdminTab === 'transfer') renderStockTransferModule();
-    else if (state.activeAdminTab === 'directory') renderDirectoryCRM();
-    else if (state.activeAdminTab === 'sales') renderDailySales();
-    else if (state.activeAdminTab === 'khata') renderKhataLedger();
-    else if (state.activeAdminTab === 'expenses') renderExpenses();
-    else if (state.activeAdminTab === 'balance') renderBalanceSheet();
-    else if (state.activeAdminTab === 'attendance') renderAttendanceModule();
-    else if (state.activeAdminTab === 'staff') renderStaffSalaries();
-    else if (state.activeAdminTab === 'settings') renderSettingsModule();
+    if (typeof renderPortalShopControl === 'function') renderPortalShopControl();
+    if (typeof renderPortalBranchSwitcher === 'function') renderPortalBranchSwitcher();
+
+    // Re-render user role and greeting cleanly
+    const greetingEl = document.getElementById('header-greeting');
+    const userRoleEl = document.getElementById('header-user-role');
+    const userNameEl = document.getElementById('header-user-name');
+    if (userNameEl && state.currentUser) {
+      let displayName = state.currentUser.name || 'Admin';
+      displayName = displayName.replace(/\s*\([^)]*\)/g, '').trim();
+      userNameEl.textContent = displayName;
+    }
+    if (greetingEl) {
+      greetingEl.textContent = __L('नमस्ते,', 'Hello,');
+    }
+    if (userRoleEl && state.currentUser) {
+      const role = (state.currentUser.role || 'Admin').toLowerCase();
+      userRoleEl.textContent = role === 'admin' ? __L('सुपर एडमिन (मालिक)', 'Super Admin (Owner)') : role === 'manager' ? __L('ब्रांच मैनेजर', 'Branch Manager') : __L('रिपेयर टेक्नीशियन', 'Repair Technician');
+    }
+
+    // Switch and re-render the active tab
+    switchPortalTab(state.activeAdminTab || 'dashboard');
   }
 
   function applyPortalLanguageUI() {
@@ -2577,24 +1573,24 @@ function filterCategoryDropdown(inputId, query) {
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
-              ${curBranch === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(curBranch)}
+              ${curBranch === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(curBranch)}
             </span>
-            <span class="text-xs text-slate-400">• आज का लाइव कंट्रोल डैशबोर्ड</span>
+            <span class="text-xs text-slate-400">• ${__L("आज का लाइव कंट्रोल डैशबोर्ड", "Today's Live Control Dashboard")}</span>
           </div>
           <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
             दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग
           </h2>
           <p class="text-xs text-slate-300 mt-1 max-w-2xl">
-            शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रिय-टाइम हिसाब।
+            ${__L("शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रियल-टाइम हिसाब।", "Live branch status, GPS-verified store opening, staff late arrival alerts, and real-time net sales summary.")}
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2 self-start md:self-center">
           <button onclick="window.MMS_APP.switchPortalTab('pos')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg transition flex items-center gap-2">
-            <span>🛒 नया बिल बनाएं</span>
+            <span>🛒 ${__L("नया बिल बनाएं", "New Invoice")}</span>
           </button>
           <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-bold transition flex items-center gap-1.5">
-            <span>👥 हाजिरी चेक करें</span>
+            <span>👥 ${__L("हाजिरी चेक करें", "Check Attendance")}</span>
           </button>
         </div>
       </div>
@@ -2605,7 +1601,7 @@ function filterCategoryDropdown(inputId, query) {
         <!-- Card 1: Today's Total Sales -->
         <div class="bg-gradient-to-br from-white to-emerald-50/40 p-5 rounded-2xl border border-emerald-100/70 shadow-2xs hover:shadow-md transition">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">आज की कुल बिक्री (Sales)</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज की कुल बिक्री", "Today's Total Sales")}</span>
             <span class="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold">₹</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -2625,14 +1621,14 @@ function filterCategoryDropdown(inputId, query) {
           </div>
           <div class="flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-black text-slate-900">${presentStaffCount}</span>
-            <span class="text-xs text-slate-400 font-bold">स्टाफ न</span>
+            <span class="text-xs text-slate-400 font-bold">${__L("उपस्थित स्टाफ", "Staff Present")}</span>
             ${lateCount > 0 
-              ? `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">🔴 ${lateCount} लेट</span>`
-              : `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 सब ऑन-टाइम</span>`
+              ? `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">🔴 ${lateCount} ${__L("लेट", "Late")}</span>`
+              : `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 ${__L("सब समय पर", "All On-Time")}</span>`
             }
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>मानक टाइम: <strong>10:30 AM</strong></span>
+            <span>${__L("मानक समय:", "Standard Time:")} <strong>10:30 AM</strong></span>
             <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-blue-600 font-bold hover:underline">रजिस्टर देखें →</button>
           </div>
         </div>
@@ -2640,7 +1636,7 @@ function filterCategoryDropdown(inputId, query) {
         <!-- Card 3: Today's New Udhar (Credit) -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">आज का नया उधार (Credit)</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज का नया उधार", "Today's New Credit")}</span>
             <span class="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base">📕</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black ${todayNewCredit > 0 ? 'text-amber-600' : 'text-slate-900'}">
@@ -2662,11 +1658,11 @@ function filterCategoryDropdown(inputId, query) {
             <span class="text-2xl sm:text-3xl font-black text-slate-900">${activeJobsCount}</span>
             <span class="text-xs text-slate-400 font-bold">चालू फोन</span>
             <span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-purple-100 text-purple-800">
-              ${readyJobsCount} रेडी
+              ${readyJobsCount} ${__L("रेडी (तैयार)", "Ready")}
             </span>
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>डिलीवरी बाकी: ${activeJobsCount}</span>
+            <span>${__L("डिलीवरी बाकी:", "Pending Delivery:")} ${activeJobsCount}</span>
             <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-purple-600 font-bold hover:underline">जॉब टोकन →</button>
           </div>
         </div>
@@ -2678,16 +1674,16 @@ function filterCategoryDropdown(inputId, query) {
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-base font-black text-slate-900">📍 शाखा लाइव स्थिति व GPS-सत्यापित स्टोर कंट्रोल</h3>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">Anti-Spoof Geofence</span>
+              <h3 class="text-base font-black text-slate-900">📍 ${__L("शाखा लाइव स्थिति व GPS-सत्यापित स्टोर कंट्रोल", "Live Branch Status & GPS-Verified Store Control")}</h3>
+              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">${__L("सत्यापित जियोफेंसिंग", "Anti-Spoof Geofence")}</span>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">
-              प्रबंधक केवल दुकान की वास्तविक लोकेशन (250m के दायरे) में खड़े होकर ही दुकान "ओपन" कर सकते हैं। घर बैठे कोई दुकान नहीं खोल सकता।
+              ${__L("प्रबंधक केवल दुकान की वास्तविक लोकेशन (250m के दायरे) में खड़े होकर ही दुकान खोल सकते हैं।", "Managers can only open store within 250m of verified physical location.")}
             </p>
           </div>
           <div class="text-xs text-slate-500 flex items-center gap-2">
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span>हरे का मतलब दुकान खुली है</span>
+            <span>${__L("हरे का मतलब दुकान खुली है", "Green indicates store is OPEN")}</span>
           </div>
         </div>
 
@@ -2706,25 +1702,25 @@ function filterCategoryDropdown(inputId, query) {
                     <span class="text-sm font-black text-slate-900">${b.name}</span>
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1.5 ${bStatus.isOpen ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
                       <span class="w-1.5 h-1.5 rounded-full ${bStatus.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-                      ${bStatus.isOpen ? '🟢 खुली है (OPEN)' : '🔴 बंद है (CLOSED)'}
+                      ${bStatus.isOpen ? __L('🟢 खुली है', '🟢 OPEN') : __L('🔴 बंद है', '🔴 CLOSED')}
                     </span>
                   </div>
                   <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${b.address}</p>
 
                   <div class="mt-3 grid grid-cols-2 gap-2 text-xs bg-white p-2.5 rounded-lg border border-slate-100">
                     <div>
-                      <span class="text-slate-400 text-[10px] block">आज की सेल</span>
+                      <span class="text-slate-400 text-[10px] block">${__L("आज की बिक्री", "Today's Sales")}</span>
                       <strong class="text-slate-900 font-bold">₹${bSales.toLocaleString('en-IN')}</strong>
                     </div>
                     <div>
-                      <span class="text-slate-400 text-[10px] block">उपस्थित स्टाफ</span>
-                      <strong class="text-blue-600 font-bold">${bStaff.length} कर्मचारी</strong>
+                      <span class="text-slate-400 text-[10px] block">${__L("उपस्थित स्टाफ", "Present Staff")}</span>
+                      <strong class="text-blue-600 font-bold">${bStaff.length} ${__L("कर्मचारी", "Staff")}</strong>
                     </div>
                   </div>
 
                   ${bStatus.isOpen && bStatus.openedBy ? `
                     <div class="mt-2 text-[10px] text-slate-500 flex items-center justify-between bg-emerald-100/50 px-2 py-1 rounded border border-emerald-200/50">
-                      <span>👤 खोला: <strong>${bStatus.openedBy}</strong></span>
+                      <span>👤 ${__L("खोला:", "Opened By:")} <strong>${bStatus.openedBy}</strong></span>
                       <span>⏰ ${bStatus.time || '10:00 AM'}</span>
                     </div>
                   ` : ''}
@@ -2737,7 +1733,7 @@ function filterCategoryDropdown(inputId, query) {
                     </button>
                   ` : `
                     <button onclick="window.MMS_APP.verifyAndOpenStore('${b.id}')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center justify-center gap-1.5">
-                      <span>📍 दुकान खोलें (GPS Verified)</span>
+                      <span>📍 ${__L("दुकान खोलें", "Open Store")}</span>
                     </button>
                   `}
                   ${isOwner ? `
@@ -3085,25 +2081,50 @@ function filterCategoryDropdown(inputId, query) {
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left: Product Search, Quick SKU Add, Custom Labor & Cart Table -->
         <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-            <div>
+          <div class="mb-4 pb-3 border-b border-slate-100 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
               <div class="flex flex-wrap items-center gap-3">
                 <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">${__L("काउंटर बिलिंग व कार्ट", "POS Counter Billing & Cart")}</h3>
+                
+                <!-- Billing Store Selector -->
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-md border-2 border-blue-400">
                   <span class="text-xs font-bold text-blue-200">🏢 ${__L("बिलिंग दुकान:", "Billing Store:")}</span>
                   <span class="text-sm font-black text-amber-300 tracking-wide">${getBranchName((state.posBillingBranch && state.posBillingBranch !== 'all') ? state.posBillingBranch : (state.activeBranch && state.activeBranch !== 'all') ? state.activeBranch : 'branch_hazratganj')}</span>
                   <select onchange="window.MMS_APP.setPosBillingBranch(this.value)" class="ml-1 bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold rounded-lg px-2 py-0.5 border-none outline-none cursor-pointer">
-                    <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">हजरतगंज (Head Lab)</option>
-                    <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' || (state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''} class="text-slate-900">नाका हिंडोला (लखनऊ)</option>
-                    <option value="branch_kannauj" ${(state.posBillingBranch || state.activeBranch) === 'branch_kannauj' ? 'selected' : ''} class="text-slate-900">कन्नौज (सरायमीरा)</option>
+                    <option value="branch_hazratganj" ${(state.posBillingBranch || state.activeBranch) === 'branch_hazratganj' ? 'selected' : ''} class="text-slate-900">${__L("हजरतगंज (मुख्य लैब)", "Hazratganj (Head Lab)")}</option>
+                    <option value="branch_naka" ${(state.posBillingBranch || state.activeBranch) === 'branch_naka' ? 'selected' : ''} class="text-slate-900">${__L("नाका हिंडोला (लखनऊ)", "Naka Hindola (Lucknow)")}</option>
+                    <option value="branch_kannauj" ${(state.posBillingBranch || state.activeBranch) === 'branch_kannauj' ? 'selected' : ''} class="text-slate-900">${__L("कन्नौज (सरायमीरा)", "Kannauj (Saraimeera)")}</option>
                   </select>
                 </div>
+
+                <!-- 📅 PROMINENT DATE PICKER RIGHT HERE AT THE TOP! -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl ${isBackdated ? 'bg-amber-500 text-slate-950 border-2 border-amber-300 ring-2 ring-amber-400' : 'bg-slate-900 text-white border-2 border-slate-700'} shadow-md">
+                  <span class="text-xs font-black flex items-center gap-1">
+                    <span>📅</span> <span>${__L("बिल की तारीख:", "Bill Date:")}</span>
+                  </span>
+                  ${canBackdate ? `
+                    <input type="date" id="pos-top-invoice-date" value="${selectedDate}" onchange="window.MMS_APP.setPosInvoiceDate(this.value)" class="bg-white text-slate-950 font-mono text-xs font-black rounded-lg px-2.5 py-1 border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                    ${isBackdated ? `
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-950 text-amber-100 animate-pulse">
+                        ${__L("⚠️ बैक-डेट बिलिंग", "⚠️ Backdated")}
+                      </span>
+                      <button type="button" onclick="window.MMS_APP.setPosInvoiceDate(getTodayDateStr())" class="px-2 py-0.5 text-[10px] font-black bg-white/30 hover:bg-white/50 text-white rounded-md cursor-pointer transition" title="${__L("आज की तारीख सेट करें", "Reset to today")}">
+                        ${__L("आज करें", "Reset Today")}
+                      </button>
+                    ` : ''}
+                  ` : `
+                    <span class="font-mono text-xs font-black bg-slate-800 text-slate-100 px-2.5 py-1 rounded-lg">${selectedDate}</span>
+                    <span class="text-[10px] text-slate-400 font-bold">🔒 ${__L("लॉक", "Locked")}</span>
+                  `}
+                </div>
               </div>
-              <p class="text-xs text-slate-500">${__L("लाइव पार्ट सर्च करें, नया पार्ट जोड़ें या कस्टम रिपेयर सर्विस चार्ज लगाएं", "Live SKU search, quick part add, and custom repair labor charges")}</p>
+
+              <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 self-start sm:self-center">
+                ${__L("⚡ ऑटो-स्टॉक डिडक्शन चालू", "⚡ Auto-Stock Deduction Active")}
+              </span>
             </div>
-            <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-              ${__L("⚡ ऑटो-स्टॉक डिडक्शन चालू", "⚡ Auto-Stock Deduction Active")}
-            </span>
+            
+            <p class="text-xs text-slate-500">${__L("लाइव पार्ट सर्च करें, नया पार्ट जोड़ें या कस्टम रिपेयर सर्विस चार्ज लगाएं", "Live SKU search, quick part add, and custom repair labor charges")}</p>
           </div>
 
           <!-- Live SKU Search Input & Quick Add Button (NO Dropdown, Direct Search) -->
@@ -3137,33 +2158,33 @@ function filterCategoryDropdown(inputId, query) {
               <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl shadow-inner space-y-3">
                 <div class="flex items-center justify-between">
                   <h4 class="text-xs font-black text-blue-900 flex items-center gap-1.5">
-                    <span>⚡ नया पार्ट तुरंत इन्वेंट्री में जोड़ें (Add New SKU)</span>
+                    <span>⚡ ${__L("नया पार्ट तुरंत इन्वेंट्री में जोड़ें", "Add New SKU to Inventory")}</span>
                   </h4>
                   <button type="button" onclick="window.MMS_APP.closeQuickSkuAdd()" class="text-slate-400 hover:text-slate-700 font-bold text-sm">✕</button>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">पार्ट / SKU का नाम *</label>
+                    <label class="block font-bold text-slate-700 mb-1">${__L("पार्ट / SKU का नाम *", "Part / SKU Name *")}</label>
                     <input id="qsku-name" type="text" value="${state.quickSkuPrefill || ''}" placeholder="उदा. Vivo Y20 Combo Folder (OEM)" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold">
                   </div>
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">कैटेगरी (सर्च करने के लिए टाइप करें) *</label>
+                    <label class="block font-bold text-slate-700 mb-1">${__L("कैटेगरी (सर्च करने हेतु टाइप करें) *", "Category (Type to search) *")}</label>
                     ${renderCategoryDropdownHTML('qsku-category', 'Display - Copy')}
                   </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 text-xs">
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">खरीद लागत ₹ (Cost)</label>
+                    <label class="block font-bold text-slate-700 mb-1">${__L("खरीद लागत ₹", "Cost Price ₹")}</label>
                     <input id="qsku-cost" type="number" placeholder="800" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-mono font-bold">
                   </div>
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">बिक्री रेट ₹ (Sell Price)</label>
+                    <label class="block font-bold text-slate-700 mb-1">${__L("बिक्री रेट ₹", "Selling Price ₹")}</label>
                     <input id="qsku-sell" type="number" placeholder="1800" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-mono font-bold">
                   </div>
                   <div>
-                    <label class="block font-bold text-slate-700 mb-1">प्रारंभिक स्टॉक</label>
+                    <label class="block font-bold text-slate-700 mb-1">${__L("प्रारंभिक स्टॉक", "Initial Stock")}</label>
                     <input id="qsku-stock" type="number" placeholder="5" value="5" class="w-full p-2 bg-white border border-slate-300 rounded-lg font-mono font-bold">
                   </div>
                 </div>
@@ -3171,7 +2192,7 @@ function filterCategoryDropdown(inputId, query) {
                 <div class="flex justify-end gap-2 pt-1">
                   <button type="button" onclick="window.MMS_APP.closeQuickSkuAdd()" class="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-lg">रद्द करें</button>
                   <button type="button" onclick="window.MMS_APP.saveQuickSku()" class="px-4 py-1.5 text-xs font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm flex items-center gap-1">
-                    💾 इन्वेंट्री में सेव करें व कार्ट में जोड़ें
+                    💾 ${__L("इन्वेंट्री में सेव करें व कार्ट में जोड़ें", "Save to Inventory & Add to Cart")}
                   </button>
                 </div>
               </div>
@@ -3180,7 +2201,7 @@ function filterCategoryDropdown(inputId, query) {
 
           <!-- Custom Labor / Extra Charge Input -->
           <div class="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
-            <span class="text-xs font-black text-slate-700 block mb-2">या कस्टम रिपेयर सर्विस / लेबर चार्ज जोड़ें:</span>
+            <span class="text-xs font-black text-slate-700 block mb-2">${__L("या कस्टम रिपेयर सर्विस / लेबर चार्ज जोड़ें:", "Or Add Custom Repair Service / Labor Charge:")}</span>
             <div class="flex gap-2">
               <input id="pos-custom-name" type="text" placeholder="${__L("उदा. सिर्फ ग्लास चेंज लेबर / IC फिटिंग", "e.g. Glass Change Labor / IC Fitting")}" class="w-2/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-medium">
               <input id="pos-custom-rate" type="number" placeholder="${__L("रेट ₹", "Rate ₹")}" class="w-1/3 p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold font-mono">
@@ -3406,11 +2427,11 @@ function filterCategoryDropdown(inputId, query) {
             ${state.posPayment.mode === 'advance' ? `
               <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 space-y-2 mt-2">
                 <div class="flex items-center justify-between">
-                  <label class="text-xs font-bold text-amber-900">एडवांस कितना जमा हुआ? (₹)</label>
+                  <label class="text-xs font-bold text-amber-900">${__L("एडवांस कितना जमा हुआ? (₹)", "Advance Amount Paid? (₹)")}</label>
                   <input id="pos-advance-paid-input" type="number" value="${state.posPayment.paid || 0}" class="w-28 p-1.5 bg-white border border-amber-300 rounded-lg text-xs font-mono font-bold text-right">
                 </div>
                 <div class="flex justify-between text-xs font-black text-rose-700 pt-1 border-t border-amber-200">
-                  <span>शेष बकाया (Due Balance):</span>
+                  <span>${__L("शेष बकाया:", "Remaining Due Balance:")}</span>
                   <span id="pos-advance-due-calc" class="font-mono">${formatCurrency(Math.max(0, calculateCartNet() - (state.posPayment.paid || 0)))}</span>
                 </div>
               </div>
@@ -3420,7 +2441,7 @@ function filterCategoryDropdown(inputId, query) {
             ${(state.posPayment.mode === 'full_udhar' || state.posPayment.mode === 'advance') ? `
               <div class="p-3 bg-rose-50 rounded-xl border border-rose-200 space-y-2 mt-2 text-xs">
                 <div class="flex items-center justify-between text-rose-900 font-bold">
-                  <span>📝 उधार नोट (किसको दिया / विवरण):</span>
+                  <span>📝 ${__L("उधार नोट (किसको दिया / विवरण):", "Credit Note (Given to / Details):")}</span>
                   <span class="text-[10px] text-slate-500 font-mono">${getTodayDateStr()} • ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
                 <input 
@@ -3429,7 +2450,7 @@ function filterCategoryDropdown(inputId, query) {
                   placeholder="उदा. राहुल भाई ले गए, कल शाम देंगे / डिस्प्ले टेस्टिंग ले गए" 
                   class="w-full p-2 bg-white border border-rose-300 rounded-lg text-xs font-medium focus:ring-1 focus:ring-rose-500"
                 >
-                <p class="text-[10px] text-rose-700">* यह नोट व तारीख/समय खाता-बही में दर्ज रहेगा।</p>
+                <p class="text-[10px] text-rose-700">${__L("* यह नोट व तारीख खाता-बही में दर्ज रहेगा।", "* This note and date will be logged in credit ledger.")}</p>
               </div>
             ` : ''}
           </div>
@@ -3495,7 +2516,7 @@ function filterCategoryDropdown(inputId, query) {
                   </td>
                   <td class="p-2.5 text-center">
                     <button onclick='window.MMS_APP.showExistingInvoice("${invId}")' class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded text-[11px] font-bold shadow-2xs transition active:scale-95 cursor-pointer">
-                      रसीद देखें
+                      ${__L("रसीद देखें", "View Receipt")}
                     </button>
                   </td>
                 </tr>
@@ -4478,7 +3499,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="text-base font-black text-slate-900">${__L("इन्वेंट्री व SKU स्टॉक लिस्ट", "Inventory & SKU Stock List")}</h3>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-200">
-                  ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                  ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
                 </span>
               </div>
               <p class="text-xs text-slate-500">${__L("20+ श्रेणियों में स्पेयर पार्ट्स का लाइव स्टॉक, खरीद व बिक्री दर", "Live stock, cost & selling prices of spare parts across 20+ categories")}</p>
@@ -5121,7 +4142,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <div class="flex items-center gap-2">
               <span class="text-xs uppercase font-bold text-amber-100 block">${__L("मार्केट में कुल बकाया उधार", "Total Market Outstanding Credit")}</span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-white/20 text-white border border-white/30">
-                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
             </div>
             <span class="text-2xl sm:text-3xl font-black font-mono">${formatCurrency(totalMarketDue)}</span>
@@ -5314,7 +4335,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 तारीख व अवधि फिल्टर
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
               <span class="text-xs text-blue-200 font-bold">• चयनित: ${filterLabel}</span>
             </div>
@@ -5679,7 +4700,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             '</div>'
           ) : (
             '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer">' +
-              '${__L("⚠️ अभी असाइन नहीं", "⚠️ Unassigned")}' +
+              __L("⚠️ अभी असाइन नहीं", "⚠️ Unassigned") +
             '</button>'
           )) +
         '</td>' +
@@ -5698,8 +4719,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           '<div class="flex items-center justify-end gap-1.5">' +
             '<a href="https://wa.me/91' + job.customerPhone.replace(/[^0-9]/g, '') + '?text=' + waText + '" target="_blank" class="p-1 text-emerald-600 hover:text-emerald-700 font-bold" title="WhatsApp पर स्टेटस भेजें">💬 WA</a>' +
             '<button onclick="window.MMS_APP.openWorkAssignmentModal(\'' + job.token + '\')" class="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-lg text-[10px]" title="काम असाइन करें या टाइमलाइन देखें">⚡ असाइन</button>' + 
-            '<button onclick="window.MMS_APP.printJobToken(\'' + job.token + '\')" class="p-1 text-blue-600 hover:text-blue-800 font-bold" title="${__L("टोकन पर्ची प्रिंट करें", "Print Token Receipt")}">${__L("🖨️ प्रिंट", "🖨️ Print")}</button>' +
-            '<button onclick="window.MMS_APP.deleteJobOrInvoice(\'' + job.token + '\')" class="p-1 text-rose-600 hover:text-rose-800 font-bold" title="${__L("टोकन हटाएं", "Delete Token")}">${__L("🗑️ हटाएं", "🗑️ Delete")}</button>' +
+            '<button onclick="window.MMS_APP.printJobToken(\'' + job.token + '\')" class="p-1 text-blue-600 hover:text-blue-800 font-bold" ' + 'title="' + __L("टोकन पर्ची प्रिंट करें", "Print Token Receipt") + '">' + __L("🖨️ प्रिंट", "🖨️ Print") + '</button>' +
+            '<button onclick="window.MMS_APP.deleteJobOrInvoice(\'' + job.token + '\')" class="p-1 text-rose-600 hover:text-rose-800 font-bold" ' + 'title="' + __L("टोकन हटाएं", "Delete Token") + '">' + __L("🗑️ हटाएं", "🗑️ Delete") + '</button>' +
           '</div>' +
         '</td>' +
       '</tr>';
@@ -5712,7 +4733,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
             <div class="flex items-center gap-2 flex-wrap">
               <h3 class="text-base font-black text-slate-900">${__L("रिपेयर जॉब-शीट व टोकन लिस्ट", "Repair Job Sheets & Token List")}</h3>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-200">
-                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
             </div>
             <p class="text-xs text-slate-500">${__L("ग्राहकों के रिपेयरिंग मोबाइल, पैटर्न लॉक और टोकन स्टेटस", "Live customer repair devices, passcodes and token status")}</p>
@@ -6645,13 +5666,13 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const curBranch = state.activeBranch || 'all';
     container.innerHTML = `
       <span class="text-[11px] uppercase font-black text-slate-500 flex items-center gap-1">
-        <span>🏢 ${__L("सुपर एडमिन शाखा व्यू:", "Super Admin Branch View:")}</span>
+        <span>🏢 ${__L("शाखा व्यू:", "Branch View:")}</span>
       </span>
       <select id="portal-branch-select" onchange="window.MMS_APP.setPortalActiveBranch(this.value)" class="bg-white border border-blue-300 text-blue-950 text-xs font-black rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer shadow-2xs">
-        <option value="all" ${curBranch === 'all' ? 'selected' : ''}>🌐 सभी शाखाएं (Master All Branches)</option>
-        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>📍 1. हजरतगंज (Head Lab)</option>
-        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>📍 2. नाका हिंडोला शाखा</option>
-        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>📍 3. कन्नौज (सरायमीरा)</option>
+        <option value="all" ${curBranch === 'all' ? 'selected' : ''}>${__L("🌐 सभी शाखाएं", "🌐 All Branches")}</option>
+        <option value="branch_hazratganj" ${curBranch === 'branch_hazratganj' ? 'selected' : ''}>${__L("📍 1. हजरतगंज (मुख्य लैब)", "📍 1. Hazratganj (Head Lab)")}</option>
+        <option value="branch_naka" ${curBranch === 'branch_naka' ? 'selected' : ''}>${__L("📍 2. नाका हिंडोला शाखा", "📍 2. Naka Hindola Branch")}</option>
+        <option value="branch_kannauj" ${curBranch === 'branch_kannauj' ? 'selected' : ''}>${__L("📍 3. कन्नौज (सरायमीरा)", "📍 3. Kannauj (Saraimeera)")}</option>
       </select>
     `;
   }
@@ -7117,7 +6138,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 स्टाफ अटेंडेंस मॉनिटरिंग
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-300 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
               <span class="text-xs text-blue-200 font-bold">• ${dateFilterLabel}</span>
             </div>
@@ -9194,7 +8215,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 दुकान खर्च ट्रैकर
               </span>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
-                ${branchFilter === 'all' ? '${__L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches")}' : getBranchName(branchFilter)}
+                ${branchFilter === 'all' ? __L("🏢 सभी 3 शाखाएं", "🏢 All 3 Branches") : getBranchName(branchFilter)}
               </span>
             </div>
             <h3 class="text-xl font-black">${__L("दुकान खर्च", "Store Overhead Expenses")}</h3>
