@@ -10,7 +10,7 @@
   <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
   <script>
     (function() {
-      window.MMS_CLIENT_BUILD = "20261116_98";
+      window.MMS_CLIENT_BUILD = "20261116_99";
 
       // 1. Kill mobile bfcache (back-forward frozen cache)
       window.addEventListener('pageshow', function(e) {
@@ -417,8 +417,9 @@
       <!-- Desktop Navigation Links -->
       <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-700">
         <a href="#services" class="hover:text-blue-600 transition" data-i18n="navServices">सर्विस व रेट</a>
-        <a href="#track" class="hover:text-blue-600 transition" data-i18n="navTrack">ट्रैक रिपेयर</a>
-        <a href="#warranty" class="hover:text-blue-600 transition" data-i18n="navWarranty">वारंटी चेक</a>
+        <a href="#machinery" class="hover:text-blue-600 transition" data-i18n="footerMachinery">आधुनिक मशीनरी</a>
+        <a href="#reviews" class="hover:text-blue-600 transition" data-i18n="footerReviews">गूगल रिव्यू</a>
+        <a href="#tracker" class="hover:text-blue-600 transition" data-i18n="navTrack">ट्रैक रिपेयर</a>
         <a href="#branches" class="hover:text-blue-600 transition" data-i18n="navBranches">शाखाएं व संपर्क</a>
       </nav>
 
@@ -446,7 +447,7 @@
   <main id="public-section" class="flex-grow">
     
     <!-- HERO SECTION (Mobile Overflow Proof & Real Phone Closeup Photo) -->
-    <section id="home" class="relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:py-20 bg-gradient-to-b from-white via-blue-50/20 to-slate-50 border-b border-slate-200/80">
+    <section id="home" class="relative overflow-hidden pt-6 pb-12 sm:pt-8 sm:pb-16 lg:py-20 border-b border-amber-900/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
@@ -480,23 +481,23 @@
               </a>
             </div>
 
-            <!-- Trust Metrics Grid (Express Repair focused) -->
+            <!-- Trust Metrics Grid (Clay Palette Matching Reference) -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 pt-6 border-t border-amber-900/10">
-              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-sm text-center lg:text-left">
+              <div class="p-3.5 sm:p-4 clay-card clay-card-blue rounded-2xl text-center lg:text-left">
                 <span class="block text-lg sm:text-xl font-black text-blue-700" data-i18n="statRepairs">15,000+ सफल रिपेयर</span>
-                <span class="text-[11px] font-semibold text-slate-500" data-i18n="statRepairsSub">हजरतगंज व लखनऊ में</span>
+                <span class="text-[11px] font-semibold text-slate-600" data-i18n="statRepairsSub">हजरतगंज व लखनऊ में</span>
               </div>
-              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-sm text-center lg:text-left">
-                <span class="block text-lg sm:text-xl font-black text-emerald-600" data-i18n="statSpeed">सुपरफास्ट</span>
-                <span class="text-[11px] font-semibold text-slate-500" data-i18n="statSpeedSub">एक्सप्रेस सर्विस</span>
+              <div class="p-3.5 sm:p-4 clay-card clay-card-mint rounded-2xl text-center lg:text-left">
+                <span class="block text-lg sm:text-xl font-black text-emerald-700" data-i18n="statSpeed">सुपरफास्ट</span>
+                <span class="text-[11px] font-semibold text-slate-600" data-i18n="statSpeedSub">एक्सप्रेस सर्विस</span>
               </div>
-              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-sm text-center lg:text-left">
-                <span class="block text-lg sm:text-xl font-black text-amber-500" data-i18n="statRating">4.9 ★</span>
-                <span class="text-[11px] font-semibold text-slate-500" data-i18n="statRatingSub">गूगल कस्टमर रेटिंग</span>
+              <div class="p-3.5 sm:p-4 clay-card clay-card-peach rounded-2xl text-center lg:text-left">
+                <span class="block text-lg sm:text-xl font-black text-amber-600" data-i18n="statRating">4.9 ★</span>
+                <span class="text-[11px] font-semibold text-slate-600" data-i18n="statRatingSub">गूगल कस्टमर रेटिंग</span>
               </div>
-              <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-sm text-center lg:text-left">
-                <span class="block text-lg sm:text-xl font-black text-indigo-600" data-i18n="statExp">10+ वर्ष</span>
-                <span class="text-[11px] font-semibold text-slate-500" data-i18n="statExpSub">अनुभवी इंजीनियर्स</span>
+              <div class="p-3.5 sm:p-4 clay-card clay-card-lilac rounded-2xl text-center lg:text-left">
+                <span class="block text-lg sm:text-xl font-black text-purple-700" data-i18n="statExp">10+ वर्ष</span>
+                <span class="text-[11px] font-semibold text-slate-600" data-i18n="statExpSub">अनुभवी इंजीनियर्स</span>
               </div>
             </div>
           </div>
@@ -543,113 +544,294 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           
           <!-- Service 1: Screen -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_11.jpg" alt="Display Screen & Broken Glass OCA Replacement" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-blue p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_11.jpg" alt="Display Screen & Broken Glass OCA Replacement" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servScreen">डिस्प्ले व ग्लास रिप्लेसमेंट</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-900 border border-blue-200" data-i18n="servScreenBadge">Express Service</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servScreenDesc">
+                ओरिजिनल कॉम्बो, गोरिल्ला ग्लास चेंज और बिना बबल OCA लेमिनेशन तकनीक।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servScreen">डिस्प्ले व ग्लास रिप्लेसमेंट</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800" data-i18n="servScreenBadge">Express Service</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servScreenDesc">
-              ओरिजिनल कॉम्बो, गोरिल्ला ग्लास चेंज और बिना बबल OCA लेमिनेशन तकनीक।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <div class="pt-3 border-t border-blue-200/60 flex items-center justify-between text-xs">
               <span class="font-bold text-emerald-700" data-i18n="servScreenTag">एक्सप्रेस रिपेयर</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
             </div>
           </div>
 
           <!-- Service 2: Battery -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_6.jpg" alt="Original Battery Replacement" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-mint p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_6.jpg" alt="Original Battery Replacement" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servBattery">बैटरी रिप्लेसमेंट</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-200" data-i18n="servBatteryBadge">20 Mins Express</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servBatteryDesc">
+                100% ओरिजिनल हाई-कैपेसिटी बैटरी और तुरंत लॉन्ग-लास्टिंग बैकअप।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servBattery">बैटरी रिप्लेसमेंट</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800" data-i18n="servBatteryBadge">20 Mins Express</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servBatteryDesc">
-              100% ओरिजिनल हाई-कैपेसिटी बैटरी और तुरंत लॉन्ग-लास्टिंग बैकअप।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <div class="pt-3 border-t border-emerald-200/60 flex items-center justify-between text-xs">
               <span class="font-bold text-emerald-700" data-i18n="servBatteryTag">फास्ट सर्विस</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
             </div>
           </div>
 
           <!-- Service 3: Motherboard IC -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_2.jpg" alt="Motherboard IC Level Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-lilac p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_2.jpg" alt="Motherboard IC Level Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servMotherboard">मदरबोर्ड IC लेवल रिपेयर</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-200" data-i18n="servMotherboardBadge">Micro-Soldering</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servMotherboardDesc">
+                डेड फोन, शॉर्टिंग, पावर IC, ऑडियो IC व CPU रिबॉलिंग स्पेशलिस्ट लैब।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servMotherboard">मदरबोर्ड IC लेवल रिपेयर</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800" data-i18n="servMotherboardBadge">Micro-Soldering</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servMotherboardDesc">
-              डेड फोन, शॉर्टिंग, पावर IC, ऑडियो IC व CPU रिबॉलिंग स्पेशलिस्ट लैब।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <div class="pt-3 border-t border-purple-200/60 flex items-center justify-between text-xs">
               <span class="font-bold text-purple-700" data-i18n="servMotherboardTag">एक्सप्रेस IC लैब</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
             </div>
           </div>
 
           <!-- Service 4: Water Damage -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_4.jpg" alt="Water Damage Shorting Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-mint p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_4.jpg" alt="Water Damage Shorting Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servWater">वॉटर डैमेज रिकवरी</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-900 border border-teal-200" data-i18n="servWaterBadge">Ultrasonic Clean</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servWaterDesc">
+                पानी में गिरे फोन की अल्ट्रासोनिक क्लीनिंग और 95% डेटा सुरक्षित रिकवरी।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servWater">वॉटर डैमेज रिकवरी</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800" data-i18n="servWaterBadge">Ultrasonic Clean</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servWaterDesc">
-              पानी में गिरे फोन की अल्ट्रासोनिक क्लीनिंग और 95% डेटा सुरक्षित रिकवरी।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
-              <span class="font-bold text-sky-700" data-i18n="servWaterTag">डेटा सेफ सर्विस</span>
+            <div class="pt-3 border-t border-teal-200/60 flex items-center justify-between text-xs">
+              <span class="font-bold text-teal-700" data-i18n="servWaterTag">डेटा सेफ सर्विस</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
             </div>
           </div>
 
           <!-- Service 5: Charging Port -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_10.jpg" alt="Charging Port & Jack Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-peach p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_10.jpg" alt="Charging Port & Jack Repair" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servCharging">चार्जिंग जैक व पोर्ट रिपेयर</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200" data-i18n="servChargingBadge">Fast Charging</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servChargingDesc">
+                फास्ट चार्जिंग सपोर्ट, ओरिजिनल सब-बोर्ड व माइक्रो-सोल्डरिंग फिक्स।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servCharging">चार्जिंग जैक व पोर्ट रिपेयर</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800" data-i18n="servChargingBadge">Fast Charging</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servChargingDesc">
-              फास्ट चार्जिंग सपोर्ट, ओरिजिनल सब-बोर्ड व माइक्रो-सोल्डरिंग फिक्स।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+            <div class="pt-3 border-t border-amber-200/60 flex items-center justify-between text-xs">
               <span class="font-bold text-amber-700" data-i18n="servChargingTag">क्विक फिक्स</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
             </div>
           </div>
 
           <!-- Service 6: Software & Accessories -->
-          <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
-            <div class="h-44 rounded-xl overflow-hidden mb-4 bg-slate-100">
-              <img src="images/user_img_8.jpg" alt="Mobile Accessories & Spares" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          <div class="clay-card clay-card-blue p-5 sm:p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="h-44 rounded-2xl overflow-hidden mb-4 bg-slate-100 shadow-sm">
+                <img src="images/user_img_8.jpg" alt="Mobile Accessories & Spares" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-black text-slate-900" data-i18n="servSoftware">सॉफ्टवेयर व अनलॉकिंग</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-900 border border-blue-200" data-i18n="servSoftwareBadge">Instant Solution</span>
+              </div>
+              <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servSoftwareDesc">
+                हैंग ऑन लोगो, फ्लैशिंग, डेटा बैकअप व लेटेस्ट OS अपडेट्स।
+              </p>
             </div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-base font-black text-slate-900" data-i18n="servSoftware">सॉफ्टवेयर व अनलॉकिंग</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800" data-i18n="servSoftwareBadge">Instant Solution</span>
-            </div>
-            <p class="text-xs text-slate-600 leading-relaxed mb-4" data-i18n="servSoftwareDesc">
-              हैंग ऑन लोगो, फ्लैशिंग, डेटा बैकअप व लेटेस्ट OS अपडेट्स।
-            </p>
-            <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
-              <span class="font-bold text-teal-700" data-i18n="servSoftwareTag">डेटा प्राइवेसी 100%</span>
+            <div class="pt-3 border-t border-blue-200/60 flex items-center justify-between text-xs">
+              <span class="font-bold text-blue-700" data-i18n="servSoftwareTag">डेटा प्राइवेसी 100%</span>
               <a href="#calculator" class="text-blue-600 font-bold hover:underline" data-i18n="checkRateLink">रेट चेक करें ↗</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 4B. MODERN TECHNOLOGY & ADVANCED MACHINERY LAB SHOWCASE -->
+    <!-- ======================================================================= -->
+    <section id="machinery" class="py-14 sm:py-20 border-b border-amber-900/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-blue-900 font-extrabold text-xs uppercase tracking-wider shadow-sm mb-3" data-i18n="machineryBadge">
+            ✨ विश्वस्तरीय उपकरण व तकनीक
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight" data-i18n="machineryTitle">
+            मॉडर्न मशीनरी व एडवांस्ड रिपेयर लैब
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2.5 max-w-2xl mx-auto leading-relaxed" data-i18n="machineryDesc">
+            हम साधारण टूल्स नहीं, बल्कि जर्मनी व जापान सर्टिफाइड अत्याधुनिक मशीनों और थर्मल इमेजिंग से 100% सुरक्षित, सटीक व टिकाऊ स्मार्टफोन रिपेयर करते हैं।
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+          
+          <!-- Machine 1: Stereo Microscope (Lilac Variant) -->
+          <div class="clay-card clay-card-lilac p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-purple-600/10 text-purple-700 flex items-center justify-center text-2xl shadow-inner">
+                  🔬
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-purple-100 text-purple-900 border border-purple-200" data-i18n="machMicroBadge">
+                  40X ऑप्टिकल ज़ूम
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machMicroTitle">
+                हाई-प्रिसिजन स्टीरियो माइक्रोस्कोप
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machMicroDesc">
+                0.02mm माइक्रो-जम्पर, CPU रीबॉलिंग, और BGA मदरबोर्ड IC रिपेयर के लिए अल्ट्रा-प्रिसिजन माइक्रो-सोल्डरिंग वर्कस्टेशन।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-purple-200/50 flex items-center justify-between text-[11px] font-bold text-purple-800">
+              <span>⚡ Chip-Level BGA Rework</span>
+              <span>100% Accuracy</span>
+            </div>
+          </div>
+
+          <!-- Machine 2: OCA Vacuum Laminator (Blue Variant) -->
+          <div class="clay-card clay-card-blue p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-700 flex items-center justify-center text-2xl shadow-inner">
+                  ⚡
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-blue-100 text-blue-900 border border-blue-200" data-i18n="machOcaBadge">
+                  बबल-फ्री वैक्यूम
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machOcaTitle">
+                ऑटोमैटिक OCA वैक्यूम लेमिनेटर
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machOcaDesc">
+                बिना किसी बबल या लाइन के केवल ऊपर का टूटा ग्लास बदलना, जिससे 100% ओरिजिनल डिस्प्ले और टच स्क्रीन सुरक्षित रहती है।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-blue-200/50 flex items-center justify-between text-[11px] font-bold text-blue-800">
+              <span>💎 Original Display Safe</span>
+              <span>Zero Bubbles</span>
+            </div>
+          </div>
+
+          <!-- Machine 3: Infrared Thermal Camera (Peach Variant) -->
+          <div class="clay-card clay-card-peach p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-600/10 text-amber-700 flex items-center justify-center text-2xl shadow-inner">
+                  🌡️
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-200" data-i18n="machThermalBadge">
+                  5 सेकंड में डिटेक्शन
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machThermalTitle">
+                इन्फ्रारेड थर्मल इमेजिंग कैमरा
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machThermalDesc">
+                मदरबोर्ड में गर्म होने वाले खराब कैपेसिटर, शॉर्ट IC और लीकेज को 5 सेकंड में बिना किसी अनुमान के तुरंत ढूंढना।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-amber-200/50 flex items-center justify-between text-[11px] font-bold text-amber-800">
+              <span>🎯 Instant Short Circuit ID</span>
+              <span>Dead Phone Fix</span>
+            </div>
+          </div>
+
+          <!-- Machine 4: Laser Separation Machine (Mint Variant) -->
+          <div class="clay-card clay-card-mint p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-600/10 text-emerald-700 flex items-center justify-center text-2xl shadow-inner">
+                  🎯
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-900 border border-emerald-200" data-i18n="machLaserBadge">
+                  नो-डैमेज कोल्ड लेज़र
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machLaserTitle">
+                कोल्ड लेज़र बैक-ग्लास सेपरेटर
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machLaserDesc">
+                iPhone और फ्लैगशिप फोन का टूटा हुआ बैक ग्लास बिना बॉडी को खोले या नुकसान पहुंचाए लेज़र द्वारा आसानी से बदलना।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-emerald-200/50 flex items-center justify-between text-[11px] font-bold text-emerald-800">
+              <span>✨ Factory Laser Finish</span>
+              <span>No Frame Bend</span>
+            </div>
+          </div>
+
+          <!-- Machine 5: Smart Programmer (Blue Variant) -->
+          <div class="clay-card clay-card-blue p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600/10 text-blue-700 flex items-center justify-center text-2xl shadow-inner">
+                  🔋
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-blue-100 text-blue-900 border border-blue-200" data-i18n="machProgrammerBadge">
+                  डेटा कैलिब्रेशन
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machProgrammerTitle">
+                स्मार्ट बैटरी व डिस्प्ले प्रोग्रामर
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machProgrammerDesc">
+                100% बैटरी हेल्थ रीस्टोर, ट्रू-टोन कैलिब्रेशन और ओरिजिनल डिस्प्ले सीरियल डेटा को नए पार्ट्स में ट्रांसफर करना।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-blue-200/50 flex items-center justify-between text-[11px] font-bold text-blue-800">
+              <span>🔋 100% Battery Health</span>
+              <span>TrueTone Retained</span>
+            </div>
+          </div>
+
+          <!-- Machine 6: Ultrasonic PCB Cleaner (Mint Variant) -->
+          <div class="clay-card clay-card-mint p-6 rounded-[32px] flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-teal-600/10 text-teal-700 flex items-center justify-center text-2xl shadow-inner">
+                  💧
+                </div>
+                <span class="px-3 py-1 rounded-full text-[11px] font-black bg-teal-100 text-teal-900 border border-teal-200" data-i18n="machUltrasonicBadge">
+                  95% डेटा रिकवरी
+                </span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2" data-i18n="machUltrasonicTitle">
+                अल्ट्रासोनिक PCB क्लीनिंग चैंबर
+              </h3>
+              <p class="text-xs text-slate-600 leading-relaxed" data-i18n="machUltrasonicDesc">
+                पानी में गिरे फोन के मदरबोर्ड से मॉइस्चर और जंग को 40kHz फ्रीक्वेंसी से गहराई से साफ करके फोन व डेटा बचाना।
+              </p>
+            </div>
+            <div class="mt-5 pt-4 border-t border-teal-200/50 flex items-center justify-between text-[11px] font-bold text-teal-800">
+              <span>🛡️ Safe Chemical Wash</span>
+              <span>95% Success Rate</span>
             </div>
           </div>
 
@@ -664,7 +846,7 @@
     <section id="calculator" class="py-12 sm:py-16 border-b border-amber-900/10">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl">
+        <div class="clay-card rounded-[36px] p-6 sm:p-10 bg-white/95">
           <div class="text-center max-w-2xl mx-auto mb-8">
             <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-bold text-xs uppercase tracking-wider" data-i18n="calcBadge">
               Smart Price Tool
@@ -790,7 +972,7 @@
     <!-- ======================================================================= -->
     <!-- 7. INSTAGRAM LIVE PHOTO FEED SHOWCASE -->
     <!-- ======================================================================= -->
-    <section id="instagram" class="py-12 sm:py-16 bg-slate-50 border-b border-slate-200/80">
+    <section id="instagram" class="py-12 sm:py-16 border-b border-amber-900/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -843,7 +1025,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           
           <!-- Branch 1: Hazratganj (Sree Rama Towers) -->
-          <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
+          <div class="clay-card clay-card-blue rounded-[32px] overflow-hidden flex flex-col group">
             <div class="relative h-56 w-full overflow-hidden bg-slate-900">
               <img src="images/branch_hazratganj_banner.jpg" alt="श्रीराम टावर हजरतगंज लैब" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
@@ -856,11 +1038,11 @@
               </div>
             </div>
 
-            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-              <div class="space-y-2 text-xs">
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-2.5 text-xs">
                 <div class="flex items-start gap-2">
                   <span class="text-blue-600 font-bold">🏢</span>
-                  <p class="text-slate-700 font-medium leading-relaxed">
+                  <p data-i18n="hazratganjAddress" class="text-slate-700 font-medium leading-relaxed">
                     216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001
                   </p>
                 </div>
@@ -872,13 +1054,13 @@
                   <span class="text-blue-600 font-bold">📞</span>
                   <a href="tel:7905859701" class="text-blue-700 font-bold hover:underline">7905859701</a>
                 </div>
-                <div class="pt-2 border-t border-slate-100">
+                <div class="pt-2 border-t border-slate-200/60">
                   <span data-i18n="branchSpecialtyLabel" class="text-[11px] font-bold text-slate-500 block">✨ विशेषज्ञता:</span>
                   <span data-i18n="branchHazratganjSpec" class="text-xs font-bold text-slate-800">एक्सप्रेस ग्लास / OCA लैमिनेशन, iPhone व मदरबोर्ड IC रिपेयर</span>
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
                 <a href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-1.5">
                   <span data-i18n="viewMapBtn">📍 मैप देखें</span>
                 </a>
@@ -890,7 +1072,7 @@
           </div>
 
           <!-- Branch 2: Naka Hindola (Lucknow) -->
-          <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
+          <div class="clay-card clay-card-lilac rounded-[32px] overflow-hidden flex flex-col group">
             <div class="relative h-56 w-full overflow-hidden bg-slate-900">
               <img src="images/branch_naka_banner.jpg" alt="नाका हिंडोला शाखा लखनऊ" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
@@ -903,11 +1085,11 @@
               </div>
             </div>
 
-            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-              <div class="space-y-2 text-xs">
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-2.5 text-xs">
                 <div class="flex items-start gap-2">
                   <span class="text-purple-600 font-bold">🏢</span>
-                  <p class="text-slate-700 font-medium leading-relaxed">
+                  <p data-i18n="nakaAddress" class="text-slate-700 font-medium leading-relaxed">
                     नाका हिंडोला मार्केट (निकट गुरुद्वारा व चारबाग), लखनऊ, उत्तर प्रदेश 226004
                   </p>
                 </div>
@@ -919,13 +1101,13 @@
                   <span class="text-purple-600 font-bold">📞</span>
                   <a href="tel:8931059701" class="text-purple-700 font-bold hover:underline">8931059701</a>
                 </div>
-                <div class="pt-2 border-t border-slate-100">
+                <div class="pt-2 border-t border-slate-200/60">
                   <span data-i18n="branchSpecialtyLabel" class="text-[11px] font-bold text-slate-500 block">✨ विशेषज्ञता:</span>
                   <span data-i18n="branchNakaSpec" class="text-xs font-bold text-slate-800">फास्ट टच स्क्रीन, ओरिजिनल डिस्प्ले फोल्डर व थोक स्पेयर पार्ट्स</span>
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
                 <a href="https://maps.google.com/?q=26.8370,80.9241" target="_blank" class="flex-1 py-2.5 px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-1.5">
                   <span data-i18n="viewMapBtn">📍 मैप देखें</span>
                 </a>
@@ -937,7 +1119,7 @@
           </div>
 
           <!-- Branch 3: Kannauj (Saraimeera) -->
-          <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group">
+          <div class="clay-card clay-card-mint rounded-[32px] overflow-hidden flex flex-col group">
             <div class="relative h-56 w-full overflow-hidden bg-slate-900">
               <img src="images/branch_kannauj_banner.jpg" alt="कन्नौज शाखा (सरायमीरा)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
@@ -950,11 +1132,11 @@
               </div>
             </div>
 
-            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-              <div class="space-y-2 text-xs">
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div class="space-y-2.5 text-xs">
                 <div class="flex items-start gap-2">
                   <span class="text-emerald-600 font-bold">🏢</span>
-                  <p class="text-slate-700 font-medium leading-relaxed">
+                  <p data-i18n="kannaujAddress" class="text-slate-700 font-medium leading-relaxed">
                     सरायमीरा (Saraimeera), जी.टी. रोड (निकट बस स्टेशन), कन्नौज, उत्तर प्रदेश 209727
                   </p>
                 </div>
@@ -966,13 +1148,13 @@
                   <span class="text-emerald-600 font-bold">📞</span>
                   <a href="tel:9044115178" class="text-emerald-700 font-bold hover:underline">9044115178</a>
                 </div>
-                <div class="pt-2 border-t border-slate-100">
+                <div class="pt-2 border-t border-slate-200/60">
                   <span data-i18n="branchSpecialtyLabel" class="text-[11px] font-bold text-slate-500 block">✨ विशेषज्ञता:</span>
                   <span data-i18n="branchKannaujSpec" class="text-xs font-bold text-slate-800">स्मार्टफोन रिपेयर, फास्ट डिस्प्ले फोल्डर, बैटरी व चिप लेवल रिपेयर</span>
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <div class="pt-3 border-t border-slate-200/60 flex items-center gap-2">
                 <a href="https://maps.google.com/?q=27.0283,79.926383" target="_blank" class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-1.5">
                   <span data-i18n="viewMapBtn">📍 मैप देखें</span>
                 </a>
@@ -1026,9 +1208,9 @@
           
           <!-- Dynamic Info Card -->
           <div class="lg:col-span-5 space-y-5">
-            <div id="contact-branch-card" class="p-6 rounded-3xl bg-slate-50 border border-slate-200 shadow-sm space-y-4">
+            <div id="contact-branch-card" class="clay-card clay-card-blue p-6 sm:p-7 rounded-[32px] space-y-4">
               <div>
-                <span id="contact-branch-badge" class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-extrabold text-[11px] uppercase tracking-wider inline-block mb-2">
+                <span id="contact-branch-badge" class="px-3 py-1 rounded-full bg-blue-100 text-blue-900 font-extrabold text-[11px] uppercase tracking-wider inline-block mb-2 border border-blue-200">
                   मुख्य लैब व हेड ऑफिस
                 </span>
                 <h3 id="contact-branch-title" class="text-xl font-black text-slate-900 leading-tight">
@@ -1050,7 +1232,7 @@
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 pt-2 border-t border-slate-200/70">
+                <div class="flex items-center gap-2.5 pt-2 border-t border-blue-200/60">
                   <span class="text-base text-emerald-600 shrink-0">⏰</span>
                   <div>
                     <strong data-i18n="timingsLabel" class="text-slate-900 block font-bold">दुकान खुलने का समय:</strong>
@@ -1058,19 +1240,19 @@
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 pt-2 border-t border-slate-200/70">
+                <div class="flex items-center gap-2.5 pt-2 border-t border-blue-200/60">
                   <span class="text-base text-blue-600 shrink-0">📞</span>
                   <div>
                     <strong data-i18n="phoneLabel" class="text-slate-900 block font-bold">फ़ोन व संपर्क सूत्र:</strong>
    <div class="flex flex-wrap items-center gap-2 mt-1">
-     <a id="contact-branch-phone" href="tel:7905859701" class="text-xs font-black px-2 py-1 bg-blue-50 text-blue-700 rounded-lg hover:underline">📞 7905859701 (<span data-i18n="navHazratganjPhone">हजरतगंज</span>)</a>
-     <a href="tel:8931059701" class="text-xs font-black px-2 py-1 bg-purple-50 text-purple-700 rounded-lg hover:underline">📞 8931059701 (<span data-i18n="navNakaPhone">नाका</span>)</a>
-     <a href="tel:9044115178" class="text-xs font-black px-2 py-1 bg-emerald-50 text-emerald-700 rounded-lg hover:underline">📞 9044115178 (<span data-i18n="navKannaujPhone">कन्नौज / WhatsApp</span>)</a>
+     <a id="contact-branch-phone" href="tel:7905859701" class="text-xs font-black px-2.5 py-1 bg-white text-blue-700 rounded-lg shadow-sm border border-blue-100 hover:underline">📞 7905859701 (<span data-i18n="navHazratganjPhone">हजरतगंज</span>)</a>
+     <a href="tel:8931059701" class="text-xs font-black px-2.5 py-1 bg-white text-purple-700 rounded-lg shadow-sm border border-purple-100 hover:underline">📞 8931059701 (<span data-i18n="navNakaPhone">नाका</span>)</a>
+     <a href="tel:9044115178" class="text-xs font-black px-2.5 py-1 bg-white text-emerald-700 rounded-lg shadow-sm border border-emerald-100 hover:underline">📞 9044115178 (<span data-i18n="navKannaujPhone">कन्नौज / WhatsApp</span>)</a>
    </div>
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 pt-2 border-t border-slate-200/70">
+                <div class="flex items-center gap-2.5 pt-2 border-t border-blue-200/60">
                   <span class="text-base text-purple-600 shrink-0">🛰️</span>
                   <div>
                     <strong data-i18n="gpsLabel" class="text-slate-900 block font-bold">GPS कोऑर्डिनेट्स:</strong>
@@ -1079,11 +1261,11 @@
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center gap-2.5">
-                <a id="contact-map-direct-btn" href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-2">
+              <div class="pt-3 border-t border-blue-200/60 flex flex-wrap items-center gap-2.5">
+                <a id="contact-map-direct-btn" href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm text-center transition flex items-center justify-center gap-2 cursor-pointer">
                   <span data-i18n="openMapsBtn">📍 Google Maps पर दिशाएं देखें</span>
                 </a>
-                <button type="button" class="open-lead-modal-btn py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1.5">
+                <button type="button" class="open-lead-modal-btn py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                   <span data-i18n="quickInquiryBtn">⚡ त्वरित पूछताछ</span>
                 </button>
               </div>
@@ -1092,7 +1274,7 @@
 
           <!-- Interactive Google Maps Iframe Container -->
           <div class="lg:col-span-7">
-            <div class="relative w-full h-[380px] sm:h-[450px] rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-slate-100">
+            <div class="relative w-full h-[380px] sm:h-[450px] rounded-[32px] overflow-hidden clay-card p-1">
               <iframe 
                 id="contact-map-iframe"
                 src="https://maps.google.com/maps?q=26.850138,80.948449&t=&z=16&ie=UTF8&iwloc=&output=embed" 
@@ -1106,6 +1288,169 @@
             </div>
           </div>
 
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 8B. GOOGLE POSITIVE REVIEWS SHOWCASE (Above Footer) -->
+    <!-- ======================================================================= -->
+    <section id="reviews" class="py-14 sm:py-20 border-t border-amber-900/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-extrabold text-xs uppercase tracking-wider shadow-sm mb-3">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span data-i18n="reviewsBadge">🌟 1,200+ सत्यापित समीक्षाएं</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight" data-i18n="reviewsTitle">
+            गूगल पर 4.9 ★ रेटिंग - ग्राहकों का भरोसा
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-600 mt-2.5 max-w-2xl mx-auto leading-relaxed" data-i18n="reviewsDesc">
+            लखनऊ (हजरतगंज, नाका) और कन्नौज के संतुष्ट ग्राहकों द्वारा गूगल पर दिए गए वास्तविक 5-स्टार अनुभव।
+          </p>
+          <div class="mt-4 flex items-center justify-center gap-2">
+            <span class="text-amber-500 text-lg">★★★★★</span>
+            <span class="text-xs font-black text-slate-800">4.9 out of 5 (Google Reviews)</span>
+          </div>
+        </div>
+
+        <!-- 4 Verified Reviews Grid (Clay Cards with Pastel Tints) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
+          
+          <!-- Review 1: Aditya Verma (Blue Variant) -->
+          <div class="clay-card clay-card-blue p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-blue-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    AV
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev1Name">आदित्य वर्मा</h4>
+                    <p class="text-[11px] font-bold text-blue-700" data-i18n="rev1City">हजरतगंज, लखनऊ</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev1Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev1Text">
+                "iPhone 13 की स्क्रीन बहुत बुरी तरह टूट गई थी। मोनू भाई ने OCA वैक्यूम मशीन से केवल 35 मिनट में ओरिजिनल डिस्प्ले बचाते हुए ग्लास बदल दिया। ट्रू-टोन भी एकदम सही चल रहा है!"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-blue-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>🔧 Express Glass OCA</span>
+              <span>2 days ago • Google Review</span>
+            </div>
+          </div>
+
+          <!-- Review 2: Pooja Sharma (Peach Variant) -->
+          <div class="clay-card clay-card-peach p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-amber-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    PS
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev2Name">पूजा शर्मा</h4>
+                    <p class="text-[11px] font-bold text-amber-700" data-i18n="rev2City">नाका हिंडोला (चारबाग), लखनऊ</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev2Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev2Text">
+                "Samsung S21 Ultra का मदरबोर्ड डेड था। दूसरी दुकानों ने ₹18,000 में नया बोर्ड डलवाने को कहा। मोनू मोबाइल ने थर्मल कैमरे से शॉर्ट IC ढूंढकर मात्र ₹2,500 में फोन ठीक कर दिया!"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-amber-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>🔬 Thermal IC Short Fix</span>
+              <span>1 week ago • Google Review</span>
+            </div>
+          </div>
+
+          <!-- Review 3: Mohd. Imran (Mint Variant) -->
+          <div class="clay-card clay-card-mint p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    MI
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev3Name">मो. इमरान</h4>
+                    <p class="text-[11px] font-bold text-emerald-700" data-i18n="rev3City">सरायमीरा, कन्नौज</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev3Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev3Text">
+                "कन्नौज की सबसे भरोसेमंद रिपेयर लैब! OnePlus 11R की ओरिजिनल बैटरी और डिस्प्ले 30 मिनट में वारंटी के साथ लगवाई। बहुत ही पारदर्शी बिलिंग और कुशल इंजीनियर हैं।"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-emerald-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>🔋 100% Genuine Spares</span>
+              <span>3 weeks ago • Google Review</span>
+            </div>
+          </div>
+
+          <!-- Review 4: Rishabh Tandon (Lilac Variant) -->
+          <div class="clay-card clay-card-lilac p-6 sm:p-7 rounded-[32px] flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-purple-600 text-white font-black text-sm flex items-center justify-center shadow-md">
+                    RT
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-black text-slate-900 leading-tight" data-i18n="rev4Name">ऋषभ टंडन</h4>
+                    <p class="text-[11px] font-bold text-purple-700" data-i18n="rev4City">गोमती नगर, लखनऊ</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-amber-500 text-sm">★★★★★</span>
+                  <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3 h-3 fill-emerald-600" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span data-i18n="rev4Badge">सत्यापित ग्राहक (Google)</span>
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed italic" data-i18n="rev4Text">
+                "iPhone 14 Pro का बैक ग्लास लेज़र मशीन से बिना फोन खोले एकदम शोरूम कंडीशन जैसा नया बना दिया। कोई स्क्रैच नहीं। लखनऊ में इनसे बेहतर लैब नहीं है।"
+              </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-purple-200/50 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>🎯 Laser Glass Replacement</span>
+              <span>1 month ago • Google Review</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Call to Action -->
+        <div class="mt-10 sm:mt-12 text-center">
+          <a href="https://maps.google.com/?q=26.850138,80.948449" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 cursor-pointer">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/></svg>
+            <span data-i18n="writeReviewBtn">Google पर रिव्यू लिखें ↗</span>
+          </a>
         </div>
 
       </div>
@@ -1386,67 +1731,75 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 10. PUBLIC FOOTER -->
+  <!-- 10. PUBLIC FOOTER (Luxury Warm Porcelain Clay Theme & 100% Bilingual) -->
   <!-- ========================================================================= -->
-  <footer class="public-shell-element bg-slate-900 text-slate-400 text-xs py-10 sm:py-12 border-t border-slate-800">
+  <footer class="public-shell-element relative mt-8 sm:mt-12 py-10 sm:py-14 text-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-800">
-        
-        <div class="md:col-span-2 space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
-              <img src="logo-badge.svg" alt="Monu Mobile Solution" class="w-full h-full object-contain">
-            </div>
-            <div class="flex flex-col">
-              <span class="text-lg sm:text-xl font-black text-white tracking-tight leading-none">Monu Mobile Solution</span>
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Express Smartphone Repairing Lab & Multi-Branch Network</span>
-            </div>
-          </div>
-          <p class="text-xs text-slate-400 max-w-lg leading-relaxed">
-            लखनऊ व कन्नौज का प्रमुख एक्सप्रेस स्मार्टफोन रिपेयरिंग लैब और होलसेल/रिटेल पार्ट्स केंद्र। 100% ओरिजिनल पार्ट्स, ओसीए लेमिनेशन, चिप-लेवल मदरबोर्ड रिपेयर और आधुनिक मशीनों द्वारा त्वरित समाधान।
-          </p>
+      <div class="clay-card p-6 sm:p-10 rounded-[36px] bg-gradient-to-br from-white/95 via-[#FFFDF9]/95 to-[#F7F2EA]/95 border border-white/90 shadow-2xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10 mb-8 pb-8 border-b border-slate-200/70">
           
-          <!-- All 3 Branch Addresses Clearly Displayed -->
-          <div class="space-y-2 pt-2 border-t border-slate-800 text-xs">
-            <div class="flex items-start gap-2">
-              <span class="text-blue-400 font-bold shrink-0">📍 मुख्य लैब (हजरतगंज, लखनऊ):</span>
-              <span class="text-slate-300">216, द्वितीय तल, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ (UP 226001) • 📞 <a href="tel:7905859701" class="text-emerald-400 font-bold hover:underline">7905859701</a></span>
+          <div class="md:col-span-2 space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0 rounded-2xl bg-white shadow-sm p-1 border border-slate-200">
+                <img src="logo-badge.svg" alt="Monu Mobile Solution" class="w-full h-full object-contain">
+              </div>
+              <div class="flex flex-col">
+                <span class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none">Monu Mobile Solution</span>
+                <span class="text-[10px] font-bold text-blue-700 uppercase tracking-widest mt-1">Express Smartphone Repairing Lab & Multi-Branch Network</span>
+              </div>
             </div>
-            <div class="flex items-start gap-2">
-              <span class="text-indigo-400 font-bold shrink-0">📍 नाका हिंडोला शाखा (लखनऊ):</span>
-              <span class="text-slate-300">नाका हिंडोला मार्केट (निकट ऐतिहासिक गुरुद्वारा व चारबाग), लखनऊ (UP 226004) • 📞 <a href="tel:8931059701" class="text-emerald-400 font-bold hover:underline">8931059701</a></span>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-emerald-400 font-bold shrink-0">📍 कन्नौज शाखा (सरायमीरा):</span>
-   <span class="text-slate-300">सरायमीरा, जी.टी. रोड (निकट बस स्टेशन), कन्नौज (UP 209727) • 📞 <a href="tel:9044115178" class="text-emerald-400 font-bold hover:underline">9044115178</a></span>
+            <p class="text-xs text-slate-600 max-w-lg leading-relaxed font-medium" data-i18n="footerAbout">
+              लखनऊ व कन्नौज का प्रमुख एक्सप्रेस स्मार्टफोन रिपेयरिंग लैब और होलसेल/रिटेल पार्ट्स केंद्र। 100% ओरिजिनल पार्ट्स, ओसीए लेमिनेशन, चिप-लेवल मदरबोर्ड रिपेयर और आधुनिक मशीनों द्वारा त्वरित समाधान।
+            </p>
+            
+            <!-- All 3 Branch Addresses with Full Bilingual Support -->
+            <div class="space-y-3 pt-3 border-t border-slate-200/80 text-xs">
+              <div class="flex items-start gap-2.5">
+                <span class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-900 font-extrabold text-[11px] shrink-0 border border-blue-200" data-i18n="footerHazratganjTitle">📍 मुख्य लैब (हजरतगंज, लखनऊ):</span>
+                <span class="text-slate-700 font-medium"><span data-i18n="footerHazratganjAddress">216, द्वितीय तल, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ (UP 226001)</span> • 📞 <a href="tel:7905859701" class="text-blue-700 font-black hover:underline">7905859701</a></span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-900 font-extrabold text-[11px] shrink-0 border border-purple-200" data-i18n="footerNakaTitle">📍 नाका हिंडोला शाखा (लखनऊ):</span>
+                <span class="text-slate-700 font-medium"><span data-i18n="footerNakaAddress">नाका हिंडोला मार्केट (निकट ऐतिहासिक गुरुद्वारा व चारबाग), लखनऊ (UP 226004)</span> • 📞 <a href="tel:8931059701" class="text-purple-700 font-black hover:underline">8931059701</a></span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-900 font-extrabold text-[11px] shrink-0 border border-emerald-200" data-i18n="footerKannaujTitle">📍 कन्नौज शाखा (सरायमीरा):</span>
+                <span class="text-slate-700 font-medium"><span data-i18n="footerKannaujAddress">सरायमीरा, जी.टी. रोड (निकट बस स्टेशन), कन्नौज (UP 209727)</span> • 📞 <a href="tel:9044115178" class="text-emerald-700 font-black hover:underline">9044115178</a></span>
+              </div>
             </div>
           </div>
+
+          <div>
+            <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 pb-1 border-b border-slate-200 inline-block" data-i18n="footerQuickLinks">क्विक लिंक्स</h4>
+            <ul class="space-y-2.5 text-xs font-semibold text-slate-600">
+              <li><a href="#services" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerServices"><span>›</span> प्रीमियम सर्विसेज</a></li>
+              <li><a href="#machinery" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerMachinery"><span>›</span> आधुनिक मशीनरी</a></li>
+              <li><a href="#reviews" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerReviews"><span>›</span> गूगल रिव्यू</a></li>
+              <li><a href="#calculator" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerEstimator"><span>›</span> खर्च कैलकुलेटर</a></li>
+              <li><a href="#tracker" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerTracker"><span>›</span> लाइव रिपेयर स्टेटस</a></li>
+              <li><a href="#branches" class="hover:text-blue-600 transition flex items-center gap-1.5" data-i18n="footerBranches"><span>›</span> शाखाएं व संपर्क</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 pb-1 border-b border-slate-200 inline-block" data-i18n="footerStaffTitle">स्टाफ व मैनेजमेंट</h4>
+            <p class="text-xs text-slate-600 mb-4 leading-relaxed font-medium" data-i18n="footerStaffDesc">POS बिलिंग, इन्वेंट्री व खाता-बही के लिए लॉगिन करें:</p>
+            <button type="button" class="open-login-btn px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs transition shadow-md shadow-blue-600/25 flex items-center gap-2 cursor-pointer" onclick="if(window.MMS_APP&&window.MMS_APP.openLoginModal){window.MMS_APP.openLoginModal();}else{document.getElementById('login-modal').classList.remove('hidden');}">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+              <span data-i18n="footerLoginBtn">लॉगिन पोर्टल ↗</span>
+            </button>
+          </div>
+
         </div>
 
-        <div>
-          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">क्विक लिंक्स</h4>
-          <ul class="space-y-2">
-            <li><a href="#services" class="hover:text-white transition">प्रीमियम सर्विसेज</a></li>
-            <li><a href="#calculator" class="hover:text-white transition">खर्च कैलकुलेटर</a></li>
-            <li><a href="#tracker" class="hover:text-white transition">लाइव रिपेयर स्टेटस</a></li>
-            <li><a href="#instagram" class="hover:text-white transition">इंस्टाग्राम शोकेस</a></li>
-            <li><a href="#contact" class="hover:text-white transition">शॉप लोकेशन</a></li>
-          </ul>
+        <div class="flex flex-wrap items-center justify-between gap-4 text-[11px] text-slate-500 font-semibold">
+          <p data-i18n="footerRights">© 2026 Monu Mobile Solution (MMS). सर्वाधिकार सुरक्षित।</p>
+          <div class="flex items-center gap-4">
+            <a href="#home" class="hover:text-blue-600 transition">↑ Top</a>
+            <span>•</span>
+            <a href="https://wa.me/919044115178" target="_blank" class="hover:text-emerald-600 transition">WhatsApp Support</a>
+          </div>
         </div>
-
-        <div>
-          <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">स्टाफ व मैनेजमेंट</h4>
-          <p class="text-xs text-slate-400 mb-3">POS बिलिंग, इन्वेंट्री व खाता-बही के लिए लॉगिन करें:</p>
-          <button type="button" class="open-login-btn px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition shadow-sm" onclick="if(window.MMS_APP&&window.MMS_APP.openLoginModal){window.MMS_APP.openLoginModal();}else{document.getElementById('login-modal').classList.remove('hidden');}">
-            लॉगिन पोर्टल ↗
-          </button>
-        </div>
-
-      </div>
-
-      <div class="flex flex-wrap items-center justify-between gap-4 text-[11px] text-slate-500">
-        <p>© 2026 Monu Mobile Solution (MMS). All Rights Reserved.</p>
-        
       </div>
     </div>
   </footer>

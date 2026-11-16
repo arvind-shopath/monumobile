@@ -8115,7 +8115,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       hazratganj: {
         badge: isEn ? "Head Lab & Main Office" : "मुख्य लैब व हेड ऑफिस",
         title: isEn ? "Sree Rama Towers Hazratganj, Lucknow" : "श्रीराम टावर हजरतगंज, लखनऊ",
-        address: "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001",
+        address: isEn ? "216, 2nd Floor, Sree Rama Towers, Ashok Marg, Sadullah Nagar, Narhi, Hazratganj, Lucknow, UP 226001" : "216, द्वितीय तल, श्री रामा टॉवर्स, अशोक मार्ग, हजरतगंज, लखनऊ (UP 226001)",
         landmark: isEn ? "(Near Hazratganj Crossing & Ashok Marg, 2nd Floor Sree Rama Towers)" : "(हजरतगंज चौराहा और अशोक मार्ग के पास, श्री रामा टॉवर्स की दूसरी मंजिल)",
         timings: isEn ? "12:00 PM - 09:00 PM (Open Daily)" : "12:00 PM - 09:00 PM (रोजाना खुला)",
         phone: "7905859701",
