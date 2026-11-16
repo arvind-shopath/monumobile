@@ -1954,6 +1954,8 @@ function filterCategoryDropdown(inputId, query) {
     applyPortalLanguageUI();
     renderPortalShopControl();
     renderPortalBranchSwitcher();
+    /* setPortalLanguageSanitizeHook */
+    try { sanitizeAndLocalizeActiveTab(); } catch(e) {}
 
     if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
     if (state.activeAdminTab === 'mywork') renderMyWorkModule();
@@ -2299,21 +2301,21 @@ function filterCategoryDropdown(inputId, query) {
       if (grpFinance) { grpFinance.style.display = 'none'; grpFinance.classList.add('hidden'); }
       if (grpHr) { grpHr.style.display = 'block'; grpHr.classList.remove('hidden'); }
       if (hrTitle) { hrTitle.style.display = 'none'; hrTitle.classList.add('hidden'); }
-      if (settingsLabel) settingsLabel.textContent = 'सेटिंग्स (Profile & KYC)';
+      if (settingsLabel) { const isEn = (state.portalLang || state.lang || 'hi') === 'en'; settingsLabel.textContent = isEn ? 'Settings' : 'सेटिंग्स'; }
     } else if (isManager) {
       if (grpCore) { grpCore.style.display = 'block'; grpCore.classList.remove('hidden'); }
       if (grpOps) { grpOps.style.display = 'block'; grpOps.classList.remove('hidden'); }
       if (grpFinance) { grpFinance.style.display = 'block'; grpFinance.classList.remove('hidden'); }
       if (grpHr) { grpHr.style.display = 'block'; grpHr.classList.remove('hidden'); }
       if (hrTitle) { hrTitle.style.display = 'block'; hrTitle.classList.remove('hidden'); }
-      if (settingsLabel) settingsLabel.textContent = 'शाखा सेटिंग्स';
+      if (settingsLabel) { const isEn = (state.portalLang || state.lang || 'hi') === 'en'; settingsLabel.textContent = isEn ? 'Settings' : 'सेटिंग्स'; }
     } else {
       if (grpCore) { grpCore.style.display = 'block'; grpCore.classList.remove('hidden'); }
       if (grpOps) { grpOps.style.display = 'block'; grpOps.classList.remove('hidden'); }
       if (grpFinance) { grpFinance.style.display = 'block'; grpFinance.classList.remove('hidden'); }
       if (grpHr) { grpHr.style.display = 'block'; grpHr.classList.remove('hidden'); }
       if (hrTitle) { hrTitle.style.display = 'block'; hrTitle.classList.remove('hidden'); }
-      if (settingsLabel) settingsLabel.textContent = 'सिस्टम व शाखा सेटिंग्स';
+      if (settingsLabel) { const isEn = (state.portalLang || state.lang || 'hi') === 'en'; settingsLabel.textContent = isEn ? 'Settings' : 'सेटिंग्स'; }
     }
 
         // Restore exact saved tab on refresh so user stays on the same page!
@@ -2549,8 +2551,9 @@ function filterCategoryDropdown(inputId, query) {
       else if (state.activeAdminTab === 'expenses') renderExpensesModule();
       else if (state.activeAdminTab === 'settings') renderSettingsModule();
     } catch (tabErr) {
-      console.error(`Error rendering portal tab "${state.activeAdminTab}":`, tabErr);
+      console.error(tabErr);
     }
+    try { sanitizeAndLocalizeActiveTab(); } catch(e) { console.error('Sanitize error:', e); }
   }
 
   // =========================================================================
@@ -5843,7 +5846,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   // ENTERPRISE SYSTEM & BRANCH SETTINGS MODULE
   // =========================================================================
 
-  function renderSettingsModule() {
+    function renderSettingsModule() {
     const container = document.getElementById('tab-view-settings');
     if (!container) return;
 
@@ -5854,7 +5857,6 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const isEmployee = !isOwner && !isManager;
 
     // IF EMPLOYEE / TECHNICIAN:
-    // Only Profile photo & KYC docs are visible. ZERO data purge/storage controls.
     if (isEmployee) {
       const myEmp = (state.staff || []).find(s => s.phone === curUser.phone || s.id === curUser.id) || curUser;
       const empId = myEmp.id || 'EMP-103';
@@ -5862,90 +5864,83 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       const pan = myEmp.pan || 'ABCDE1234F';
 
       container.innerHTML = `
-        <div class="max-w-2xl mx-auto space-y-6">
-          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <div class="max-w-2xl mx-auto space-y-4">
+          <div class="clay-card bg-white p-5 rounded-[26px] border border-slate-200/80 shadow-sm space-y-4">
             
-            <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-black text-slate-900">👤 मेरी प्रोफाइल व KYC सेटिंग्स</h3>
-                <p class="text-xs text-slate-500">आप अपनी प्रोफाइल फोटो और जरूरी पहचान दस्तावेज (Aadhaar/PAN) यहां से अपडेट कर सकते हैं</p>
-              </div>
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200">
-                ${myEmp.roleLabel || myEmp.role || 'कर्मचारी'}
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span>👤</span>
+                <span>${__L('प्रोफाइल व KYC सेटिंग्स', 'Profile & KYC Settings')}</span>
+              </h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-800 border border-blue-200">
+                ${myEmp.roleLabel || myEmp.role || __L('कर्मचारी', 'Staff')}
               </span>
             </div>
 
             <!-- Profile Photo Section -->
-            <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <div class="relative">
-                <img id="emp-profile-preview" src="${myEmp.photo || 'images/avatar_placeholder.png'}" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md" onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('${myEmp.name}')">
-              </div>
-              <div class="space-y-1.5 flex-1">
-                <strong class="text-xs font-black text-slate-800 block">प्रोफाइल फोटो बदलें</strong>
-                <input type="file" id="emp-photo-file-input" accept="image/*" onchange="window.MMS_APP.handleEmployeePhotoUpload(event)" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-                <span class="text-[10px] text-slate-400 block">JPG, PNG समर्थित (अधिकतम 2MB)</span>
+            <div class="flex items-center gap-4 p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200">
+              <img id="emp-profile-preview" src="${myEmp.photo || 'images/avatar_placeholder.png'}" class="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md" onerror="this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('${myEmp.name}')">
+              <div class="space-y-1 flex-1">
+                <strong class="text-xs font-black text-slate-800 block">${__L('प्रोफाइल फोटो', 'Profile Photo')}</strong>
+                <input type="file" id="emp-photo-file-input" accept="image/*" onchange="window.MMS_APP.handleEmployeePhotoUpload(event)" class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
               </div>
             </div>
 
-            <!-- Non-editable Employee Info (Name & ID) -->
-            <div class="grid grid-cols-2 gap-4 text-xs">
+            <!-- Employee Info -->
+            <div class="grid grid-cols-2 gap-3 text-xs">
               <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">कर्मचारी का नाम (स्थिर)</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">${__L('कर्मचारी नाम', 'Employee Name')}</span>
                 <strong class="text-sm text-slate-900 block mt-0.5">${myEmp.name}</strong>
-                <span class="text-[10px] text-slate-400">नाम केवल एडमिन बदल सकता है</span>
               </div>
               <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">कर्मचारी आईडी (Employee ID)</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">${__L('कर्मचारी ID', 'Employee ID')}</span>
                 <strong class="text-sm font-mono text-blue-700 block mt-0.5">${empId}</strong>
-                <span class="text-[10px] text-slate-400">कंपनी रजिस्टर्ड ID</span>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-2 gap-3 text-xs">
               <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">शाखा (Assigned Branch)</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">${__L('शाखा', 'Branch')}</span>
                 <strong class="text-xs text-slate-800 block mt-0.5">${getBranchName(myEmp.branchId || 'branch_hazratganj')}</strong>
               </div>
               <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">मोबाइल नंबर (लॉगिन)</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">${__L('मोबाइल', 'Mobile')}</span>
                 <strong class="text-xs font-mono text-slate-800 block mt-0.5">${myEmp.phone}</strong>
               </div>
             </div>
 
-            <!-- KYC Documents Upload Section -->
-            <div class="space-y-3 pt-2">
-              <h4 class="text-xs font-black uppercase text-slate-700 tracking-wider">📄 पहचान दस्तावेज (KYC Documents)</h4>
+            <!-- KYC Documents -->
+            <div class="space-y-2.5 pt-2 border-t border-slate-100">
+              <h4 class="text-xs font-black uppercase text-slate-700 tracking-wider">${__L('पहचान दस्तावेज (KYC)', 'KYC Documents')}</h4>
               
               <!-- Aadhaar Card -->
-              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs">
                 <div>
-                  <strong class="text-slate-900 block font-bold">आधार कार्ड (Aadhaar Card)</strong>
-                  <span class="text-[11px] font-mono text-slate-500">नंबर: ${aadhar}</span>
-                  <span class="text-[10px] text-emerald-600 font-bold block">✓ दस्तावेज सत्यापित</span>
+                  <strong class="text-slate-900 block font-bold">${__L('आधार कार्ड', 'Aadhaar Card')}</strong>
+                  <span class="text-[11px] font-mono text-slate-500">${aadhar}</span>
                 </div>
-                <label class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold text-[11px] hover:bg-slate-100 cursor-pointer shadow-2xs self-start sm:self-center">
-                  <span>📎 नया आधार अपलोड</span>
+                <label class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold text-[11px] hover:bg-slate-100 cursor-pointer shadow-2xs">
+                  <span>${__L('📎 नया अपलोड', '📎 Upload New')}</span>
                   <input type="file" accept="image/*,.pdf" onchange="window.MMS_APP.handleDocUpload('aadhar', event)" class="hidden">
                 </label>
               </div>
 
               <!-- PAN Card -->
-              <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs">
                 <div>
-                  <strong class="text-slate-900 block font-bold">पैन कार्ड (PAN Card)</strong>
-                  <span class="text-[11px] font-mono text-slate-500">नंबर: ${pan}</span>
-                  <span class="text-[10px] text-emerald-600 font-bold block">✓ दस्तावेज सत्यापित</span>
+                  <strong class="text-slate-900 block font-bold">${__L('पैन कार्ड', 'PAN Card')}</strong>
+                  <span class="text-[11px] font-mono text-slate-500">${pan}</span>
                 </div>
-                <label class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold text-[11px] hover:bg-slate-100 cursor-pointer shadow-2xs self-start sm:self-center">
-                  <span>📎 नया पैन अपलोड</span>
+                <label class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-700 font-bold text-[11px] hover:bg-slate-100 cursor-pointer shadow-2xs">
+                  <span>${__L('📎 नया अपलोड', '📎 Upload New')}</span>
                   <input type="file" accept="image/*,.pdf" onchange="window.MMS_APP.handleDocUpload('pan', event)" class="hidden">
                 </label>
               </div>
             </div>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
-              <button onclick="alert('✅ आपकी प्रोफाइल फोटो व दस्तावेज सुरक्षित रूप से सहेज लिए गए हैं!')" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                सहेजें (Save Changes)
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
+              <button onclick="alert(__L('✅ प्रोफाइल व दस्तावेज सुरक्षित सहेजे गए!', '✅ Profile & KYC documents saved successfully!'))" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer">
+                ${__L('सहेजें', 'Save Changes')}
               </button>
             </div>
 
@@ -5958,80 +5953,70 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     // IF ADMIN OR MANAGER: SHOW MASTER SYSTEM SETTINGS
     const branches = state.branches || [];
 
-    // Storage card is ONLY for isOwner (Super Admin) - Never for Manager or Employee!
+    // Storage card is ONLY for isOwner (Super Admin)
     const adminStorageCard = isOwner ? `
-      <!-- Dedicated Enterprise Storage & 2-Month Data Lifecycle Card (ADMIN ONLY) -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm mb-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-lg">
-              🛡️
-            </div>
-            <div>
-              <h3 class="text-base font-black text-slate-900 tracking-tight">प्राइवेट सर्वर स्टोरेज सुरक्षा व 2-माह डेटा लाइफसाइकिल (केवल सुपर एडमिन)</h3>
-              <p class="text-xs text-slate-500 font-semibold mt-0.5">डेटाबेस स्पेस कभी फुल न हो इसके लिए 2 महीने से पुराने रिकॉर्ड्स का ऑटो-आर्काइव सिस्टम</p>
-            </div>
+      <!-- Server Storage Card -->
+      <div class="clay-card bg-white rounded-[26px] border border-slate-200/80 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🛡️</span>
+            <h3 class="text-sm font-black text-slate-900">${__L('सर्वर स्टोरेज', 'Server Storage')}</h3>
           </div>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            स्टोरेज सुरक्षित (Healthy)
+            ${__L('स्टोरेज सुरक्षित', 'Healthy')}
           </span>
         </div>
 
         <!-- Live Storage Capacity Gauges -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-              <span class="flex items-center gap-1.5 font-extrabold text-slate-900">
-                <span>🗄️</span> मुख्य ERP डेटाबेस क्षमता (Database Capacity)
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+              <span class="flex items-center gap-1 font-extrabold text-slate-900">
+                <span>🗄️</span> ${__L('ERP डेटाबेस', 'ERP Database')}
               </span>
-              <span class="text-slate-500 font-black">अधिकतम सीमा: 4.5 GB</span>
+              <span class="text-slate-500 font-bold text-[11px]">${__L('अधिकतम: 4.5 GB', 'Max: 4.5 GB')}</span>
             </div>
-            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
               <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 2.5%;"></div>
             </div>
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-2">
-              <span>वर्तमान उपयोग: <strong>0.18 MB</strong></span>
-              <span class="text-emerald-600 font-black">4,499.8 MB सुरक्षित खाली है</span>
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-1.5">
+              <span>${__L('उपयोग', 'Used')}: <strong>0.18 MB</strong></span>
+              <span class="text-emerald-600 font-black">${__L('4,499.8 MB सुरक्षित खाली', '4,499.8 MB Free')}</span>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
-              <span class="flex items-center gap-1.5 font-extrabold text-slate-900">
-                <span>📸</span> मीडिया व लाइव सेल्फी स्टोरेज (Media Storage)
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1.5">
+              <span class="flex items-center gap-1 font-extrabold text-slate-900">
+                <span>📸</span> ${__L('मीडिया स्टोरेज', 'Media Storage')}
               </span>
-              <span class="text-slate-500 font-black">अधिकतम सीमा: 9.5 GB</span>
+              <span class="text-slate-500 font-bold text-[11px]">${__L('अधिकतम: 9.5 GB', 'Max: 9.5 GB')}</span>
             </div>
-            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
               <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 1.2%;"></div>
             </div>
-            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-2">
-              <span>वर्तमान उपयोग: <strong>0.22 MB</strong></span>
-              <span class="text-emerald-600 font-black">9,499.7 MB सुरक्षित खाली है</span>
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mt-1.5">
+              <span>${__L('उपयोग', 'Used')}: <strong>0.22 MB</strong></span>
+              <span class="text-emerald-600 font-black">${__L('9,499.7 MB सुरक्षित खाली', '9,499.7 MB Free')}</span>
             </div>
           </div>
         </div>
 
-        <!-- 2-Month Archive & Download Workflow -->
-        <div class="p-4 rounded-xl bg-gradient-to-r from-blue-50/60 to-indigo-50/60 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white">2-माह नियम</span>
-              <h4 class="text-xs font-black text-slate-900">2 महीने पुराना डेटा एक्सेल में डाउनलोड करें और स्पेस खाली करें</h4>
-            </div>
-            <p class="text-[11px] text-slate-600 font-semibold mt-1">
-              अटेंडेंस सेल्फी व पूर्ण हो चुके रिपेयर जॉब्स सिर्फ 60 दिन तक सर्वर पर रहते हैं। पहले एक्सेल डाउनलोड करें, फिर सुरक्षित क्लीनअप करें।
-            </p>
+        <!-- 60-Day Archive Action -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white">${__L('60 दिन', '60 Days')}</span>
+            <span class="font-bold text-slate-800">${__L('पुराने रिकॉर्ड्स बैकअप व क्लीनअप', 'Old Records Backup & Purge')}</span>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button type="button" onclick="window.MMS_APP.exportOldDataToExcel(60)" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+            <button type="button" onclick="window.MMS_APP.exportOldDataToExcel(60)" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
               <span>📥</span>
-              <span>1. एक्सेल डाउनलोड करें</span>
+              <span>${__L('एक्सेल डाउनलोड', 'Export Excel')}</span>
             </button>
-            <button type="button" onclick="window.MMS_APP.purgeOldDataWithConfirmation()" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <button type="button" onclick="window.MMS_APP.purgeOldDataWithConfirmation()" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
               <span>🗑️</span>
-              <span>2. डेटा क्लीन करें</span>
+              <span>${__L('डेटा क्लीन', 'Clean Data')}</span>
             </button>
           </div>
         </div>
@@ -6039,46 +6024,38 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     ` : '';
 
     container.innerHTML = `
-      <div class="space-y-6">
+      <div class="space-y-4">
         
         <!-- Header -->
-        <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xl">⚙️</span>
-              <h2 class="text-lg font-black text-slate-900">सिस्टम, स्टोर व जीपीएस सेटिंग्स (Master Control)</h2>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">
-              तीनों शाखाओं के सटीक GPS निर्देशांक, दुकान खुलने का समय, बिलिंग नियम और डेटा बैकअप नियंत्रित करें।
-            </p>
+        <div class="clay-card bg-white p-4 sm:p-5 rounded-[26px] border border-slate-200/80 shadow-sm flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">⚙️</span>
+            <h2 class="text-base font-black text-slate-900">${__L('सिस्टम सेटिंग्स', 'System Settings')}</h2>
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="window.MMS_APP.exportBackup()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-              <span>💾 पूरा बैकअप डाउनलोड (JSON)</span>
+            <button onclick="window.MMS_APP.exportBackup()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+              <span>💾</span>
+              <span>${__L('पूरा बैकअप (JSON)', 'Full Backup (JSON)')}</span>
             </button>
           </div>
         </div>
 
         ${adminStorageCard}
 
-        <!-- 3 Branches GPS Coordinates & Geofence Manager -->
-        <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-          <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
-            <div>
-              <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                <span>📍 शाखाएं व GPS जियोफेंस कॉन्फ़िगरेशन (3 Physical Stores)</span>
-              </h3>
-              <p class="text-[11px] text-slate-500">
-                जब आप वास्तविक लोकेशन पर पहुंचें तो '📍 लाइव GPS भरें' दबाकर सटीक अक्षांश-देशांतर अपडेट कर सकते हैं।
-              </p>
-            </div>
-            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Anti-Spoof Enforced</span>
+        <!-- 3 Branches GPS Coordinates -->
+        <div class="clay-card bg-white p-5 rounded-[26px] border border-slate-200/80 shadow-sm space-y-3.5">
+          <div class="border-b border-slate-100 pb-2.5 flex items-center justify-between">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span>📍</span>
+              <span>${__L('शाखाएं व GPS सेटिंग्स', 'Branches & GPS Settings')}</span>
+            </h3>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">${__L('एंटी-स्पूफ सक्रिय', 'Anti-Spoof Active')}</span>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             ${branches.map((b, idx) => `
-              <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+              <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-2.5">
                 <div class="flex items-center justify-between">
                   <strong class="text-xs font-black text-slate-900">${b.name}</strong>
                   <span class="text-[10px] font-mono text-slate-400">#${idx + 1}</span>
@@ -6086,41 +6063,42 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                 
                 <div class="space-y-2 text-xs">
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase">फ़ोन / हेल्पलाइन</label>
-                    <input id="set-branch-phone-${b.id}" type="text" value="${b.phone || ''}" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">${__L('फ़ोन', 'Phone')}</label>
+                    <input id="set-branch-phone-${b.id}" type="text" value="${b.phone || ''}" class="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold">
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <div>
-                      <label class="block text-[10px] font-bold text-slate-500 uppercase">Latitude (अक्षांश)</label>
-                      <input id="set-branch-lat-${b.id}" type="number" step="any" value="${b.lat || 0}" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold">
+                      <label class="block text-[10px] font-bold text-slate-500 uppercase">${__L('अक्षांश (Lat)', 'Latitude')}</label>
+                      <input id="set-branch-lat-${b.id}" type="number" step="any" value="${b.lat || 0}" class="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold">
                     </div>
                     <div>
-                      <label class="block text-[10px] font-bold text-slate-500 uppercase">Longitude (देशांतर)</label>
-                      <input id="set-branch-lng-${b.id}" type="number" step="any" value="${b.lng || 0}" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold">
+                      <label class="block text-[10px] font-bold text-slate-500 uppercase">${__L('देशांतर (Lng)', 'Longitude')}</label>
+                      <input id="set-branch-lng-${b.id}" type="number" step="any" value="${b.lng || 0}" class="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold">
                     </div>
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase">अनुमति दायरा (Radius in Meters)</label>
-                    <input id="set-branch-radius-${b.id}" type="number" value="${b.radiusMeters || 10}" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">${__L('दायरा (मीटर)', 'Radius (Meters)')}</label>
+                    <input id="set-branch-radius-${b.id}" type="number" value="${b.radiusMeters || 10}" class="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold">
                   </div>
                   <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200">
                     <div>
-                      <label class="block text-[10px] font-bold text-blue-700 uppercase">दुकान खुलने का समय</label>
+                      <label class="block text-[10px] font-bold text-blue-700 uppercase">${__L('खुलने का समय', 'Open Time')}</label>
                       <input id="set-branch-open-${b.id}" type="time" value="${b.openTime || '10:30'}" class="w-full p-1.5 bg-white border border-blue-200 rounded-lg text-xs font-black text-slate-800">
                     </div>
                     <div>
-                      <label class="block text-[10px] font-bold text-slate-700 uppercase">दुकान बंद का समय</label>
+                      <label class="block text-[10px] font-bold text-slate-700 uppercase">${__L('बंद का समय', 'Close Time')}</label>
                       <input id="set-branch-close-${b.id}" type="time" value="${b.closeTime || '20:30'}" class="w-full p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-black text-slate-800">
                     </div>
                   </div>
                 </div>
 
                 <div class="pt-2 border-t border-slate-200 flex items-center gap-2">
-                  <button onclick="window.MMS_APP.fillCurrentGPSForBranch('${b.id}')" class="flex-1 py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1">
-                    <span>📍 लाइव GPS लें</span>
+                  <button onclick="window.MMS_APP.fillCurrentGPSForBranch('${b.id}')" class="flex-1 py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1 cursor-pointer">
+                    <span>📍</span>
+                    <span>${__L('लाइव GPS लें', 'Get Live GPS')}</span>
                   </button>
-                  <button onclick="window.MMS_APP.saveBranchSettings('${b.id}')" class="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[11px] font-bold transition">
-                    सहेजें
+                  <button onclick="window.MMS_APP.saveBranchSettings('${b.id}')" class="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[11px] font-bold transition cursor-pointer">
+                    ${__L('सहेजें', 'Save')}
                   </button>
                 </div>
               </div>
@@ -6128,28 +6106,27 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
         </div>
 
-        <!-- Store Timings & Attendance Shift Settings -->
-        <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs">
-          <div class="border-b border-slate-100 pb-3 mb-4">
-            <h3 class="text-sm font-black text-slate-900">⏰ कार्य समय व लेट-मार्क नियम (Shift Timings)</h3>
-            <p class="text-[11px] text-slate-500">स्टाफ के इन-टाइम और लेट-अराइवल डिटेक्शन के मानक घंटे।</p>
+        <!-- Shift & Policy Settings -->
+        <div class="clay-card bg-white p-5 rounded-[26px] border border-slate-200/80 shadow-sm">
+          <div class="border-b border-slate-100 pb-2.5 mb-3">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span>⏰</span>
+              <span>${__L('कार्य समय व नियम', 'Shift & Work Rules')}</span>
+            </h3>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <span class="block text-slate-400 text-[10px] font-bold uppercase">दुकान खुलने का समय (Shift Start)</span>
-              <strong class="text-base text-slate-900 block mt-1">10:30 AM</strong>
-              <span class="text-[10px] text-slate-500">इसके बाद पंच करने पर लेट-मार्क लगेगा</span>
+              <span class="block text-slate-400 text-[10px] font-bold uppercase">${__L('दुकान खुलने का समय', 'Shift Start')}</span>
+              <strong class="text-sm text-slate-900 block mt-0.5">10:30 AM</strong>
             </div>
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <span class="block text-slate-400 text-[10px] font-bold uppercase">दुकान बंद होने का समय (Shift End)</span>
-              <strong class="text-base text-slate-900 block mt-1">08:30 PM</strong>
-              <span class="text-[10px] text-slate-500">कुल मानक शिफ्ट: 10 घंटे प्रतिदिन</span>
+              <span class="block text-slate-400 text-[10px] font-bold uppercase">${__L('दुकान बंद होने का समय', 'Shift End')}</span>
+              <strong class="text-sm text-slate-900 block mt-0.5">08:30 PM</strong>
             </div>
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <span class="block text-slate-400 text-[10px] font-bold uppercase">उधार अनुमति नियम (Khata Policy)</span>
-              <strong class="text-base text-amber-600 block mt-1">B2B दुकानदार केवल</strong>
-              <span class="text-[10px] text-slate-500">नॉर्मल वॉक-इन कस्टमर को उधार लॉक रहेगा</span>
+              <span class="block text-slate-400 text-[10px] font-bold uppercase">${__L('उधार नियम', 'Credit Policy')}</span>
+              <strong class="text-sm text-amber-600 block mt-0.5">${__L('केवल B2B', 'B2B Only')}</strong>
             </div>
           </div>
         </div>
@@ -6157,6 +6134,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       </div>
     `;
   }
+
 
   function handleEmployeePhotoUpload(event) {
     const file = event.target.files[0];
@@ -10750,6 +10728,273 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     `;
   }
 
+
+  
+  // =========================================================================
+  // UNIVERSAL CLEAN TEXT & BILINGUAL PURITY ENGINE
+  // =========================================================================
+  const MMS_TRANSLATIONS = {
+    // Exact phrase translations
+    'बिलिंग काउंटर': 'Billing Counter',
+    'बिलिंग': 'Billing',
+    'ग्राहक विवरण व बिलिंग सारांश': 'Customer Details & Billing Summary',
+    'ग्राहक विवरण': 'Customer Details',
+    'इन्वेंट्री व SKU स्टॉक लिस्ट': 'Inventory & Stock List',
+    'इन्वेंट्री': 'Inventory',
+    'ट्रांसफर इन्वेंट्री व डिलीवरी चालान': 'Stock Transfer & Challans',
+    'हालिया ट्रांसफर चालान हिस्ट्री': 'Recent Stock Transfers',
+    'ट्रांसफर': 'Transfer',
+    'बकाया खाता-बही सूची (Due Ledger)': 'Due Khata Ledger',
+    'बकाया खाता-बही सूची': 'Due Khata Ledger',
+    'खाता-बही': 'Khata Ledger',
+    'खाता': 'Khata',
+    'डेली सेल्स व गल्ला मिलान': 'Daily Sales & Register',
+    'डेली सेल्स': 'Daily Sales',
+    'परिचालन व्यय विवरण (Operating Expenses Breakdown)': 'Operating Expenses Breakdown',
+    'दुकान परिसंपत्ति व देनदारी (Assets & Receivables)': 'Assets & Receivables',
+    '3 शाखाओं का तुलनात्मक लाभ-हानि खाता (Branch-Wise P&L)': 'Branch-Wise Profit & Loss',
+    'बैलेंस शीट': 'Balance Sheet',
+    'रिपोर्ट्स': 'Reports',
+    'रिपेयर जॉब-शीट व टोकन लिस्ट': 'Repair Job Sheets',
+    'रिपेयर जॉब्स': 'Repair Jobs',
+    'रिपेयर': 'Repairs',
+    'सिस्टम, स्टोर व जीपीएस सेटिंग्स (Master Control)': 'System Settings',
+    'सिस्टम व शाखा सेटिंग्स': 'System Settings',
+    'सिस्टम सेटिंग्स': 'System Settings',
+    'सेटिंग्स': 'Settings',
+    'शाखाएं व GPS जियोफेंस कॉन्फ़िगरेशन (3 Physical Stores)': 'Branches & GPS Geofence',
+    'शाखाएं व GPS सेटिंग्स': 'Branches & GPS Settings',
+    'कार्य समय व लेट-मार्क नियम (Shift Timings)': 'Shift & Work Rules',
+    'कार्य समय व नियम': 'Shift & Work Rules',
+    'कर्मचारी, कार्य-घंटे व ऑटो-सैलरी मैनेजमेंट': 'Staff, Hours & Auto-Salary',
+    'स्टाफ सूची व कार्य-घंटे गणित (Dynamic Shift & Hourly Rate)': 'Staff List & Shifts',
+    'स्टाफ एडवांस व लोन खाता (Staff Advances & EMI Ledger)': 'Staff Advances & Loans',
+    'स्टाफ': 'Staff',
+    'दुकान खर्च वाउचर सूची (Expense Vouchers)': 'Expense Vouchers',
+    'दुकान खर्च': 'Store Expenses',
+    'दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग': 'Store Operations & Sales',
+    'दैनिक उपस्थिति रजिस्टर व स्वीकृति (Admin View)': 'Daily Attendance Register',
+    'दैनिक उपस्थिति रजिस्टर (Attendance Log)': 'Attendance Register',
+    'हाजिरी': 'Attendance',
+    'टास्क': 'Tasks',
+    'नया बिल बनाएं': 'Create New Invoice',
+    'नया बिल': 'New Invoice',
+    'नया SKU जोड़ें': 'Add New SKU',
+    'नया खर्च जोड़ें': 'Add New Expense',
+    'नया कर्मचारी जोड़ें': 'Add New Employee',
+    'नया पार्ट जोड़ें': 'Add New Part',
+    'पब्लिक वेबसाइट': 'Public Website',
+    'वेबसाइट': 'Website',
+    'लॉगआउट': 'Sign Out',
+    'सुपर एडमिन (Owner)': 'Super Admin (Owner)',
+    'सुपर एडमिन': 'Super Admin',
+    'ब्रांच मैनेजर': 'Branch Manager',
+    'स्टाफ': 'Staff',
+    'सभी शाखाएं (Master All Branches)': 'All Branches',
+    'सभी शाखाएं': 'All Branches',
+    'हजरतगंज (Head Lab)': 'Hazratganj (Head Lab)',
+    'हजरतगंज (Sree Rama Towers)': 'Hazratganj (Sree Rama Towers)',
+    'हजरतगंज': 'Hazratganj',
+    'नाका हिंडोला शाखा (Naka Hindola Lucknow)': 'Naka Hindola Branch',
+    'नाका हिंडोला': 'Naka Hindola',
+    'नाका': 'Naka',
+    'कन्नौज शाखा (Saraimeera Kannauj)': 'Kannauj Branch',
+    'कन्नौज शाखा': 'Kannauj Branch',
+    'कन्नौज': 'Kannauj',
+    'दुकान स्थिति:': 'Shop Status:',
+    'दुकान स्थिति': 'Shop Status',
+    'खुली रखें': 'Open',
+    'बंद रखें': 'Closed',
+    'ऑटो टाइम': 'Auto Time',
+    'ऑटो': 'Auto',
+    'अलर्ट्स': 'Alerts',
+    'सहेजें': 'Save',
+    'रद्द करें': 'Cancel',
+    'खोजें': 'Search',
+    'फ़िल्टर': 'Filter',
+    'प्रिंट': 'Print',
+    'डाउनलोड': 'Download',
+    'एक्सेल डाउनलोड करें': 'Export Excel',
+    'एक्सेल डाउनलोड': 'Export Excel',
+    'डेटा क्लीन करें': 'Clean Data',
+    'डेटा क्लीन': 'Clean Data',
+    'पूरा बैकअप डाउनलोड (JSON)': 'Full Backup (JSON)',
+    'लाइव GPS लें': 'Get Live GPS',
+    'लाइव GPS भरें': 'Get Live GPS',
+    'कैश': 'Cash',
+    'नकद:': 'Cash:',
+    'नकद': 'Cash',
+    'उधार': 'Credit',
+    'एडवांस': 'Advance',
+    'जमा': 'Paid',
+    'शेष': 'Due',
+    'कुल': 'Total',
+    'दर': 'Rate',
+    'मात्रा': 'Qty',
+    'एक्शन': 'Action',
+    'स्थिति': 'Status',
+    'तारीख': 'Date',
+    'बिल नं': 'Invoice No',
+    'मोबाइल नंबर': 'Mobile Number',
+    'मोबाइल': 'Mobile',
+    'कर्मचारी का नाम': 'Employee Name',
+    'कर्मचारी नाम': 'Employee Name',
+    'नाम': 'Name',
+    'शाखा': 'Branch',
+    'कर्मचारी आईडी': 'Employee ID',
+    'कर्मचारी ID': 'Employee ID',
+    'आईडी': 'ID',
+    'वेतन': 'Salary',
+    'स्वीकृत': 'Approved',
+    'लंबित': 'Pending',
+    'अस्वीकृत': 'Rejected',
+    'लेट': 'Late',
+    'समय पर': 'On Time',
+    'चालू': 'Active',
+    'पूर्ण': 'Completed',
+    'डिलीवर': 'Delivered',
+    'स्टोरेज सुरक्षित (Healthy)': 'Healthy',
+    'स्टोरेज सुरक्षित': 'Healthy',
+    'मुख्य ERP डेटाबेस क्षमता (Database Capacity)': 'ERP Database Capacity',
+    'मीडिया व लाइव सेल्फी स्टोरेज (Media Storage)': 'Media Storage',
+    'अधिकतम सीमा:': 'Max:',
+    'वर्तमान उपयोग:': 'Used:',
+    'सुरक्षित खाली है': 'Free',
+    'सुरक्षित खाली': 'Free',
+    'दुकान खुलने का समय (Shift Start)': 'Shift Start Time',
+    'दुकान बंद होने का समय (Shift End)': 'Shift End Time',
+    'उधार अनुमति नियम (Khata Policy)': 'Credit Policy',
+    'दुकान खुलने का समय': 'Opening Time',
+    'दुकान बंद होने का समय': 'Closing Time',
+    'दुकान बंद का समय': 'Closing Time',
+    'उधार नियम': 'Credit Policy',
+    'केवल B2B दुकानदार': 'B2B Only',
+    'केवल B2B': 'B2B Only',
+    'B2B दुकानदार केवल': 'B2B Only',
+    'पहचान दस्तावेज (KYC Documents)': 'KYC Documents',
+    'पहचान दस्तावेज (KYC)': 'KYC Documents',
+    'पहचान दस्तावेज': 'KYC Documents',
+    'आधार कार्ड (Aadhaar Card)': 'Aadhaar Card',
+    'आधार कार्ड': 'Aadhaar Card',
+    'पैन कार्ड (PAN Card)': 'PAN Card',
+    'पैन कार्ड': 'PAN Card',
+    'दस्तावेज सत्यापित': 'Verified',
+    'नया आधार अपलोड': 'Upload Aadhaar',
+    'नया पैन अपलोड': 'Upload PAN',
+    'प्रोफाइल फोटो बदलें': 'Change Photo',
+    'प्रोफाइल फोटो': 'Profile Photo',
+    'सहेजें (Save Changes)': 'Save Changes',
+    'रजिस्टर्ड दुकानदार व ग्राहकों का रिकॉर्ड': 'Registered Customers & Merchants',
+    'ग्राहक डायरेक्टरी': 'Customer Directory',
+    'ग्राहक व दुकानदार CRM': 'Customer & Merchant CRM',
+    'रजिस्टर्ड ग्राहक': 'Registered Customers',
+    'नया ग्राहक / दुकानदार जोड़ें': 'Add New Customer / Merchant',
+    'दुकानदार / B2B': 'Shopkeeper / B2B',
+    'नॉर्मल ग्राहक': 'Regular Customer',
+    'खर्च श्रेणी': 'Expense Category',
+    'खर्च का नाम': 'Expense Title',
+    'राशि': 'Amount',
+    'भुगतान माध्यम': 'Payment Mode',
+    'खर्च विवरण': 'Expense Notes',
+    'आज की कुल बिक्री (SALES)': "Today's Gross Sales",
+    'आज की कुल बिक्री': "Today's Gross Sales",
+    'उपस्थित कर्मचारी व लेट रिपोर्ट': 'Staff Attendance & Late Report',
+    'उपस्थित कर्मचारी': 'Present Staff',
+    'आज का उधार': "Today's Credit",
+    'रिपेयर वर्कलोड': 'Repair Workload',
+    'शाखा स्थिति व कंट्रोल': 'Branch Status & Control',
+    'हाजिरी चेक करें': 'Check Attendance',
+    'नया बिल': 'New Bill',
+    'सभी 3 शाखाएं': 'All 3 Branches',
+    'कंट्रोल पैनल': 'Control Panel'
+  };
+
+  function sanitizeAndLocalizeActiveTab() {
+    const isEn = (state.portalLang || state.lang || 'hi') === 'en';
+    
+    // Always update sidebar elements to single clean words
+    const settingsLabel = document.getElementById('portal-settings-tab-label');
+    if (settingsLabel) settingsLabel.textContent = isEn ? 'Settings' : 'सेटिंग्स';
+    
+    const sidebarActionTitle = document.getElementById('sidebar-action-title');
+    if (sidebarActionTitle) sidebarActionTitle.textContent = isEn ? 'Create New Invoice' : 'नया बिल बनाएं';
+    
+    // Remove obsolete sidebar subtitle if present
+    const sidebarActionCard = document.querySelector('#sidebar .space-y-1\\.5');
+    if (sidebarActionCard) {
+      const extraSub = sidebarActionCard.querySelector('.text-\\[10px\\]');
+      if (extraSub && extraSub.id !== 'sidebar-action-title') {
+        extraSub.style.display = 'none';
+        extraSub.remove();
+      }
+    }
+
+    const container = document.getElementById('tab-view-' + state.activeAdminTab);
+    if (!container) return;
+
+    // 1. Text reduction: Hide or remove long boilerplate explanatory paragraphs (length > 40 chars)
+    const verboseP = container.querySelectorAll('p, span.text-\\[10px\\], span.text-\\[11px\\], div.text-\\[11px\\]');
+    verboseP.forEach(el => {
+      const txt = el.textContent.trim();
+      if (
+        txt.includes('तीनों शाखाओं के सटीक GPS') ||
+        txt.includes('डेटाबेस स्पेस कभी फुल न हो') ||
+        txt.includes('जब आप वास्तविक लोकेशन पर पहुंचें') ||
+        txt.includes('अटेंडेंस सेल्फी व पूर्ण हो चुके') ||
+        txt.includes('दुकान ऑपरेशंस एक्सेस करने के लिए') ||
+        txt.includes('20+ श्रेणियों में स्पेयर पार्ट्स') ||
+        txt.includes('यहाँ के सभी स्पेयर पार्ट्स सीधे कंपनी') ||
+        txt.includes('हजरतगंज से नाका हिंडोला भेजे गए') ||
+        txt.includes('तारीख, समय और दुकानदार के उधार नोट') ||
+        txt.includes('शाम को दुकान बंद करते समय गल्ला') ||
+        txt.includes('हजरतगंज (Head Lab), नाका हिंडोला और कन्नौज') ||
+        txt.includes('ग्राहकों के रिपेयरिंग मोबाइल, पैटर्न') ||
+        txt.includes('आप अपनी प्रोफाइल फोटो और जरूरी पहचान') ||
+        txt.includes('फोटो, समय, GPS स्थान और एडमिन') ||
+        txt.includes('मासिक सैलरी से स्वतः कटने वाली') ||
+        txt.includes('हर खर्च का विवरण, भुगतान माध्यम') ||
+        txt.includes('यह राशि बैलेंस शीट और P&L में स्वतः') ||
+        txt.includes('दैनिक शिफ्ट घंटे तय करें, सिस्टम') ||
+        txt.includes('Live SKU search, quick part add') ||
+        txt.includes('सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल')
+      ) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 2. Bilingual text node replacement if English
+    if (isEn) {
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      const sortedKeys = Object.keys(MMS_TRANSLATIONS).sort((a, b) => b.length - a.length);
+      while ((node = walker.nextNode())) {
+        let val = node.nodeValue;
+        if (!val || !/[\u0900-\u097F]/.test(val)) continue;
+        for (const k of sortedKeys) {
+          if (val.includes(k)) {
+            val = val.split(k).join(MMS_TRANSLATIONS[k]);
+          }
+        }
+        node.nodeValue = val;
+      }
+
+      // Update placeholders and titles
+      const inputs = container.querySelectorAll('input, textarea, select, button');
+      inputs.forEach(inp => {
+        if (inp.placeholder && /[\u0900-\u097F]/.test(inp.placeholder)) {
+          for (const k of sortedKeys) {
+            if (inp.placeholder.includes(k)) inp.placeholder = inp.placeholder.split(k).join(MMS_TRANSLATIONS[k]);
+          }
+        }
+        if (inp.title && /[\u0900-\u097F]/.test(inp.title)) {
+          for (const k of sortedKeys) {
+            if (inp.title.includes(k)) inp.title = inp.title.split(k).join(MMS_TRANSLATIONS[k]);
+          }
+        }
+      });
+    }
+  }
+  
 
   window.MMS_APP = {
     toggleCategoryDropdown,
