@@ -1578,7 +1578,7 @@ function filterCategoryDropdown(inputId, query) {
             <span class="text-xs text-slate-400">• ${__L("आज का लाइव कंट्रोल डैशबोर्ड", "Today's Live Control Dashboard")}</span>
           </div>
           <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-            दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग
+            ${__L("दुकान ऑपरेशंस, बिक्री व स्टाफ मॉनिटरिंग", "Store Operations, Sales & Staff Monitoring")}
           </h2>
           <p class="text-xs text-slate-300 mt-1 max-w-2xl">
             ${__L("शाखाओं की लाइव स्थिति, GPS-सत्यापित स्टोर ओपनिंग, कर्मचारियों का लेट-अराइवल अलर्ट और आज की नेट बिक्री का रियल-टाइम हिसाब।", "Live branch status, GPS-verified store opening, staff late arrival alerts, and real-time net sales summary.")}
@@ -1608,15 +1608,15 @@ function filterCategoryDropdown(inputId, query) {
             ₹${todaySalesTotal.toLocaleString('en-IN')}
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>नकद: <strong class="text-slate-800">₹${todayCash.toLocaleString('en-IN')}</strong></span>
-            <span>UPI: <strong class="text-blue-600">₹${todayUPI.toLocaleString('en-IN')}</strong></span>
+            <span>${__L("नकद:", "Cash:")} <strong class="text-slate-800">₹${todayCash.toLocaleString('en-IN')}</strong></span>
+            <span>${__L("ऑनलाइन (UPI):", "Online (UPI):")} <strong class="text-blue-600">₹${todayUPI.toLocaleString('en-IN')}</strong></span>
           </div>
         </div>
 
         <!-- Card 2: Staff Attendance & Late Arrivals -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">उपस्थित कर्मचारी & लेट</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("उपस्थित कर्मचारी व लेट", "Staff Attendance & Late")}</span>
             <span class="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">👥</span>
           </div>
           <div class="flex items-baseline gap-2">
@@ -1629,7 +1629,7 @@ function filterCategoryDropdown(inputId, query) {
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>${__L("मानक समय:", "Standard Time:")} <strong>10:30 AM</strong></span>
-            <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-blue-600 font-bold hover:underline">रजिस्टर देखें →</button>
+            <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-blue-600 font-bold hover:underline">${__L("रजिस्टर देखें →", "View Register →")}</button>
           </div>
         </div>
 
@@ -1643,27 +1643,27 @@ function filterCategoryDropdown(inputId, query) {
             ₹${todayNewCredit.toLocaleString('en-IN')}
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>केवल B2B दुकानदार</span>
-            <button onclick="window.MMS_APP.switchPortalTab('khata')" class="text-amber-700 font-bold hover:underline">खाता-बही →</button>
+            <span>${__L("केवल B2B दुकानदार", "B2B Merchants Only")}</span>
+            <button onclick="window.MMS_APP.switchPortalTab('khata')" class="text-amber-700 font-bold hover:underline">${__L("खाता-बही →", "Credit Ledger →")}</button>
           </div>
         </div>
 
         <!-- Card 4: Active Repair Tokens -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">लैब रिपेयर लोड</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("लैब रिपेयर कार्यभार", "Lab Repair Load")}</span>
             <span class="h-9 w-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">🔧</span>
           </div>
           <div class="flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-black text-slate-900">${activeJobsCount}</span>
-            <span class="text-xs text-slate-400 font-bold">चालू फोन</span>
+            <span class="text-xs text-slate-400 font-bold">${__L("चालू फोन", "In-Progress")}</span>
             <span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-purple-100 text-purple-800">
               ${readyJobsCount} ${__L("रेडी (तैयार)", "Ready")}
             </span>
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>${__L("डिलीवरी बाकी:", "Pending Delivery:")} ${activeJobsCount}</span>
-            <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-purple-600 font-bold hover:underline">जॉब टोकन →</button>
+            <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-purple-600 font-bold hover:underline">${__L("जॉब टोकन →", "Job Tokens →")}</button>
           </div>
         </div>
 
@@ -1729,7 +1729,7 @@ function filterCategoryDropdown(inputId, query) {
                 <div class="pt-2 border-t border-slate-200/70 flex items-center gap-2">
                   ${bStatus.isOpen ? `
                     <button onclick="window.MMS_APP.toggleStoreOpenStatus('${b.id}', false)" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
-                      🛑 दुकान बंद करें
+                      🛑 ${__L("दुकान बंद करें", "Close Store")}
                     </button>
                   ` : `
                     <button onclick="window.MMS_APP.verifyAndOpenStore('${b.id}')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center justify-center gap-1.5">
