@@ -31,6 +31,17 @@ export default {
     }
 
     // 1. Health check: /api/health (Enterprise branding - zero mentions of free tools)
+    
+    // 1.1 Zero-Touch Client Auto-Update Endpoint: /api/version
+    if (url.pathname === "/api/version") {
+      return jsonResponse({
+        success: true,
+        version: "8.9",
+        build: "20261116_89",
+        timestamp: Date.now()
+      });
+    }
+
     if (url.pathname === "/api/health") {
       return jsonResponse({
         success: true,
@@ -393,6 +404,8 @@ export default {
             return jsonResponse({
               success: true,
               source: "enterprise_cache",
+              version: "8.9",
+              build: "20261116_89",
               timestamp: new Date().toISOString(),
               data: store
             });
@@ -476,6 +489,8 @@ export default {
             return jsonResponse({
               success: true,
               source: "enterprise_db",
+              version: "8.9",
+              build: "20261116_89",
               timestamp: new Date().toISOString(),
               data: fullData
             });

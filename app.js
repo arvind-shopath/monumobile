@@ -231,6 +231,13 @@ function filterCategoryDropdown(inputId, query) {
         if (!res.ok) return;
         const resData = await res.json();
         if (resData.success && resData.data) {
+        if (resData.build && typeof window.MMS_CLIENT_BUILD !== 'undefined' && resData.build !== window.MMS_CLIENT_BUILD) {
+          if (typeof window.MMS_TRIGGER_AUTO_UPDATE === 'function') {
+            window.MMS_TRIGGER_AUTO_UPDATE(resData.build);
+            return;
+          }
+        }
+
           const { attendance, invoices, jobs, expenses } = resData.data;
           let changed = false;
 

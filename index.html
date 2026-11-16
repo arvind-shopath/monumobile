@@ -6,6 +6,83 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+
+  <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
+  <script>
+    (function() {
+      window.MMS_CLIENT_BUILD = "20261116_89";
+
+      // 1. Kill mobile bfcache (back-forward frozen cache)
+      window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+          window.location.reload();
+        }
+      });
+
+      // 2. Unregister any stale service workers & clear browser CacheStorage
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var i = 0; i < regs.length; i++) regs[i].unregister();
+        }).catch(function(){});
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var i = 0; i < names.length; i++) caches.delete(names[i]);
+        }).catch(function(){});
+      }
+
+      // 3. Automatic Zero-Touch Version Watchdog
+      var isUpdating = false;
+      function checkLiveVersion() {
+        if (isUpdating) return;
+        try {
+          fetch('/api/version?_t=' + Date.now(), { cache: 'no-store' })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+              if (data && data.build && data.build !== window.MMS_CLIENT_BUILD) {
+                triggerAutoUpdate(data.build);
+              }
+            })
+            .catch(function(){});
+        } catch(e) {}
+      }
+
+      function triggerAutoUpdate(newBuild) {
+        if (isUpdating) return;
+        isUpdating = true;
+        console.log('🚀 New MMS Software Build Detected:', newBuild, 'Current:', window.MMS_CLIENT_BUILD);
+
+        var banner = document.createElement('div');
+        banner.id = 'mms-auto-update-toast';
+        banner.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999999;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#ffffff;padding:10px 22px;border-radius:9999px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5),0 8px 10px -6px rgba(0,0,0,0.4);font-family:system-ui,-apple-system,sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;border:1px solid #3b82f6;letter-spacing:0.02em;';
+        banner.innerHTML = '<span style="font-size:16px;">🔄</span> <span>सिस्टम का नया अपडेट मिला है! ऑटोमैटिक रीलोड हो रहा है...</span>';
+        if (document.body) {
+          document.body.appendChild(banner);
+        } else {
+          document.documentElement.appendChild(banner);
+        }
+
+        setTimeout(function() {
+          var targetUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?_v=' + newBuild + '&_t=' + Date.now();
+          window.location.replace(targetUrl);
+        }, 1000);
+      }
+
+      window.MMS_TRIGGER_AUTO_UPDATE = triggerAutoUpdate;
+      window.MMS_CHECK_APP_VERSION = checkLiveVersion;
+
+      // Check on tab visibility/focus (when mobile phone unlocks or tab wakes up)
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') checkLiveVersion();
+      });
+      window.addEventListener('focus', checkLiveVersion);
+
+      // Periodic check every 45s
+      setInterval(checkLiveVersion, 45000);
+      setTimeout(checkLiveVersion, 1500);
+    })();
+  </script>
+
     <!-- Instant Auth Cloak: Completely prevents flash of logged-out public website on page reload -->
   <script>
     (function() {
