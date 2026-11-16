@@ -1981,15 +1981,19 @@ function filterCategoryDropdown(inputId, query) {
     const btnHi = document.getElementById('btn-portal-lang-hi');
     if (btnEn && btnHi) {
       if (isEn) {
-        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnEn.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black transition cursor-pointer bg-slate-900 text-white shadow-sm';
+        btnHi.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       } else {
-        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnHi.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-black transition cursor-pointer bg-slate-900 text-white shadow-sm';
+        btnEn.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       }
     }
 
     // Update Header user role & titles
+    const sidebarActionTitle = document.getElementById('sidebar-action-title');
+    if (sidebarActionTitle) {
+      sidebarActionTitle.textContent = isEn ? 'Create New Invoice' : 'नया बिल बनाएं';
+    }
     const userRoleEl = document.getElementById('header-user-role');
     if (userRoleEl) {
       userRoleEl.textContent = isEn ? 'Admin' : 'एडमिन';
@@ -2450,9 +2454,9 @@ function filterCategoryDropdown(inputId, query) {
         b.style.display = 'flex';
         b.classList.remove('hidden');
         if (bTab === state.activeAdminTab) {
-          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition font-bold bg-blue-600 text-white shadow-sm';
+          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25';
         } else {
-          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
+          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-semibold';
         }
       } else {
         b.style.display = 'none';
@@ -2608,7 +2612,7 @@ function filterCategoryDropdown(inputId, query) {
 
     container.innerHTML = `
       <!-- Top Overview Greeting & Status -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 p-5 rounded-2xl text-white shadow-md border border-slate-700/60">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-6 rounded-[28px] text-white shadow-[0_20px_45px_-10px_rgba(79,70,229,0.35)] border border-blue-400/30">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
@@ -2634,7 +2638,7 @@ function filterCategoryDropdown(inputId, query) {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- Card 1: Today's Total Sales -->
-        <div class="bg-gradient-to-br from-white to-emerald-50/40 p-5 rounded-2xl border border-emerald-100/70 shadow-2xs hover:shadow-md transition">
+        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज की कुल बिक्री", "Today's Gross Sales")}</span>
             <span class="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold">₹</span>
@@ -2649,7 +2653,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 2: Staff Attendance & Late Arrivals -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
+        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("उपस्थित कर्मचारी", "Present Staff")}</span>
             <span class="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">👥</span>
@@ -2669,7 +2673,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 3: Today's New Udhar (Credit) -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
+        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज का नया उधार", "Today's Credit")}</span>
             <span class="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base">📕</span>
@@ -2684,7 +2688,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 4: Active Repair Tokens -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition">
+        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("रिपेयर लोड", "Repair Workload")}</span>
             <span class="h-9 w-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">🔧</span>
@@ -2705,7 +2709,7 @@ function filterCategoryDropdown(inputId, query) {
       </div>
 
       <!-- Row 2: Location-Verified Store Opening & Branch Operational Status (Security Feature) -->
-      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs">
+      <div class="clay-card p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
           <div>
             <div class="flex items-center gap-2">
@@ -2786,7 +2790,7 @@ function filterCategoryDropdown(inputId, query) {
       </div>
 
       <!-- Row 3: Staff Attendance & Late-Comers Live Table -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+      <div class="clay-card overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div class="flex items-center gap-2">
@@ -2905,7 +2909,7 @@ function filterCategoryDropdown(inputId, query) {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         
         <!-- Recent Invoices -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div class="clay-card p-5">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
               <span>🧾 ${__L("हालिया बिल", "Recent Invoices")}</span>
@@ -2938,7 +2942,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Recent Repair Tokens -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div class="clay-card p-5">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
               <span>🔧 ${__L("हालिया रिपेयर", "Recent Repairs")}</span>
@@ -3117,7 +3121,7 @@ function filterCategoryDropdown(inputId, query) {
     container.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Left: Product Search, Quick SKU Add, Custom Labor & Cart Table -->
-        <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="lg:col-span-7 clay-card p-6">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
             <div class="flex flex-wrap items-center gap-3">
               <h3 class="text-lg font-black text-slate-900 tracking-tight">${__L("बिलिंग काउंटर", "Billing Counter")}</h3>
@@ -3303,7 +3307,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Right: Customer Type, Saved Shopkeeper Directory, Payment & Checkout -->
-        <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="lg:col-span-5 clay-card p-6 space-y-4">
           <h3 class="text-base font-black text-slate-900 pb-2 border-b border-slate-100">${__L("ग्राहक विवरण व बिलिंग सारांश", "Customer Details & Billing Summary")}</h3>
 
           <!-- 📅 Bill Date Indicator -->
@@ -7034,7 +7038,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
         <!-- Hours Summary -->
           <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs text-center">
+            <div class="clay-card p-5 text-center">
               <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">आज का कार्य समय</span>
               <div class="text-3xl font-black text-blue-600 font-mono mt-1">
                 ${isPunchedIn ? 'ड्यूटी चालू' : `${todayHours.toFixed(1)} hrs`}
@@ -7042,7 +7046,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
               <span class="text-[10px] text-slate-400 mt-1 block">दैनिक शिफ्ट</span>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs text-center">
+            <div class="clay-card p-5 text-center">
               <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">इस महीने कुल काम</span>
               <div class="text-3xl font-black text-emerald-600 font-mono mt-1">
                 ${monthHours.toFixed(1)} hrs
