@@ -713,9 +713,9 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   const state = {
-    lang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
-    currentLang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
-    portalLang: localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    lang: localStorage.getItem('mms_portal_lang') || localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    currentLang: localStorage.getItem('mms_portal_lang') || localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
+    portalLang: localStorage.getItem('mms_portal_lang') || localStorage.getItem('mms_lang') || localStorage.getItem(STORAGE_KEYS.LANG) || 'hi',
     currentUser: JSON.parse(localStorage.getItem(STORAGE_KEYS.AUTH) || 'null'),
     // portalLang synchronized via state.lang
     activeView: localStorage.getItem(STORAGE_KEYS.ACTIVE_VIEW) || 'portal',
@@ -834,8 +834,8 @@ function filterCategoryDropdown(inputId, query) {
   
   // --- Universal Bilingual Localization Helper ---
   function __L(hi, en) {
-    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
-    return isEn ? en : hi;
+    const active = state.portalLang || state.lang || 'hi';
+    return active === 'en' ? en : hi;
   }
 
   function persistData() {
@@ -921,9 +921,7 @@ function filterCategoryDropdown(inputId, query) {
     }
   }
 
-  function setPortalLanguage(lang) {
-    setLanguage(lang);
-  }
+  // setPortalLanguage implemented below in portal engine
 
   // --- Formatters ---
   function formatCurrency(amount) {
@@ -1939,13 +1937,27 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function setPortalLanguage(lang) {
+    lang = (lang === 'en') ? 'en' : 'hi';
     state.portalLang = lang;
-    localStorage.setItem('mms_portal_lang', lang);
+    state.lang = lang;
+    state.currentLang = lang;
+    try {
+      localStorage.setItem('mms_portal_lang', lang);
+      localStorage.setItem('mms_lang', lang);
+      localStorage.setItem(STORAGE_KEYS.LANG, lang);
+    } catch(e) {}
+
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
+
     applyPortalLanguageUI();
-    // Re-render active tab view
+    renderPortalShopControl();
+    renderPortalBranchSwitcher();
+
     if (typeof renderEmployeeJobAlerts === 'function') renderEmployeeJobAlerts();
-      if (state.activeAdminTab === 'mywork') renderMyWorkModule();
-      else if (state.activeAdminTab === 'dashboard') renderDashboard();
+    if (state.activeAdminTab === 'mywork') renderMyWorkModule();
+    else if (state.activeAdminTab === 'dashboard') renderDashboard();
     else if (state.activeAdminTab === 'pos') renderPOS();
     else if (state.activeAdminTab === 'jobs') renderJobCards();
     else if (state.activeAdminTab === 'inventory') renderInventory();
@@ -1961,7 +1973,7 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function applyPortalLanguageUI() {
-    const lang = state.portalLang || 'en';
+    const lang = (state.portalLang || state.lang || 'hi') === 'en' ? 'en' : 'hi';
     const isEn = lang === 'en';
 
     // Update Language Switcher active styles
@@ -1969,51 +1981,48 @@ function filterCategoryDropdown(inputId, query) {
     const btnHi = document.getElementById('btn-portal-lang-hi');
     if (btnEn && btnHi) {
       if (isEn) {
-        btnEn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnHi.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       } else {
-        btnHi.className = 'px-2.5 py-1 rounded-lg text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
-        btnEn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
+        btnHi.className = 'px-2 py-0.5 rounded text-[11px] font-black transition cursor-pointer bg-white text-indigo-900 shadow-2xs';
+        btnEn.className = 'px-2 py-0.5 rounded text-[11px] font-bold text-slate-500 hover:text-slate-900 transition cursor-pointer';
       }
     }
 
-    // Update Header greeting & Role
-    const greetingEl = document.getElementById('header-greeting');
-    if (greetingEl) greetingEl.textContent = isEn ? 'Hello,' : 'नमस्ते,';
-
-    const headerSyncBadge = document.getElementById('cloud-sync-status-badge');
-    if (headerSyncBadge) {
-      headerSyncBadge.innerHTML = isEn 
-        ? '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ Live App:</span> Sync Active'
-        : '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span class="hidden sm:inline">⚡ लाइव ऐप:</span> सिंक सक्रिय';
+    // Update Header user role
+    const userRoleEl = document.getElementById('header-user-role');
+    if (userRoleEl) {
+      userRoleEl.textContent = isEn ? 'Admin' : 'एडमिन';
     }
 
-    const quickBillBtn = document.getElementById('btn-header-quick-bill');
-    if (quickBillBtn) quickBillBtn.innerHTML = isEn ? '+ New Invoice' : '+ बिल';
-    const quickTokenBtn = document.getElementById('btn-header-quick-token');
-    if (quickTokenBtn) quickTokenBtn.innerHTML = isEn ? '+ New Token' : '+ टोकन';
+    const publicSiteBtn = document.getElementById('back-to-site-btn');
+    if (publicSiteBtn) {
+      const label = publicSiteBtn.querySelector('.sidebar-text-label');
+      if (label) label.textContent = isEn ? 'Public Website' : 'पब्लिक वेबसाइट';
+    }
 
-    const publicSiteBtn = document.getElementById('btn-portal-public-site');
-    if (publicSiteBtn) publicSiteBtn.textContent = isEn ? 'Public Website' : 'पब्लिक वेबसाइट';
-    const portalLogoutBtn = document.getElementById('btn-portal-logout');
-    if (portalLogoutBtn) portalLogoutBtn.textContent = isEn ? 'Sign Out' : 'लॉगआउट';
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      const label = logoutBtn.querySelector('.sidebar-text-label');
+      if (label) label.textContent = isEn ? 'Sign Out' : 'लॉगआउट';
+    }
 
     // Update Sidebar Navigation Button Labels
     const tabMap = {
-      dashboard: pT('tabDashboard'),
-      pos: pT('tabPos'),
-      jobs: pT('tabJobs'),
-      inventory: pT('tabInventory'),
-      transfer: pT('tabTransfer'),
-      directory: pT('tabDirectory'),
-      sales: pT('tabSales'),
-      khata: pT('tabKhata'),
-      expenses: pT('tabExpenses'),
-      balance: pT('tabBalance'),
-      attendance: pT('tabAttendance'),
-      staff: pT('tabStaff'),
-      settings: pT('tabSettings'),
-      mywork: pT('tabMyWork')
+      dashboard: isEn ? 'Dashboard' : 'डैशबोर्ड',
+      pos: isEn ? 'Billing' : 'बिलिंग',
+      jobs: isEn ? 'Repairs' : 'रिपेयर',
+      inventory: isEn ? 'Inventory' : 'इन्वेंट्री',
+      transfer: isEn ? 'Transfer' : 'ट्रांसफर',
+      directory: isEn ? 'Customers' : 'ग्राहक',
+      sales: isEn ? 'Sales' : 'बिक्री',
+      khata: isEn ? 'Khata' : 'खाता',
+      expenses: isEn ? 'Expenses' : 'खर्चे',
+      balance: isEn ? 'Reports' : 'रिपोर्ट्स',
+      attendance: isEn ? 'Attendance' : 'हाजिरी',
+      staff: isEn ? 'Staff' : 'स्टाफ',
+      settings: isEn ? 'Settings' : 'सेटिंग्स',
+      mywork: isEn ? 'Tasks' : 'टास्क'
     };
 
     const pTabs = (dom && dom.portalTabs && dom.portalTabs.length) ? dom.portalTabs : document.querySelectorAll(".portal-tab-btn");
@@ -2027,28 +2036,29 @@ function filterCategoryDropdown(inputId, query) {
 
     // Update Nav Group Headers
     const grpCoreTitle = document.querySelector('#portal-nav-group-core .sidebar-text-label span');
-    if (grpCoreTitle) grpCoreTitle.textContent = pT('navCore');
+    if (grpCoreTitle) grpCoreTitle.textContent = isEn ? 'Overview' : 'ओवरव्यू';
 
     const grpOpsTitle = document.querySelector('#portal-nav-group-ops .sidebar-text-label');
-    if (grpOpsTitle) grpOpsTitle.textContent = pT('navOps');
+    if (grpOpsTitle) grpOpsTitle.textContent = isEn ? 'Operations' : 'दुकान';
 
     const grpFinanceTitle = document.querySelector('#portal-nav-group-finance .sidebar-text-label');
-    if (grpFinanceTitle) grpFinanceTitle.textContent = pT('navFinance');
+    if (grpFinanceTitle) grpFinanceTitle.textContent = isEn ? 'Accounts' : 'हिसाब';
 
     const grpHrTitle = document.getElementById('portal-nav-group-hr-title');
-    if (grpHrTitle) grpHrTitle.textContent = pT('navHr');
+    if (grpHrTitle) grpHrTitle.textContent = isEn ? 'Staff' : 'स्टाफ';
 
-    const backSiteBtn = document.getElementById('back-to-site-btn');
-    if (backSiteBtn) {
-      const span = backSiteBtn.querySelectorAll('span')[1];
-      if (span) span.textContent = pT('publicSite');
+    // Update sidebar bottom user role
+    if (dom && dom.portalUserBadge) {
+      const roleText = (state.currentUser && state.currentUser.role || 'admin').toLowerCase();
+      const badgeRoleEl = dom.portalUserBadge.querySelector('.text-\\[10px\\]') || dom.portalUserBadge.querySelector('div:last-child div:last-child');
+      if (badgeRoleEl) {
+        badgeRoleEl.textContent = isEn 
+          ? (roleText === 'admin' ? 'Super Admin (Owner)' : roleText === 'manager' ? 'Branch Manager' : 'Staff')
+          : (roleText === 'admin' ? 'सुपर एडमिन (Owner)' : roleText === 'manager' ? 'ब्रांच मैनेजर' : 'स्टाफ');
+      }
     }
 
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      const span = logoutBtn.querySelectorAll('span')[1];
-      if (span) span.textContent = pT('logout');
-    }
+
   }
   
   
@@ -2624,15 +2634,15 @@ function filterCategoryDropdown(inputId, query) {
           </div>
           <div class="flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-black text-slate-900">${presentStaffCount}</span>
-            <span class="text-xs text-slate-400 font-bold">स्टाफ न</span>
+            <span class="text-xs text-slate-400 font-bold">${__L("स्टाफ", "Staff")}</span>
             ${lateCount > 0 
-              ? `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">🔴 ${lateCount} लेट</span>`
-              : `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 सब ऑन-टाइम</span>`
+              ? `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-200">🔴 ${lateCount} ${__L("लेट", "Late")}</span>`
+              : `<span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">🟢 ${__L("समय पर", "On-Time")}</span>`
             }
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>मानक टाइम: <strong>10:30 AM</strong></span>
-            <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-blue-600 font-bold hover:underline">रजिस्टर देखें →</button>
+            <span>${__L("मानक समय: 10:30 AM", "Standard: 10:30 AM")}</span>
+            <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-blue-600 font-bold hover:underline">${__L("रजिस्टर देखें →", "View Register →")}</button>
           </div>
         </div>
 
@@ -2646,8 +2656,8 @@ function filterCategoryDropdown(inputId, query) {
             ₹${todayNewCredit.toLocaleString('en-IN')}
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>केवल B2B दुकानदार</span>
-            <button onclick="window.MMS_APP.switchPortalTab('khata')" class="text-amber-700 font-bold hover:underline">खाता-बही →</button>
+            <span>${__L("केवल B2B", "B2B Only")}</span>
+            <button onclick="window.MMS_APP.switchPortalTab('khata')" class="text-amber-700 font-bold hover:underline">${__L("खाता देखें →", "View Khata →")}</button>
           </div>
         </div>
 
@@ -2659,14 +2669,14 @@ function filterCategoryDropdown(inputId, query) {
           </div>
           <div class="flex items-baseline gap-2">
             <span class="text-2xl sm:text-3xl font-black text-slate-900">${activeJobsCount}</span>
-            <span class="text-xs text-slate-400 font-bold">चालू फोन</span>
+            <span class="text-xs text-slate-400 font-bold">${__L("चालू फोन", "In Progress")}</span>
             <span class="ml-auto px-2 py-0.5 rounded-full text-[11px] font-black bg-purple-100 text-purple-800">
-              ${readyJobsCount} रेडी
+              ${readyJobsCount} ${__L("रेडी", "Ready")}
             </span>
           </div>
           <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>डिलीवरी बाकी: ${activeJobsCount}</span>
-            <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-purple-600 font-bold hover:underline">जॉब टोकन →</button>
+            <span>${__L("डिलीवरी बाकी: ", "Pending: ")}${activeJobsCount}</span>
+            <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-purple-600 font-bold hover:underline">${__L("जॉब टोकन →", "Job Tokens →")}</button>
           </div>
         </div>
 
@@ -2698,25 +2708,25 @@ function filterCategoryDropdown(inputId, query) {
                     <span class="text-sm font-black text-slate-900">${b.name}</span>
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black flex items-center gap-1.5 ${bStatus.isOpen ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
                       <span class="w-1.5 h-1.5 rounded-full ${bStatus.isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-                      ${bStatus.isOpen ? '🟢 खुली है (OPEN)' : '🔴 बंद है (CLOSED)'}
+                      ${bStatus.isOpen ? __L('🟢 खुली है', '🟢 OPEN') : __L('🔴 बंद है', '🔴 CLOSED')}
                     </span>
                   </div>
                   <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${b.address}</p>
 
                   <div class="mt-3 grid grid-cols-2 gap-2 text-xs bg-white p-2.5 rounded-lg border border-slate-100">
                     <div>
-                      <span class="text-slate-400 text-[10px] block">आज की सेल</span>
+                      <span class="text-slate-400 text-[10px] block">${__L("आज की बिक्री", "Today's Sales")}</span>
                       <strong class="text-slate-900 font-bold">₹${bSales.toLocaleString('en-IN')}</strong>
                     </div>
                     <div>
-                      <span class="text-slate-400 text-[10px] block">उपस्थित स्टाफ</span>
-                      <strong class="text-blue-600 font-bold">${bStaff.length} कर्मचारी</strong>
+                      <span class="text-slate-400 text-[10px] block">${__L("उपस्थित स्टाफ", "Present Staff")}</span>
+                      <strong class="text-blue-600 font-bold">${bStaff.length} ${__L("स्टाफ", "Staff")}</strong>
                     </div>
                   </div>
 
                   ${bStatus.isOpen && bStatus.openedBy ? `
                     <div class="mt-2 text-[10px] text-slate-500 flex items-center justify-between bg-emerald-100/50 px-2 py-1 rounded border border-emerald-200/50">
-                      <span>👤 खोला: <strong>${bStatus.openedBy}</strong></span>
+                      <span>👤 ${__L("खोला:", "Opened by:")} <strong>${bStatus.openedBy}</strong></span>
                       <span>⏰ ${bStatus.time || '10:00 AM'}</span>
                     </div>
                   ` : ''}
@@ -2725,11 +2735,11 @@ function filterCategoryDropdown(inputId, query) {
                 <div class="pt-2 border-t border-slate-200/70 flex items-center gap-2">
                   ${bStatus.isOpen ? `
                     <button onclick="window.MMS_APP.toggleStoreOpenStatus('${b.id}', false)" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
-                      🛑 दुकान बंद करें
+                      ${__L("🛑 दुकान बंद करें", "🛑 Close Store")}
                     </button>
                   ` : `
                     <button onclick="window.MMS_APP.verifyAndOpenStore('${b.id}')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center justify-center gap-1.5">
-                      <span>📍 दुकान खोलें (GPS Verified)</span>
+                      <span>📍 ${__L("दुकान खोलें", "Open Store")}</span>
                     </button>
                   `}
                   ${isOwner ? `
@@ -2749,18 +2759,14 @@ function filterCategoryDropdown(inputId, query) {
         <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-base font-black text-slate-900">👥 आज का कर्मचारी हाजिरी रजिस्टर & लेट रिपोर्ट</h3>
+              <h3 class="text-base font-black text-slate-900">👥 ${__L("आज का कर्मचारी हाजिरी रजिस्टर", "Today's Staff Attendance & Punctuality")}</h3>
               <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
-                ${presentStaffCount} उपस्थित
+                ${presentStaffCount} ${__L("उपस्थित", "Present")}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">
-              10:30 AM के बाद पंच करने वाले कर्मचारियों को सिस्टम ऑटोमैटिक लेट (Late) चिन्हित करता है।
-            </p>
           </div>
           <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
-            <span>पूरा रजिस्टर खोलें</span>
-            <span>→</span>
+            <span>${__L("पूरा रजिस्टर देखें →", "View Full Register →")}</span>
           </button>
         </div>
 
@@ -2768,12 +2774,12 @@ function filterCategoryDropdown(inputId, query) {
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200">
               <tr>
-                <th class="py-3 px-4">कर्मचारी</th>
-                <th class="py-3 px-4">शाखा</th>
-                <th class="py-3 px-4">इन-टाइम (Punch In)</th>
-                <th class="py-3 px-4">स्थिति (Punctuality)</th>
-                <th class="py-3 px-4">GPS दूरी (शाखा से)</th>
-                <th class="py-3 px-4 text-right">एडमिन एक्शन</th>
+                <th class="py-3 px-4">${__L("कर्मचारी", "Employee")}</th>
+                <th class="py-3 px-4">${__L("शाखा", "Branch")}</th>
+                <th class="py-3 px-4">${__L("इन-टाइम", "Punch In")}</th>
+                <th class="py-3 px-4">${__L("स्थिति", "Punctuality")}</th>
+                <th class="py-3 px-4">${__L("दूरी", "GPS Distance")}</th>
+                <th class="py-3 px-4 text-right">${__L("एडमिन एक्शन", "Admin Action")}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -2814,36 +2820,36 @@ function filterCategoryDropdown(inputId, query) {
                       ${getBranchName(emp.branchId || 'branch_hazratganj')}
                     </td>
                     <td class="py-3 px-4 font-bold text-slate-800">
-                      ${att ? att.inTime : '<span class="text-slate-300 font-normal">अनुपस्थित</span>'}
+                      ${att ? att.inTime : `<span class="text-slate-300 font-normal">${__L("अनुपस्थित", "Absent")}</span>`}
                     </td>
                     <td class="py-3 px-4">
                       ${!isPresent ? `
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
-                          ⚪ अभी नहीं आया
+                          ⚪ ${__L("अभी नहीं आया", "Not In")}
                         </span>
                       ` : isLate ? `
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200">
-                          🔴 लेट आया (${lateMins} मिनट लेट)
+                          🔴 ${__L("लेट आया", "Late")} (${lateMins}m)
                         </span>
                       ` : `
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
-                          🟢 समय पर (On Time)
+                          🟢 ${__L("समय पर", "On Time")}
                         </span>
                       `}
                     </td>
                     <td class="py-3 px-4 text-slate-600">
-                      ${att ? `📍 ${att.distanceMeters || '15'}m (दुकान के अंदर)` : '—'}
+                      ${att ? `📍 ${att.distanceMeters || '15'}m (${__L("दुकान अंदर", "In Store")})` : '—'}
                     </td>
                     <td class="py-3 px-4 text-right">
                       ${att && att.status === 'pending' ? `
                         <button onclick="window.MMS_APP.approveAttendance('${att.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-[10px] hover:bg-emerald-700 transition">
-                          स्वीकृत करें
+                          ${__L("स्वीकृत करें", "Approve")}
                         </button>
                       ` : att ? `
-                        <span class="text-[11px] font-bold text-emerald-600">✓ ${att.status === 'approved' ? 'स्वीकृत' : att.status}</span>
+                        <span class="text-[11px] font-bold text-emerald-600">✓ ${att.status === 'approved' ? __L('स्वीकृत', 'Approved') : att.status}</span>
                       ` : `
                         <button onclick="window.MMS_APP.promptManualAttendance('${emp.id}')" class="text-blue-600 hover:underline text-[11px] font-bold">
-                          + मैनुअल हाजिरी
+                          + ${__L("हाजिरी लगाएं", "Manual Punch")}
                         </button>
                       `}
                     </td>
@@ -2862,10 +2868,10 @@ function filterCategoryDropdown(inputId, query) {
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-              <span>🧾 हालिया बिल (Recent Invoices)</span>
+              <span>🧾 ${__L("हालिया बिल", "Recent Invoices")}</span>
             </h4>
             <button onclick="window.MMS_APP.switchPortalTab('sales')" class="text-xs font-bold text-blue-600 hover:underline">
-              सभी देखें →
+              ${__L("सभी देखें →", "View All →")}
             </button>
           </div>
           <div class="space-y-2.5">
@@ -2895,10 +2901,10 @@ function filterCategoryDropdown(inputId, query) {
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-              <span>🔧 हालिया रिपेयर टोकन (Repair Tokens)</span>
+              <span>🔧 ${__L("हालिया रिपेयर", "Recent Repairs")}</span>
             </h4>
             <button onclick="window.MMS_APP.switchPortalTab('jobs')" class="text-xs font-bold text-purple-600 hover:underline">
-              सभी जॉब्स →
+              ${__L("सभी जॉब्स →", "View All Jobs →")}
             </button>
           </div>
           <div class="space-y-2.5">
@@ -6680,11 +6686,11 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   
   function getBranchName(branchId) {
-    const isEn = (state.lang === 'en' || state.currentLang === 'en' || state.portalLang === 'en');
+    const isEn = (state.portalLang || state.lang || 'hi') === 'en';
     if (!branchId || branchId === 'all') return isEn ? 'All Branches' : 'सभी शाखाएं';
-    if (branchId === 'branch_hazratganj') return isEn ? 'Hazratganj (Sree Rama Towers)' : 'हजरतगंज (श्रीराम टावर)';
-    if (branchId === 'branch_naka') return isEn ? 'Naka Hindola (Lucknow)' : 'नाका हिंडोला (लखनऊ)';
-    if (branchId === 'branch_kannauj') return isEn ? 'Kannauj (Saraimeera)' : 'कन्नौज (सरायमीरा)';
+    if (branchId === 'branch_hazratganj') return isEn ? 'Hazratganj (Head Lab)' : 'हजरतगंज (श्रीराम टावर)';
+    if (branchId === 'branch_naka') return isEn ? 'Naka Hindola' : 'नाका हिंडोला';
+    if (branchId === 'branch_kannauj') return isEn ? 'Kannauj' : 'कन्नौज';
     const b = (state.branches || []).find(x => x.id === branchId);
     return b ? (isEn ? (b.nameEn || b.name) : b.name) : branchId;
   }
