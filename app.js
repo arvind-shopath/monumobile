@@ -2615,7 +2615,7 @@ function filterCategoryDropdown(inputId, query) {
 
     container.innerHTML = `
       <!-- Top Overview Greeting & Status -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-6 rounded-[28px] text-white shadow-[0_20px_45px_-10px_rgba(79,70,229,0.35)] border border-blue-400/30">
+      <div class="clay-card-hero p-6 sm:p-7 rounded-[32px] flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7 text-white">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 border border-blue-400/30">
@@ -2631,17 +2631,17 @@ function filterCategoryDropdown(inputId, query) {
           <button onclick="window.MMS_APP.switchPortalTab('pos')" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg transition flex items-center gap-1.5 cursor-pointer">
             <span>🛒 ${__L("नया बिल", "New Bill")}</span>
           </button>
-          <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+          <button onclick="window.MMS_APP.switchPortalTab('attendance')" class="clay-pill px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-xs font-black text-slate-200 border border-slate-600 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
             <span>👥 ${__L("हाजिरी", "Attendance")}</span>
           </button>
         </div>
       </div>
 
       <!-- Row 1: High-Impact KPI Metric Cards (SaaS Style) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
         
         <!-- Card 1: Today's Total Sales -->
-        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="clay-card clay-card-blue p-6 rounded-[32px]">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज की कुल बिक्री", "Today's Gross Sales")}</span>
             <span class="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold">₹</span>
@@ -2656,7 +2656,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 2: Staff Attendance & Late Arrivals -->
-        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="clay-card clay-card-mint p-6 rounded-[32px]">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("उपस्थित कर्मचारी", "Present Staff")}</span>
             <span class="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">👥</span>
@@ -2676,7 +2676,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- Card 3: Today's New Udhar (Credit) -->
-        <div class="clay-card p-5 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="clay-card clay-card-peach p-6 rounded-[32px]">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">${__L("आज का नया उधार", "Today's Credit")}</span>
             <span class="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base">📕</span>
@@ -2712,7 +2712,7 @@ function filterCategoryDropdown(inputId, query) {
       </div>
 
       <!-- Row 2: Location-Verified Store Opening & Branch Operational Status (Security Feature) -->
-      <div class="clay-card p-5 sm:p-6">
+      <div class="clay-card bg-white/95 p-6 sm:p-7 rounded-[32px] mb-7">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
           <div>
             <div class="flex items-center gap-2">
@@ -2723,7 +2723,7 @@ function filterCategoryDropdown(inputId, query) {
         </div>
 
         <!-- 3 Branch Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           ${branches.map(b => {
             const bStatus = (state.branchStatus && state.branchStatus[b.id]) || { isOpen: false };
             const bInvoices = (state.invoices || []).filter(i => (i.branchId === b.id || (!i.branchId && b.id === 'branch_hazratganj')) && (i.date || '').startsWith(todayStr));
@@ -5365,7 +5365,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Metric Badges Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">${__L("कुल बिक्री", "Total Sales (Gross)")}</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${formatCurrency(grossTotal)}</span>
@@ -6439,7 +6439,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Metric Badges Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">🏪 कुल लोकल दुकानदार (B2B)</span>
             <span class="text-2xl font-black text-slate-900 font-mono mt-1 block">${shopkeepers.length}</span>
@@ -9207,7 +9207,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
         </div>
 
         <!-- Metric Badges -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-7">
           <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-500 block">कुल खर्च (TOTAL OVERHEADS)</span>
             <span class="text-2xl font-black text-rose-600 font-mono mt-1 block">${formatCurrency(totalExpense)}</span>
