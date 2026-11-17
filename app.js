@@ -2533,6 +2533,12 @@ function filterCategoryDropdown(inputId, query) {
     const greetingEl = document.getElementById('header-greeting');
     const userNameEl = document.getElementById('header-user-name');
     const userRoleEl = document.getElementById('header-user-role');
+    const sidebarUserEl = document.getElementById('sidebar-user-display-name');
+    if (sidebarUserEl && state.currentUser) {
+      let dName = state.currentUser.name || 'Admin';
+      dName = dName.replace(/\s*\([^)]*\)/g, '').trim();
+      sidebarUserEl.textContent = dName;
+    }
     if (userNameEl && state.currentUser) {
       let displayName = state.currentUser.name || 'Admin';
       displayName = displayName.replace(/\s*\([^)]*\)/g, '').trim();
