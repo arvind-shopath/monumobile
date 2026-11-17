@@ -45,8 +45,8 @@ window.MMS_DATA = {
 
   // Role Credentials (Real Working Accounts)
   users: [
-    { phone: "9044115178", pass: "Mms@115178", role: "admin", name: "मोनू जी (Monu - Super Admin)", branchId: "all" },
     { phone: "7905859701", pass: "Mms@859701", role: "admin", name: "मोनू जी (Monu - Super Admin)", branchId: "all" },
+    { phone: "9044115178", pass: "Mms@115178", role: "technician", name: "Mini", branchId: "branch_hazratganj" },
     { phone: "8707641628", pass: "Mms@641628", role: "manager", name: "Soniya Kashyap", branchId: "branch_hazratganj" },
     { phone: "9026445293", pass: "Mms@445293", role: "technician", name: "Sourabh", branchId: "branch_hazratganj" },
     { phone: "8726179000", pass: "Mms@179000", role: "technician", name: "Harshit Bhai", branchId: "branch_hazratganj" },
@@ -817,8 +817,8 @@ window.MMS_DATA = {
     {
       id: "emp_101",
       name: "मोनू जी (Monu)",
-      phone: "9044115178",
-      pass: "Mms@115178",
+      phone: "7905859701",
+      pass: "Mms@859701",
       role: "admin",
       roleLabel: "सुपर एडमिन (Owner)",
       branchId: "all",
