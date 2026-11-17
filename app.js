@@ -750,7 +750,7 @@ function filterCategoryDropdown(inputId, query) {
     staff: (() => {
       let s = JSON.parse(localStorage.getItem(STORAGE_KEYS.STAFF) || 'null');
       // Auto-migrate if local cache is outdated (missing Mini tiwari or has old dummy Suraj)
-      const isFresh = Array.isArray(s) && s.some(x => x.phone === '9044115178' || (x.name && x.name.includes('Mini')));
+      const isFresh = Array.isArray(s) && s.length >= 10 && s.some(x => x.phone === '8726179000');
       if (isFresh) return s;
       const freshStaff = (window.MMS_DATA && window.MMS_DATA.staff) || [];
       try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(freshStaff)); } catch(e) {}
@@ -1239,7 +1239,7 @@ function filterCategoryDropdown(inputId, query) {
 
     // Pull latest staff list with fallback to window.MMS_DATA.staff
     let staffList = state.staff;
-    if (!Array.isArray(staffList) || staffList.length === 0 || !staffList.some(s => s.phone === '9044115178')) {
+    if (!Array.isArray(staffList) || staffList.length < 10 || !staffList.some(s => s.phone === '8726179000')) {
       staffList = (window.MMS_DATA && window.MMS_DATA.staff) || [];
       state.staff = staffList;
       try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(staffList)); } catch(err) {}
