@@ -2247,6 +2247,13 @@ function filterCategoryDropdown(inputId, query) {
   }
 
   function renderPortal() {
+    if (state.currentUser) {
+      const sbName = document.getElementById('sidebar-user-display-name');
+      const hdrName = document.getElementById('header-user-name');
+      let dName = (state.currentUser.name || 'Staff').replace(/\s*\([^)]*\)/g, '').trim();
+      if (sbName) sbName.textContent = dName;
+      if (hdrName) hdrName.textContent = dName;
+    }
     renderPortalShopControl();
     renderPortalBranchSwitcher();
     applyPortalLanguageUI();
