@@ -318,7 +318,7 @@ function filterCategoryDropdown(inputId, query) {
             }
           }
 
-          if (resData.data.staff && Array.isArray(resData.data.staff) && resData.data.staff.length > 0) {
+          if (resData.data.staff && Array.isArray(resData.data.staff) && resData.data.staff.length >= (window.MMS_DATA && window.MMS_DATA.staff ? window.MMS_DATA.staff.length : 1)) {
             const oldStr = JSON.stringify(state.staff || []);
             const newStaff = resData.data.staff;
             const newStr = JSON.stringify(newStaff);
