@@ -756,7 +756,14 @@ function filterCategoryDropdown(inputId, query) {
       try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(freshStaff)); } catch(e) {}
       return freshStaff;
     })(),
-    attendance: JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || 'null') || window.MMS_DATA.initialAttendance || [],
+    attendance: (() => {
+      let a = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || 'null');
+      const isFresh = Array.isArray(a) && a.length >= 100;
+      if (isFresh) return a;
+      const freshAtt = (window.MMS_DATA && window.MMS_DATA.attendance) || [];
+      try { localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(freshAtt)); } catch(e) {}
+      return freshAtt;
+    })(),
     advances: JSON.parse(localStorage.getItem(STORAGE_KEYS.ADVANCES) || 'null') || window.MMS_DATA.initialAdvances || [],
     expenses: JSON.parse(localStorage.getItem(STORAGE_KEYS.EXPENSES) || 'null') || window.MMS_DATA.initialExpenses || [],
 
