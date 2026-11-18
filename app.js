@@ -7132,6 +7132,9 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   let attMediaStream = null;
   let attCapturedPhotoData = null;
   let attCurrentCoords = null;
+  let attGpsWatchId = null;
+  let attGpsSamples = [];
+  let attIsLocationCalibrated = false;
 
   function renderAttendanceModule() {
     const container = document.getElementById('tab-view-attendance');
@@ -7497,7 +7500,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const videoEl = document.getElementById('punch-camera-video');
     const placeholder = document.getElementById('punch-camera-placeholder');
     
-    // STRICT RULE: If GPS has NOT been captured yet, camera and buttons MUST REMAIN LOCKED
+    // STRICT RULE 1: If GPS has NOT been captured yet, camera and buttons MUST REMAIN LOCKED
     if (!attCurrentCoords) {
       if (alertBox) {
         alertBox.className = 'p-3 bg-amber-500 text-white rounded-xl text-center space-y-1 block border border-amber-400 shadow-md';
@@ -7507,9 +7510,6 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           </div>
           <p class="text-[11px] font-bold">
             कृपया फोन/डिवाइस में लोकेशन (GPS) ऑन रखें और ब्राउज़र को परमिशन दें।
-          </p>
-          <p class="text-[10px] text-amber-100">
-            सुरक्षा नियम: स्थान सत्यापन (10 मीटर दायरा) पूरा होने पर ही कैमरा खुलेगा।
           </p>
         `;
       }
@@ -7533,57 +7533,93 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const lng = attCurrentCoords.lng;
     const dist = Math.round(calculateDistanceMeters(lat, lng, branch.lat, branch.lng));
     const maxRadius = branch.radiusMeters || 100;
-    
     const isOutOfRadius = dist > maxRadius;
     const distFormatted = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist + 'm';
-    
-    if (alertBox) {
-      if (isOutOfRadius) {
+
+    // STRICT RULE 2: Anti-Mock / Location Calibration Check ("Change your location")
+    if (!attIsLocationCalibrated) {
+      if (alertBox) {
+        alertBox.className = 'p-3 bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-xl text-center space-y-1 block shadow-sm';
+        alertBox.innerHTML = `
+          <div class="text-xs font-black flex items-center justify-center gap-1.5 text-amber-800">
+            <span>📍 कृपया अपना स्थान बदलें (Change your location)</span>
+          </div>
+          <p class="text-[11px] font-bold text-amber-900">
+            लाइव GPS सैटेलाइट सिग्नल कैलिब्रेट किया जा रहा है।
+          </p>
+          <p class="text-[10px] text-amber-700 font-semibold">
+            कृपया 2-3 कदम आगे-पीछे चलकर अपना स्थान बदलें (Take 2-3 steps to calibrate position).
+          </p>
+        `;
+      }
+      if (captureBtn) {
+        captureBtn.disabled = true;
+        captureBtn.className = 'flex-1 py-2 bg-slate-600 text-slate-300 rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.className = 'px-5 py-2.5 bg-slate-400 text-white rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
+      }
+      if (videoEl) videoEl.classList.add('hidden');
+      if (placeholder) {
+        placeholder.classList.remove('hidden');
+        placeholder.innerHTML = `<span class="text-amber-700 font-bold">📍 कृपया अपना स्थान बदलें (Change your location)...<br><span class="text-xs font-normal text-slate-500">2-3 कदम चलते ही लाइव कैमरा अनलॉक हो जाएगा।</span></span>`;
+      }
+      return false;
+    }
+
+    // STRICT RULE 3: Out of Radius Check
+    if (isOutOfRadius) {
+      if (alertBox) {
         alertBox.className = 'p-3 bg-rose-600 text-white rounded-xl text-center space-y-1 block border-2 border-rose-400 shadow-md';
         alertBox.innerHTML = `
           <div class="text-xs font-black flex items-center justify-center gap-1.5">
-            <span>🚫 कैमरा ब्लॉक (स्थान सत्यापन विफल)</span>
+            <span>🚫 कैमरा ब्लॉक (दुकान से बाहर)</span>
           </div>
           <p class="text-[11px] font-bold">
             आप ${branch.shortName || branch.name} से <strong>${distFormatted}</strong> दूर हैं! (अनुमति दायरा: ${maxRadius} मीटर)
           </p>
           <p class="text-[10px] text-rose-100 font-semibold">
-            सुरक्षा नियम: आप दुकान पर मौजूद नहीं हैं। दुकान के 10 मीटर दायरे में आने पर ही कैमरा खुलेगा और सेल्फी खींची जा सकेगी।
+            सुरक्षा नियम: आप दुकान पर मौजूद नहीं हैं। दुकान के दायरे में आने पर ही कैमरा खुलेगा और सेल्फी खींची जा सकेगी।
           </p>
         `;
-        if (captureBtn) {
-          captureBtn.disabled = true;
-          captureBtn.className = 'flex-1 py-2 bg-slate-600 text-slate-300 rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
-        }
-        if (submitBtn) {
-          submitBtn.disabled = true;
-          submitBtn.className = 'px-5 py-2.5 bg-slate-400 text-white rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
-        }
-        if (videoEl) videoEl.classList.add('hidden');
-        if (placeholder) {
-          placeholder.classList.remove('hidden');
-          placeholder.innerHTML = `<span class="text-rose-400 font-bold">🚫 गलत स्थान से सेल्फी लेना ब्लॉक है!<br>आप दुकान से <strong>${distFormatted}</strong> दूर हैं।</span>`;
-        }
-      } else {
-        alertBox.className = 'p-2.5 bg-emerald-50 text-emerald-800 rounded-xl text-center block border border-emerald-300';
-        alertBox.innerHTML = `
-          <div class="text-xs font-black flex items-center justify-center gap-1.5 text-emerald-700">
-            <span>🟢 लोकेशन सत्यापित (दुकान के अंदर: ${distFormatted})</span>
-          </div>
-        `;
-        if (captureBtn) {
-          captureBtn.disabled = false;
-          captureBtn.className = 'flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer';
-        }
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.className = 'px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer';
-        }
-        if (videoEl) videoEl.classList.remove('hidden');
-        if (placeholder && attMediaStream) placeholder.classList.add('hidden');
       }
+      if (captureBtn) {
+        captureBtn.disabled = true;
+        captureBtn.className = 'flex-1 py-2 bg-slate-600 text-slate-300 rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.className = 'px-5 py-2.5 bg-slate-400 text-white rounded-xl text-xs font-bold cursor-not-allowed opacity-60';
+      }
+      if (videoEl) videoEl.classList.add('hidden');
+      if (placeholder) {
+        placeholder.classList.remove('hidden');
+        placeholder.innerHTML = `<span class="text-rose-400 font-bold">🚫 गलत स्थान से सेल्फी लेना ब्लॉक है!<br>आप दुकान से <strong>${distFormatted}</strong> दूर हैं।</span>`;
+      }
+      return false;
     }
-    return !isOutOfRadius;
+
+    // ALL CHECKS PASSED: Location verified & within shop radius
+    if (alertBox) {
+      alertBox.className = 'p-2.5 bg-emerald-50 text-emerald-800 rounded-xl text-center block border border-emerald-300';
+      alertBox.innerHTML = `
+        <div class="text-xs font-black flex items-center justify-center gap-1.5 text-emerald-700">
+          <span>🟢 स्थान सत्यापित (दुकान के अंदर: ${distFormatted}) ✓</span>
+        </div>
+      `;
+    }
+    if (captureBtn) {
+      captureBtn.disabled = false;
+      captureBtn.className = 'flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer';
+    }
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.className = 'px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer';
+    }
+    if (videoEl) videoEl.classList.remove('hidden');
+    if (placeholder && attMediaStream) placeholder.classList.add('hidden');
+    return true;
   }
 
   function openPunchModal(forcedType) {
@@ -7768,6 +7804,12 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
 
   function closePunchModal() {
     stopCamera();
+    if (attGpsWatchId && navigator.geolocation) {
+      try { navigator.geolocation.clearWatch(attGpsWatchId); } catch(e){}
+      attGpsWatchId = null;
+    }
+    attGpsSamples = [];
+    attIsLocationCalibrated = false;
     const modal = document.getElementById('punch-modal-backdrop');
     if (modal) modal.remove();
   }
@@ -7977,37 +8019,108 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       return;
     }
 
-    statusEl.innerHTML = '<span class="text-blue-600 font-bold animate-pulse">📡 लाइव GPS सैटेलाइट सिग्नल खोजा जा रहा है...</span>';
+    statusEl.innerHTML = '<span class="text-blue-600 font-bold animate-pulse">📡 लाइव GPS सिग्नल खोजा जा रहा है (कैलिब्रेशन जारी)...</span>';
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        attCurrentCoords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy
-        };
+    if (!attGpsSamples) attGpsSamples = [];
+    attIsLocationCalibrated = false;
+
+    if (attGpsWatchId) {
+      try { navigator.geolocation.clearWatch(attGpsWatchId); } catch(e){}
+      attGpsWatchId = null;
+    }
+
+    const handleGpsUpdate = (pos) => {
+      const now = Date.now();
+      const coords = pos.coords || {};
+      const lat = coords.latitude;
+      const lng = coords.longitude;
+      const acc = coords.accuracy || 0;
+      const isMockFlag = !!(coords.isMock || pos.mocked || acc === 0);
+
+      attCurrentCoords = {
+        lat: lat,
+        lng: lng,
+        accuracy: acc
+      };
+
+      attGpsSamples.push({ lat, lng, acc, t: now, isMock: isMockFlag });
+      if (attGpsSamples.length > 5) attGpsSamples.shift();
+
+      if (isMockFlag) {
+        attIsLocationCalibrated = false;
+      } else if (attGpsSamples.length >= 2) {
+        const s1 = attGpsSamples[0];
+        const s2 = attGpsSamples[attGpsSamples.length - 1];
+        const deltaLat = Math.abs(s2.lat - s1.lat);
+        const deltaLng = Math.abs(s2.lng - s1.lng);
+        const driftMeters = calculateDistanceMeters(s1.lat, s1.lng, s2.lat, s2.lng);
+
+        // If coordinates are completely frozen down to zero micro-jitter or accuracy is 0
+        if (deltaLat === 0 && deltaLng === 0 && (acc <= 5 || acc === 0)) {
+          attIsLocationCalibrated = false;
+        } else {
+          attIsLocationCalibrated = true;
+        }
+      } else {
+        // Initial sample received; schedule second sample to verify real satellite movement/drift
+        setTimeout(() => {
+          if (navigator.geolocation && attGpsSamples.length < 2) {
+            navigator.geolocation.getCurrentPosition(
+              (p2) => handleGpsUpdate(p2),
+              (e2) => console.warn("GPS sample 2 err:", e2),
+              { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 }
+            );
+          }
+        }, 800);
+      }
+
+      const branchSelect = document.getElementById('punch-branch-select');
+      const branchId = branchSelect ? branchSelect.value : (state.activeBranch !== 'all' ? state.activeBranch : 'branch_hazratganj');
+      const branch = (state.branches || []).find(b => b.id === branchId) || state.branches[0];
+      const dist = Math.round(calculateDistanceMeters(lat, lng, branch.lat, branch.lng));
+      const distFormatted = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist + 'm';
+
+      if (!attIsLocationCalibrated) {
+        statusEl.innerHTML = `
+          <span class="text-amber-700 font-bold flex items-center gap-1">
+            <span>📍 सिग्नल स्थिर: कृपया अपना स्थान बदलें (Change your location)</span>
+          </span>
+        `;
+      } else {
         statusEl.innerHTML = `
           <span class="text-emerald-700 font-bold">
-            🟢 लाइव लोकेशन प्राप्त: ${pos.coords.latitude.toFixed(5)}°N, ${pos.coords.longitude.toFixed(5)}°E (एक्यूरेसी: ±${Math.round(pos.coords.accuracy)}m)
+            🟢 लाइव लोकेशन सत्यापित: ${lat.toFixed(5)}°N, ${lng.toFixed(5)}°E (दुकान से ${distFormatted})
           </span>
         `;
-        const isWithinRadius = checkGeofenceSecurity();
-        if (isWithinRadius) {
-          startCamera();
-        }
-      },
-      (err) => {
-        console.warn("GPS error:", err);
-        attCurrentCoords = null;
-        statusEl.innerHTML = `
-          <span class="text-rose-600 font-bold">
-            🚫 GPS सिग्नल नहीं मिला (${err.message || 'लोकेशन परमिशन अस्वीकृत'}). कृपया फोन में GPS ऑन करें।
-          </span>
-        `;
-        checkGeofenceSecurity();
-      },
-      { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
-    );
+      }
+
+      const isWithinRadius = checkGeofenceSecurity();
+      if (isWithinRadius && attIsLocationCalibrated) {
+        startCamera();
+      }
+    };
+
+    try {
+      attGpsWatchId = navigator.geolocation.watchPosition(
+        handleGpsUpdate,
+        (err) => {
+          console.warn("GPS watch error:", err);
+          navigator.geolocation.getCurrentPosition(
+            handleGpsUpdate,
+            (err2) => {
+              attCurrentCoords = null;
+              attIsLocationCalibrated = false;
+              statusEl.innerHTML = `<span class="text-rose-600 font-bold">🚫 GPS सिग्नल नहीं मिला (${err2.message || 'परमिशन अस्वीकृत'}).</span>`;
+              checkGeofenceSecurity();
+            },
+            { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
+          );
+        },
+        { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 }
+      );
+    } catch(e) {
+      navigator.geolocation.getCurrentPosition(handleGpsUpdate, null, { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 });
+    }
   }
 
   function submitPunch(e) {
@@ -8042,8 +8155,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     const branchName = branch ? branch.name : getBranchName(branchId);
 
     // STRICT GPS Geofence Check on Submit
-    if (!attCurrentCoords) {
-      alert('🚫 लाइव GPS लोकेशन प्राप्त नहीं हुई है!\n\nकृपया फोन का GPS ऑन करें और ब्राउज़र को परमिशन दें। बिना लोकेशन के हाजिरी दर्ज नहीं होगी।');
+    if (!attCurrentCoords || !attIsLocationCalibrated) {
+      alert('📍 कृपया अपना स्थान बदलें (Change your location)!\n\nसुरक्षा नियम: लाइव स्थान सत्यापन के लिए कृपया 2-3 कदम आगे बढ़कर पुनः प्रयास करें।');
       return;
     }
 
