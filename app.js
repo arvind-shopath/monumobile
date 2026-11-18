@@ -11474,6 +11474,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     activateManagerOffDutyMode: () => activateManagerOffDutyMode(),
     renderGatekeeperView: () => renderGatekeeperView(),
     closePunchModal,
+    simulateGpsDrift: (calibrated) => { attIsLocationCalibrated = !!calibrated; checkGeofenceSecurity(); },
+    checkGeofenceSecurity,
     startCamera,
     captureSelfie,
     handlePhotoUpload,
