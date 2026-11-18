@@ -37,7 +37,7 @@ export default {
       return jsonResponse({
         success: true,
         version: "11.0",
-        build: "20261118_114",
+        build: "20261118_115",
         timestamp: Date.now()
       });
     }
@@ -417,7 +417,7 @@ export default {
               success: true,
               source: "enterprise_cache",
               version: "11.0",
-              build: "20261118_114",
+              build: "20261118_115",
               timestamp: new Date().toISOString(),
               data: store
             });
@@ -515,7 +515,7 @@ export default {
               success: true,
               source: "enterprise_db",
               version: "11.0",
-              build: "20261118_114",
+              build: "20261118_115",
               timestamp: new Date().toISOString(),
               data: fullData
             });
@@ -564,11 +564,11 @@ export default {
               if (Array.isArray(data.expenses)) currentKv.expenses = data.expenses.slice(0, 200);
               if (Array.isArray(data.attendance)) {
                 currentKv.attendance = data.attendance.slice(0, 1000);
-                if (env.DB) {
-                  for (const a of currentKv.attendance) {
-                    try {
+                if (env.DB && currentKv.attendance.length > 0) {
+                  try {
+                    const stmts = currentKv.attendance.slice(0, 100).map(a => {
                       const id = a.id || `att_${a.empId}_${(a.date||'').replace(/-/g,'')}`;
-                      await env.DB.prepare(`
+                      return env.DB.prepare(`
                         INSERT INTO attendance (id, emp_id, emp_name, branch_id, branch_name, date, in_time, out_time, duration, status, lat, lng, distance, photo)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT(id) DO UPDATE SET
@@ -580,9 +580,10 @@ export default {
                         a.branchName || '', a.date || '', a.inTime || '—', a.outTime || '—', a.duration || '',
                         a.status || 'approved', a.lat || 26.8501, a.lng || 80.9483, a.distance || a.distanceMeters || 15,
                         null
-                      ).run();
-                    } catch(e) {}
-                  }
+                      );
+                    });
+                    await env.DB.batch(stmts);
+                  } catch(e) { console.warn("D1 batch err:", e.message); }
                 }
               }
               if (Array.isArray(data.advances)) currentKv.advances = data.advances.slice(0, 200);
