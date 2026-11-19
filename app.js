@@ -1357,6 +1357,21 @@ function filterCategoryDropdown(inputId, query) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     renderPortal();
     renderPortalShopControl();
+
+    // Check first-time employee onboarding tour
+    const curU = state.currentUser;
+    const r = (curU && curU.role || '').toLowerCase();
+    const isEmp = r === 'technician' || r === 'employee' || r === 'staff';
+    if (isEmp && curU) {
+      const tourKey = 'mms_tour_seen_' + (curU.phone || curU.id || 'emp');
+      if (!localStorage.getItem(tourKey)) {
+        setTimeout(() => {
+          if (window.MMS_APP && window.MMS_APP.startEmployeeTour) {
+            window.MMS_APP.startEmployeeTour();
+          }
+        }, 800);
+      }
+    }
   }
 
   function showPublicSite() {
@@ -2225,8 +2240,14 @@ function filterCategoryDropdown(inputId, query) {
 
         <!-- Action Buttons -->
         <div class="space-y-3 pt-2">
+          <!-- Demo / Tour Button for Employees -->
+          <button type="button" id="employee-tour-btn" onclick="window.MMS_APP.startEmployeeTour()" class="w-full py-3 px-4 bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 rounded-2xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98">
+            <span class="text-base">💡</span>
+            <span>नया यूजर? यहाँ क्लिक करें: 1 मिनट का डेमो / गाइड टूर देखें</span>
+          </button>
+
           <!-- Button 1: Mandatory Shop Punch In / Punch Out -->
-          <button type="button" onclick="window.MMS_APP.openPunchModal('${hasOut ? 'in' : 'in'}')" class="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer">
+          <button type="button" id="gatekeeper-punch-btn" onclick="window.MMS_APP.openPunchModal('${hasOut ? 'in' : 'in'}')" class="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-2xl text-sm font-black shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer">
             <span class="text-xl">📍</span>
             <span>${hasOut ? 'पुनः ड्यूटी पंच-इन करें (Selfie + GPS)' : 'दुकान पर लाइव पंच-इन करें (Selfie + GPS 100m)'}</span>
           </button>
@@ -11316,7 +11337,345 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
   }
   
 
+  
+  // =========================================================================
+  // INTERACTIVE EMPLOYEE ONBOARDING TOUR (Spotlight + Axis Bank Style Popovers)
+  // =========================================================================
+  let currentTourStep = 0;
+  let tourResizeHandler = null;
+
+  const tourSteps = [
+    {
+      targetId: 'sidebar-user-display-name',
+      fallbackTargetId: 'header-user-name',
+      icon: '👋',
+      title: 'नमस्ते! यह आपकी प्रोफाइल है',
+      body: '<p>मोनू मोबाइल सॉल्यूशन पोर्टल में आपका स्वागत है! यहाँ आपका नाम, पद <strong>'इंप्लाई'</strong> और आवंटित दुकान शाखा दिखाई देती है।</p><p class="text-slate-500 text-[11px]">आपका 10-अंकों का मोबाइल नंबर ही आपका यूजर आईडी है।</p>',
+      tip: '👆 अब 'अगला कदम ➔' पर क्लिक करें और देखें कि दुकान पहुँचने पर क्या करना है।',
+      action: null
+    },
+    {
+      targetId: 'gatekeeper-punch-btn',
+      fallbackTargetId: 'portal-gatekeeper-view',
+      icon: '📍',
+      title: 'यहाँ क्लिक करें: दुकान पर लाइव पंच-इन',
+      body: '<p>दुकान पहुँचते ही सबसे पहले इस <strong>बड़े हरे बटन</strong> पर क्लिक करना है। जब तक आप दुकान पर पंच-इन नहीं करेंगे, तब तक पोर्टल सुरक्षित रहेगा।</p><p class="text-emerald-700 font-semibold text-[11px]">नियम: हाजिरी केवल दुकान के 100 मीटर के दायरे में पहुँचने पर ही लगेगी।</p>',
+      tip: '👆 दुकान पहुंचकर हमेशा सबसे पहले यह बटन दबाएं!',
+      action: null
+    },
+    {
+      targetId: 'punch-gps-container',
+      fallbackTargetId: 'punch-modal-backdrop',
+      icon: '🛰️',
+      title: 'लेयर 1: लाइव GPS व 'स्थान बदलें' नियम',
+      body: '<p>फोन में लोकेशन (GPS) चालू रखें। सैटेलाइट आपकी सटीक स्थिति जांचेगा।</p><div class="text-amber-800 font-bold bg-amber-50 p-2 rounded-xl border border-amber-200 text-[11px] leading-tight">⚠️ खास नियम: अगर स्क्रीन पर <em>"📍 कृपया अपना स्थान बदलें (Change your location)"</em> दिखे, तो परेशान न हों—बस 2-3 कदम आगे बढ़ें ताकि सैटेलाइट आपको पहचान सके।</div>',
+      tip: 'फेक जीपीएस रोकने के लिए सिस्टम 2-3 कदम चलने पर ही एक्टिव होता है।',
+      action: () => {
+        if (!document.getElementById('punch-modal-backdrop')) {
+          openPunchModal('in');
+        }
+      }
+    },
+    {
+      targetId: 'punch-capture-btn',
+      fallbackTargetId: 'punch-camera-placeholder',
+      icon: '📸',
+      title: 'लेयर 2 व 3: पलकें झपकाएं व सेल्फी लें',
+      body: '<p>कैमरा चालू होते ही कैमरे की ओर देखकर <strong>1-2 बार पलकें झपकाएं (Blink Eyes)</strong>।</p><p>सत्यापन हरा होते ही नीचे इस <strong>गोल लाल बटन</strong> को दबाएं। दुकान की पोशाक में लाइव सेल्फी खींचें और <strong>'पंच दर्ज करें'</strong> दबाएं।</p><p class="text-rose-600 font-bold text-[10px]">गैलरी से फोटो सख्त मना है, केवल लाइव कैमरे की सेल्फी मान्य है।</p>',
+      tip: 'गोल लाल बटन दबाकर दुकान में लाइव सेल्फी खींची जाती है।',
+      action: () => {
+        if (!document.getElementById('punch-modal-backdrop')) {
+          openPunchModal('in');
+        }
+      }
+    },
+    {
+      targetId: 'portal-sidebar',
+      targetSelector: 'button[data-tab="mywork"]',
+      fallbackTargetId: 'portal-sidebar',
+      icon: '🛠️',
+      title: 'पंच-इन के बाद: 'मेरा कार्य' टैब',
+      body: '<p>हाजिरी लगते ही पोर्टल का पूरा लॉक खुल जाएगा! यहाँ <strong>'मेरा कार्य' (My Work)</strong> टैब में आपको मैनेजर द्वारा दिए गए रिपेयरिंग जॉब्स, मॉडल और टास्क मिलेंगे।</p><p class="text-blue-700 font-semibold text-[11px]">काम खत्म होने पर यहीं से स्टेटस पूरा मार्क किया जाता है।</p>',
+      tip: 'आपके सभी असाइन्ड रिपेयर जॉब्स इसी टैब में मिलेंगे।',
+      action: () => {
+        closePunchModal();
+      }
+    },
+    {
+      targetId: 'portal-sidebar',
+      targetSelector: 'button[data-tab="attendance"]',
+      fallbackTargetId: 'portal-sidebar',
+      icon: '🌙',
+      title: 'शाम को छुट्टी के समय: पंच-आउट',
+      body: '<p>शाम को काम खत्म करके दुकान से निकलते समय दोबारा यहाँ आकर <strong>'Punch Out'</strong> जरूर करें।</p><div class="text-indigo-800 font-bold bg-indigo-50 p-2 rounded-xl border border-indigo-200 text-[11px] leading-tight">💰 सैलरी नियम: आपके इन-टाइम और आउट-टाइम के अंतर से ही आपके कुल कार्य-घंटे और महीने की सैलरी सही-सही बनेगी।</div>',
+      tip: 'आउट-टाइम दर्ज करना उतना ही जरूरी है जितना इन-टाइम!',
+      action: () => {
+        closePunchModal();
+      }
+    },
+    {
+      targetId: 'employee-tour-btn',
+      fallbackTargetId: 'employee-header-tour-btn',
+      icon: '🎉',
+      title: 'बधाई! आपका टूर पूरा हुआ',
+      body: '<p>अब आप पोर्टल को आसानी से इस्तेमाल करने के लिए तैयार हैं!</p><p>यदि भविष्य में कभी कोई बात भूल जाएं, तो कभी भी इस <strong>'💡 टूर / गाइड'</strong> बटन को दबाकर यह डेमो दोबारा देख सकते हैं।</p>',
+      tip: 'शानदार! अब काम शुरू करने के लिए नीचे 'शुरू करें' दबाएं।',
+      nextLabel: 'समझ गया, काम शुरू करें! 🚀',
+      action: () => {
+        closePunchModal();
+      }
+    }
+  ];
+
+  function startEmployeeTour(fromStep = 0) {
+    currentTourStep = fromStep;
+    createTourDOM();
+    renderTourStep(currentTourStep);
+
+    if (!tourResizeHandler) {
+      tourResizeHandler = () => {
+        updateSpotlightPosition(currentTourStep);
+      };
+      window.addEventListener('resize', tourResizeHandler);
+      window.addEventListener('scroll', tourResizeHandler, true);
+    }
+  }
+
+  function createTourDOM() {
+    let overlay = document.getElementById('mms-tour-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'mms-tour-overlay';
+      overlay.className = 'fixed inset-0 z-[99990] pointer-events-none transition-all duration-300';
+      overlay.innerHTML = `
+        <div id="mms-tour-spotlight" style="position: absolute; border: 3px solid #3b82f6; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.76), 0 0 35px rgba(59, 130, 246, 0.6); pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    let card = document.getElementById('mms-tour-card');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'mms-tour-card';
+      card.className = 'fixed z-[99999] max-w-sm w-[92vw] sm:w-[380px] bg-white rounded-3xl p-5 shadow-2xl border-2 border-blue-400 flex flex-col space-y-3.5 transition-all duration-300 pointer-events-auto animate-in fade-in zoom-in-95';
+      card.innerHTML = `
+        <!-- Header: Badge & Close -->
+        <div class="flex items-center justify-between">
+          <span id="mms-tour-step-badge" class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-[11px] font-black tracking-wide border border-blue-300 flex items-center gap-1">
+            <span>💡 गाइड टूर</span>
+            <span id="mms-tour-step-counter" class="text-blue-900">• कदम 1/7</span>
+          </span>
+          <button type="button" onclick="window.MMS_APP.endEmployeeTour(true)" class="text-xs font-bold text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+            टूर छोड़ें ✕
+          </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div id="mms-tour-progress-bar" class="bg-gradient-to-r from-blue-600 to-indigo-600 h-full transition-all duration-300" style="width: 14%;"></div>
+        </div>
+
+        <!-- Title & Icon -->
+        <div>
+          <h4 id="mms-tour-title" class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span id="mms-tour-icon" class="text-xl">👋</span>
+            <span id="mms-tour-title-text">नमस्ते! यह आपकी प्रोफाइल है</span>
+          </h4>
+        </div>
+
+        <!-- Body Description -->
+        <div id="mms-tour-body" class="text-xs text-slate-600 space-y-2 leading-relaxed"></div>
+
+        <!-- Animated Pointer Tip -->
+        <div id="mms-tour-tip" class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-900 flex items-center gap-2">
+          <span class="animate-bounce text-base shrink-0">👆</span>
+          <span id="mms-tour-tip-text">यहाँ आपका नाम और दुकान की शाखा दिखाई देती है।</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+          <button type="button" id="mms-tour-prev-btn" onclick="window.MMS_APP.prevTourStep()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+            <span>◀ पिछला</span>
+          </button>
+          <button type="button" id="mms-tour-next-btn" onclick="window.MMS_APP.nextTourStep()" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/25 transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+            <span id="mms-tour-next-label">अगला कदम</span>
+            <span>➔</span>
+          </button>
+        </div>
+      `;
+      document.body.appendChild(card);
+    }
+  }
+
+  function renderTourStep(stepIdx) {
+    if (stepIdx < 0) stepIdx = 0;
+    if (stepIdx >= tourSteps.length) {
+      endEmployeeTour(false);
+      return;
+    }
+
+    currentTourStep = stepIdx;
+    const step = tourSteps[stepIdx];
+
+    if (typeof step.action === 'function') {
+      try { step.action(); } catch(e) {}
+    }
+
+    setTimeout(() => {
+      updateSpotlightPosition(stepIdx);
+
+      const counter = document.getElementById('mms-tour-step-counter');
+      const bar = document.getElementById('mms-tour-progress-bar');
+      const icon = document.getElementById('mms-tour-icon');
+      const title = document.getElementById('mms-tour-title-text');
+      const body = document.getElementById('mms-tour-body');
+      const tip = document.getElementById('mms-tour-tip-text');
+      const prevBtn = document.getElementById('mms-tour-prev-btn');
+      const nextLabel = document.getElementById('mms-tour-next-label');
+
+      if (counter) counter.textContent = `• कदम ${stepIdx + 1}/${tourSteps.length}`;
+      if (bar) bar.style.width = `${Math.round(((stepIdx + 1) / tourSteps.length) * 100)}%`;
+      if (icon) icon.textContent = step.icon || '📍';
+      if (title) title.textContent = step.title;
+      if (body) body.innerHTML = step.body;
+      if (tip) tip.textContent = step.tip;
+
+      if (prevBtn) {
+        if (stepIdx === 0) {
+          prevBtn.style.visibility = 'hidden';
+        } else {
+          prevBtn.style.visibility = 'visible';
+        }
+      }
+
+      if (nextLabel) {
+        nextLabel.textContent = step.nextLabel || (stepIdx === tourSteps.length - 1 ? 'समझ गया, शुरू करें! 🎉' : 'अगला कदम');
+      }
+    }, 150);
+  }
+
+  function getTargetElement(step) {
+    let el = null;
+    if (step.targetSelector) {
+      el = document.querySelector(step.targetSelector);
+    }
+    if ((!el || el.offsetParent === null) && step.targetId) {
+      el = document.getElementById(step.targetId);
+    }
+    if ((!el || el.offsetParent === null) && step.fallbackTargetId) {
+      el = document.getElementById(step.fallbackTargetId);
+    }
+    if (!el || el.offsetParent === null) {
+      const mobBtn = document.getElementById('sidebar-open-btn');
+      if (mobBtn && mobBtn.offsetParent !== null) el = mobBtn;
+    }
+    return el;
+  }
+
+  function updateSpotlightPosition(stepIdx) {
+    const step = tourSteps[stepIdx];
+    if (!step) return;
+
+    const targetEl = getTargetElement(step);
+    const spotlight = document.getElementById('mms-tour-spotlight');
+    const card = document.getElementById('mms-tour-card');
+    if (!spotlight || !card) return;
+
+    if (targetEl && targetEl.offsetParent !== null) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const rect = targetEl.getBoundingClientRect();
+      const pad = 8;
+
+      spotlight.style.opacity = '1';
+      spotlight.style.display = 'block';
+      spotlight.style.top = Math.max(0, rect.top - pad) + 'px';
+      spotlight.style.left = Math.max(0, rect.left - pad) + 'px';
+      spotlight.style.width = (rect.width + pad * 2) + 'px';
+      spotlight.style.height = (rect.height + pad * 2) + 'px';
+
+      // Position the floating Popover Card
+      const cardWidth = Math.min(window.innerWidth * 0.92, 380);
+      const cardHeight = 320; // Estimated height
+      let top = 0;
+      let left = 0;
+
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        left = Math.max(16, (window.innerWidth - cardWidth) / 2);
+        // Place below if space, otherwise above
+        if (rect.bottom + cardHeight + 20 < window.innerHeight) {
+          top = rect.bottom + 16;
+        } else if (rect.top - cardHeight - 20 > 0) {
+          top = Math.max(16, rect.top - cardHeight - 16);
+        } else {
+          top = window.innerHeight - cardHeight - 24;
+        }
+      } else {
+        // Desktop: If target on left sidebar, put card on the right
+        if (rect.left < 350) {
+          left = rect.right + 24;
+          top = Math.min(window.innerHeight - cardHeight - 30, Math.max(30, rect.top));
+        } else {
+          // Center / Right targets
+          if (rect.bottom + cardHeight + 30 < window.innerHeight) {
+            top = rect.bottom + 16;
+            left = Math.min(window.innerWidth - cardWidth - 30, Math.max(30, rect.left));
+          } else {
+            top = Math.max(30, rect.top - cardHeight - 16);
+            left = Math.min(window.innerWidth - cardWidth - 30, Math.max(30, rect.left));
+          }
+        }
+      }
+
+      card.style.top = top + 'px';
+      card.style.left = left + 'px';
+    } else {
+      // Centered fallback if element not found
+      spotlight.style.opacity = '0';
+      spotlight.style.display = 'none';
+      card.style.top = '50%';
+      card.style.left = '50%';
+      card.style.transform = 'translate(-50%, -50%)';
+    }
+  }
+
+  function nextTourStep() {
+    renderTourStep(currentTourStep + 1);
+  }
+
+  function prevTourStep() {
+    renderTourStep(currentTourStep - 1);
+  }
+
+  function endEmployeeTour(skipped = false) {
+    const curU = state.currentUser;
+    if (curU) {
+      const tourKey = 'mms_tour_seen_' + (curU.phone || curU.id || 'emp');
+      try { localStorage.setItem(tourKey, 'true'); } catch(e){}
+    }
+
+    if (tourResizeHandler) {
+      window.removeEventListener('resize', tourResizeHandler);
+      window.removeEventListener('scroll', tourResizeHandler, true);
+      tourResizeHandler = null;
+    }
+
+    const overlay = document.getElementById('mms-tour-overlay');
+    if (overlay) overlay.remove();
+
+    const card = document.getElementById('mms-tour-card');
+    if (card) card.remove();
+
+    closePunchModal();
+  }
+
+
   window.MMS_APP = {
+    startEmployeeTour,
+    nextTourStep,
+    prevTourStep,
+    endEmployeeTour,
     toggleCategoryDropdown,
     closeCategoryDropdown,
     selectCategory,

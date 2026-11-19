@@ -10,7 +10,7 @@
   <!-- MMS Zero-Touch Auto-Update & Anti-Cache Guardian (Mobile & Desktop) -->
   <script>
     (function() {
-      window.MMS_CLIENT_BUILD = "20261118_117";
+      window.MMS_CLIENT_BUILD = "20261119_118";
 
       // 1. Kill mobile bfcache (back-forward frozen cache)
       window.addEventListener('pageshow', function(e) {
@@ -1805,6 +1805,10 @@
             <div class="min-w-0 flex items-center gap-1.5">
               <span id="header-user-name" class="text-xs sm:text-sm font-black text-slate-900 truncate">मोनू जी</span>
               <span id="header-user-role" class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">एडमिन</span>
+              <button id="employee-header-tour-btn" type="button" onclick="window.MMS_APP.startEmployeeTour()" class="ml-1 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg text-[10px] sm:text-[11px] font-black transition cursor-pointer shadow-xs active:scale-95" title="1 मिनट का डेमो व गाइड टूर देखें">
+                <span>💡</span>
+                <span class="hidden sm:inline">गाइड टूर</span>
+              </button>
             </div>
           </div>
 
@@ -2342,7 +2346,7 @@
 
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="data.js?v=20261118_117"></script>
-  <script src="app.js?v=20261118_117"></script>
+  <script src="data.js?v=20261119_118"></script>
+  <script src="app.js?v=20261119_118"></script>
 </body>
 </html>
