@@ -7722,64 +7722,64 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
           <!-- Geofence Security Alert Banner -->
           <div id="punch-geofence-alert" class="hidden"></div>
 
-          <!-- Camera Stream Section -->
-          <div class="p-3.5 bg-slate-900 rounded-2xl text-white space-y-2">
-            <div class="flex items-center justify-between text-xs">
+          <!-- Camera Stream Section (Vertical / Portrait Friendly for Mobile) -->
+          <div class="p-4 bg-slate-900 rounded-3xl text-white space-y-3 shadow-inner">
+            <div class="flex items-center justify-between text-xs px-1">
               <span class="font-bold flex items-center gap-1.5 text-slate-200">
-                <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                लाइव कैमरा सेल्फी
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                लाइव फ्रंट कैमरा सेल्फी
               </span>
               <button type="button" onclick="window.MMS_APP.startCamera()" class="text-[11px] font-bold text-blue-400 hover:text-blue-300 underline">
-                कैमरा चालू करें
+                कैमरा री-स्टार्ट करें
               </button>
             </div>
 
-            <div class="relative w-full h-48 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-slate-800 shadow-inner">
+            <!-- Vertical Mobile Portrait Viewport (Unobstructed View for Face & Clothes) -->
+            <div class="relative w-full max-w-[280px] aspect-[3/4] mx-auto bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-slate-700 shadow-2xl">
               <video id="punch-camera-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
               <canvas id="punch-camera-canvas" class="hidden"></canvas>
               <img id="punch-photo-preview" class="hidden absolute inset-0 w-full h-full object-cover" alt="Captured">
               
-              <!-- Blink Detection Overlay Grid -->
-              <div id="punch-blink-overlay" class="hidden absolute inset-0 pointer-events-none flex flex-col justify-between p-3">
-                <div class="flex items-center justify-between">
-                  <span class="px-2 py-0.5 rounded-full bg-slate-900/80 text-[10px] font-mono text-emerald-400 border border-emerald-500/40">
-                    🟢 AI LIVE FEED
-                  </span>
-                  <span id="punch-blink-counter" class="px-2 py-0.5 rounded-full bg-slate-900/80 text-[10px] font-mono text-amber-300 border border-amber-500/40">
-                    पलक सत्यापन: प्रतीक्षारत...
-                  </span>
-                </div>
-                <!-- Face Oval Guide -->
-                <div class="w-32 h-40 mx-auto rounded-full border-2 border-dashed border-white/40 flex items-center justify-center">
-                  <span class="text-[9px] text-white/60 font-bold bg-slate-900/60 px-2 py-0.5 rounded-full">चेहरा यहाँ रखें</span>
-                </div>
-                <div class="text-center">
-                  <span class="text-[10px] text-white/80 bg-slate-900/80 px-2.5 py-1 rounded-full font-bold">
-                    👁️ कृपया 1-2 बार पलकें झपकाएं (Blink Twice)
-                  </span>
-                </div>
+              <!-- Clean Oval Outline ONLY (Zero Text Over Face) -->
+              <div id="punch-blink-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center p-3">
+                <div class="w-40 h-52 rounded-full border-2 border-dashed border-white/30"></div>
               </div>
 
-              <div id="punch-camera-placeholder" class="text-center p-4 text-slate-400 text-xs">
+              <div id="punch-camera-placeholder" class="text-center p-5 text-slate-400 text-xs">
                 <span>📡 लाइव GPS सैटेलाइट सिग्नल खोजा जा रहा है... सत्यापन के बाद ही कैमरा अनलॉक होगा।</span>
               </div>
             </div>
 
-            <!-- LIVENESS STATUS INSTRUCTION BADGE -->
-            <div id="punch-liveness-badge" class="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-center text-xs font-bold text-amber-300 transition-all flex items-center justify-center gap-1.5 shadow-xs">
-              <span>👀 लाइव सत्यापन: कैमरा चालू होने पर 1-2 बार अपनी पलकें झपकाएं (Blink Eyes)</span>
-            </div>
+            <!-- ALL STATUS & INSTRUCTIONS PLACED CLEANLY BELOW THE CAMERA FRAME (NOT OVER FACE) -->
+            <div class="space-y-2 pt-1 max-w-sm mx-auto">
+              <!-- Live Feed & Blink Badges Stacked Below Frame -->
+              <div class="flex items-center justify-center gap-2 text-center flex-wrap">
+                <span class="px-2.5 py-1 rounded-full bg-slate-800 text-[10px] sm:text-[11px] font-mono text-emerald-400 border border-emerald-500/40 font-bold flex items-center gap-1">
+                  <span>🟢</span>
+                  <span>AI LIVE FEED</span>
+                </span>
+                <span id="punch-blink-counter" class="px-2.5 py-1 rounded-full bg-slate-800 text-[10px] sm:text-[11px] font-mono text-amber-300 border border-amber-500/40 font-bold flex items-center gap-1">
+                  <span>👁️</span>
+                  <span>पलकें: प्रतीक्षारत...</span>
+                </span>
+              </div>
 
-            <!-- PROMINENT CIRCULAR CAMERA SHUTTER BUTTON (Directly Below Output Box) -->
-            <div class="pt-2 pb-1 flex flex-col items-center justify-center gap-1.5">
-              <button type="button" id="punch-capture-btn" disabled onclick="window.MMS_APP.captureSelfie()" class="relative w-16 h-16 rounded-full border-4 border-slate-600 bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xl transition-all duration-300 flex items-center justify-center cursor-pointer group active:scale-90" title="फोटो खींचने के लिए यहाँ दबाएं">
-                <div id="punch-shutter-inner" class="w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center text-white text-xl font-black transition group-hover:scale-105">
-                  📸
-                </div>
-              </button>
-              <span id="punch-shutter-label" class="text-[11px] font-bold text-slate-400 transition-colors">
-                सत्यापन के बाद ऊपर गोल कैमरा बटन दबाएं
-              </span>
+              <!-- LIVENESS STATUS INSTRUCTION BADGE -->
+              <div id="punch-liveness-badge" class="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-center text-xs font-bold text-amber-300 transition-all flex items-center justify-center gap-1.5 shadow-xs">
+                <span>👀 कैमरे में देखकर 1-2 बार पलकें झपकाएं (Blink Eyes)</span>
+              </div>
+
+              <!-- PROMINENT CIRCULAR CAMERA SHUTTER BUTTON -->
+              <div class="pt-1 pb-1 flex flex-col items-center justify-center gap-1.5">
+                <button type="button" id="punch-capture-btn" disabled onclick="window.MMS_APP.captureSelfie()" class="relative w-16 h-16 rounded-full border-4 border-slate-600 bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed shadow-2xl transition-all duration-300 flex items-center justify-center cursor-pointer group active:scale-90" title="फोटो खींचने के लिए यहाँ दबाएं">
+                  <div id="punch-shutter-inner" class="w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center text-white text-xl font-black transition group-hover:scale-105">
+                    📸
+                  </div>
+                </button>
+                <span id="punch-shutter-label" class="text-[11px] font-bold text-slate-400 transition-colors">
+                  सत्यापन के बाद गोल बटन दबाकर सेल्फी लें
+                </span>
+              </div>
             </div>
           </div>
 
