@@ -11350,8 +11350,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       fallbackTargetId: 'header-user-name',
       icon: '👋',
       title: 'नमस्ते! यह आपकी प्रोफाइल है',
-      body: '<p>मोनू मोबाइल सॉल्यूशन पोर्टल में आपका स्वागत है! यहाँ आपका नाम, पद <strong>'इंप्लाई'</strong> और आवंटित दुकान शाखा दिखाई देती है।</p><p class="text-slate-500 text-[11px]">आपका 10-अंकों का मोबाइल नंबर ही आपका यूजर आईडी है।</p>',
-      tip: '👆 अब 'अगला कदम ➔' पर क्लिक करें और देखें कि दुकान पहुँचने पर क्या करना है।',
+      body: '<p>मोनू मोबाइल सॉल्यूशन पोर्टल में आपका स्वागत है! यहाँ आपका नाम, पद <strong>"इंप्लाई"</strong> और आवंटित दुकान शाखा दिखाई देती है।</p><p class="text-slate-500 text-[11px]">आपका 10-अंकों का मोबाइल नंबर ही आपका यूजर आईडी है।</p>',
+      tip: '👆 अब "अगला कदम ➔" पर क्लिक करें और देखें कि दुकान पहुँचने पर क्या करना है।',
       action: null
     },
     {
@@ -11367,7 +11367,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       targetId: 'punch-gps-container',
       fallbackTargetId: 'punch-modal-backdrop',
       icon: '🛰️',
-      title: 'लेयर 1: लाइव GPS व 'स्थान बदलें' नियम',
+      title: 'लेयर 1: लाइव GPS व "स्थान बदलें" नियम',
       body: '<p>फोन में लोकेशन (GPS) चालू रखें। सैटेलाइट आपकी सटीक स्थिति जांचेगा।</p><div class="text-amber-800 font-bold bg-amber-50 p-2 rounded-xl border border-amber-200 text-[11px] leading-tight">⚠️ खास नियम: अगर स्क्रीन पर <em>"📍 कृपया अपना स्थान बदलें (Change your location)"</em> दिखे, तो परेशान न हों—बस 2-3 कदम आगे बढ़ें ताकि सैटेलाइट आपको पहचान सके।</div>',
       tip: 'फेक जीपीएस रोकने के लिए सिस्टम 2-3 कदम चलने पर ही एक्टिव होता है।',
       action: () => {
@@ -11381,7 +11381,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       fallbackTargetId: 'punch-camera-placeholder',
       icon: '📸',
       title: 'लेयर 2 व 3: पलकें झपकाएं व सेल्फी लें',
-      body: '<p>कैमरा चालू होते ही कैमरे की ओर देखकर <strong>1-2 बार पलकें झपकाएं (Blink Eyes)</strong>।</p><p>सत्यापन हरा होते ही नीचे इस <strong>गोल लाल बटन</strong> को दबाएं। दुकान की पोशाक में लाइव सेल्फी खींचें और <strong>'पंच दर्ज करें'</strong> दबाएं।</p><p class="text-rose-600 font-bold text-[10px]">गैलरी से फोटो सख्त मना है, केवल लाइव कैमरे की सेल्फी मान्य है।</p>',
+      body: '<p>कैमरा चालू होते ही कैमरे की ओर देखकर <strong>1-2 बार पलकें झपकाएं (Blink Eyes)</strong>।</p><p>सत्यापन हरा होते ही नीचे इस <strong>गोल लाल बटन</strong> को दबाएं। दुकान की पोशाक में लाइव सेल्फी खींचें और <strong>"पंच दर्ज करें"</strong> दबाएं।</p><p class="text-rose-600 font-bold text-[10px]">गैलरी से फोटो सख्त मना है, केवल लाइव कैमरे की सेल्फी मान्य है।</p>',
       tip: 'गोल लाल बटन दबाकर दुकान में लाइव सेल्फी खींची जाती है।',
       action: () => {
         if (!document.getElementById('punch-modal-backdrop')) {
@@ -11394,8 +11394,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       targetSelector: 'button[data-tab="mywork"]',
       fallbackTargetId: 'portal-sidebar',
       icon: '🛠️',
-      title: 'पंच-इन के बाद: 'मेरा कार्य' टैब',
-      body: '<p>हाजिरी लगते ही पोर्टल का पूरा लॉक खुल जाएगा! यहाँ <strong>'मेरा कार्य' (My Work)</strong> टैब में आपको मैनेजर द्वारा दिए गए रिपेयरिंग जॉब्स, मॉडल और टास्क मिलेंगे।</p><p class="text-blue-700 font-semibold text-[11px]">काम खत्म होने पर यहीं से स्टेटस पूरा मार्क किया जाता है।</p>',
+      title: 'पंच-इन के बाद: "मेरा कार्य" टैब',
+      body: '<p>हाजिरी लगते ही पोर्टल का पूरा लॉक खुल जाएगा! यहाँ <strong>"मेरा कार्य" (My Work)</strong> टैब में आपको मैनेजर द्वारा दिए गए रिपेयरिंग जॉब्स, मॉडल और टास्क मिलेंगे।</p><p class="text-blue-700 font-semibold text-[11px]">काम खत्म होने पर यहीं से स्टेटस पूरा मार्क किया जाता है।</p>',
       tip: 'आपके सभी असाइन्ड रिपेयर जॉब्स इसी टैब में मिलेंगे।',
       action: () => {
         closePunchModal();
@@ -11407,7 +11407,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       fallbackTargetId: 'portal-sidebar',
       icon: '🌙',
       title: 'शाम को छुट्टी के समय: पंच-आउट',
-      body: '<p>शाम को काम खत्म करके दुकान से निकलते समय दोबारा यहाँ आकर <strong>'Punch Out'</strong> जरूर करें।</p><div class="text-indigo-800 font-bold bg-indigo-50 p-2 rounded-xl border border-indigo-200 text-[11px] leading-tight">💰 सैलरी नियम: आपके इन-टाइम और आउट-टाइम के अंतर से ही आपके कुल कार्य-घंटे और महीने की सैलरी सही-सही बनेगी।</div>',
+      body: '<p>शाम को काम खत्म करके दुकान से निकलते समय दोबारा यहाँ आकर <strong>"Punch Out"</strong> जरूर करें।</p><div class="text-indigo-800 font-bold bg-indigo-50 p-2 rounded-xl border border-indigo-200 text-[11px] leading-tight">💰 सैलरी नियम: आपके इन-टाइम और आउट-टाइम के अंतर से ही आपके कुल कार्य-घंटे और महीने की सैलरी सही-सही बनेगी।</div>',
       tip: 'आउट-टाइम दर्ज करना उतना ही जरूरी है जितना इन-टाइम!',
       action: () => {
         closePunchModal();
@@ -11418,8 +11418,8 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       fallbackTargetId: 'employee-header-tour-btn',
       icon: '🎉',
       title: 'बधाई! आपका टूर पूरा हुआ',
-      body: '<p>अब आप पोर्टल को आसानी से इस्तेमाल करने के लिए तैयार हैं!</p><p>यदि भविष्य में कभी कोई बात भूल जाएं, तो कभी भी इस <strong>'💡 टूर / गाइड'</strong> बटन को दबाकर यह डेमो दोबारा देख सकते हैं।</p>',
-      tip: 'शानदार! अब काम शुरू करने के लिए नीचे 'शुरू करें' दबाएं।',
+      body: '<p>अब आप पोर्टल को आसानी से इस्तेमाल करने के लिए तैयार हैं!</p><p>यदि भविष्य में कभी कोई बात भूल जाएं, तो कभी भी इस <strong>"💡 टूर / गाइड"</strong> बटन को दबाकर यह डेमो दोबारा देख सकते हैं।</p>',
+      tip: 'शानदार! अब काम शुरू करने के लिए नीचे "शुरू करें" दबाएं।',
       nextLabel: 'समझ गया, काम शुरू करें! 🚀',
       action: () => {
         closePunchModal();
