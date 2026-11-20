@@ -385,10 +385,51 @@
     }
   
     /* =========================================================================
-       SIDEBAR & COLLAPSED NAVIGATION DESIGN SYSTEM (v12.2)
+       SIDEBAR DUAL-TONE & COLLAPSED NAVIGATION DESIGN SYSTEM (v12.3)
        ========================================================================= */
     #portal-sidebar {
+      background: linear-gradient(180deg, #CBD5E1 0%, #BAC7D5 100%) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+      box-shadow: 0 24px 50px -10px rgba(70, 85, 105, 0.35), 0 8px 20px -4px rgba(70, 85, 105, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.95) !important;
       transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Dual-tone inner floating cards on darker grey sidebar */
+    #portal-sidebar #portal-nav-group-ops > div {
+      background: #FFFFFF !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 8px 22px rgba(60, 75, 95, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+    }
+    #portal-sidebar .p-3.bg-white\/95 {
+      background: #FFFFFF !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 8px 22px rgba(60, 75, 95, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+    }
+    
+    /* Text and Labels Contrast on Darker Grey */
+    #portal-sidebar .sidebar-text-label {
+      color: #475569;
+    }
+    #portal-sidebar h3#sidebar-user-display-name {
+      color: #0F172A !important;
+    }
+    #portal-sidebar .portal-tab-btn:not(.portal-tab-active):not([class*="from-blue-600"]) {
+      color: #1E293B !important;
+    }
+    #portal-sidebar .portal-tab-btn:hover:not(.portal-tab-active):not([class*="from-blue-600"]) {
+      background-color: rgba(255, 255, 255, 0.75) !important;
+      color: #0F172A !important;
+    }
+    
+    /* Footer buttons */
+    #portal-sidebar #back-to-site-btn {
+      background-color: rgba(255, 255, 255, 0.85) !important;
+      border: 1px solid rgba(255, 255, 255, 0.95) !important;
+      color: #1E293B !important;
+    }
+    #portal-sidebar #logout-btn {
+      background-color: #FFF1F2 !important;
+      border: 1px solid #FECDD3 !important;
     }
     
     /* Active button styling: Enforces pure white icon & text on active blue gradient */
@@ -413,10 +454,6 @@
     .portal-tab-btn.portal-tab-inactive svg {
       color: #64748b;
       stroke: #64748b;
-    }
-    .portal-tab-btn:hover:not(.portal-tab-active):not([class*="from-blue-600"]) {
-      background-color: rgba(241, 245, 249, 0.85);
-      color: #0f172a;
     }
 
     /* COLLAPSED SIDEBAR RULES */
@@ -2484,6 +2521,6 @@
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="data.js?v=20261120_121"></script>
-  <script src="app.js?v=20261120_122"></script>
+  <script src="app.js?v=20261120_123"></script>
 </body>
 </html>
