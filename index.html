@@ -94,7 +94,9 @@
       window.addEventListener('focus', checkLiveVersion);
 
       // Periodic check every 45s
-      setInterval(checkLiveVersion, 45000);
+      setInterval(function() {
+        if (!document.hidden) checkLiveVersion();
+      }, 60000);
       setTimeout(checkLiveVersion, 1500);
     })();
   </script>

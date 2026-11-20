@@ -1,3 +1,6 @@
+let inMemorySyncCache = null;
+let inMemorySyncCacheTime = 0;
+
 // Cloudflare Pages Advanced Worker: _worker.js
 // Enterprise Cloud Backend: Primary Database + Real-Time Sync + Data Lifecycle & Purge Engine
 
@@ -356,6 +359,10 @@ export default {
     // 4. Data sync: /api/sync
     if (url.pathname === "/api/sync") {
       if (request.method === "GET") {
+        // High-speed In-Memory Guard: If cached within last 10 seconds, return immediately (0 KV, 0 D1 reads)
+        if (inMemorySyncCache && (Date.now() - inMemorySyncCacheTime < 10000)) {
+          return jsonResponse(inMemorySyncCache);
+        }
         try {
           let store = null;
           if (env.KV) {
@@ -413,14 +420,17 @@ export default {
                 return true;
               });
             }
-            return jsonResponse({
+const cachePayload = {
               success: true,
               source: "enterprise_cache",
               version: "11.0",
               build: "20261120_121",
               timestamp: new Date().toISOString(),
               data: store
-            });
+            };
+            inMemorySyncCache = cachePayload;
+            inMemorySyncCacheTime = Date.now();
+            return jsonResponse(cachePayload);
           }
 
           if (env.DB) {
