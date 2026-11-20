@@ -2455,14 +2455,14 @@ function filterCategoryDropdown(inputId, query) {
       sidebar.classList.remove('sidebar-collapsed', 'lg:w-20', 'xl:w-20');
       sidebar.style.width = '';
       sidebar.style.minWidth = '';
-      sidebar.classList.add('lg:w-64', 'xl:w-72');
+      sidebar.classList.add('lg:w-52', 'xl:w-56');
       if (collapseIcon) collapseIcon.innerHTML = '◀';
     } else {
       // COLLAPSE - 5rem icon-only mode
-      sidebar.classList.remove('lg:w-64', 'xl:w-72');
+      sidebar.classList.remove('lg:w-52', 'xl:w-56');
       sidebar.classList.add('sidebar-collapsed', 'lg:w-20', 'xl:w-20');
-      sidebar.style.width = '5rem';
-      sidebar.style.minWidth = '5rem';
+      sidebar.style.width = '4.75rem';
+      sidebar.style.minWidth = '4.75rem';
       if (collapseIcon) collapseIcon.innerHTML = '▶';
     }
   }
@@ -2565,9 +2565,9 @@ function filterCategoryDropdown(inputId, query) {
         b.style.display = 'flex';
         b.classList.remove('hidden');
         if (bTab === state.activeAdminTab) {
-          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25';
+          b.className = 'portal-tab-btn portal-tab-active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25';
         } else {
-          b.className = 'portal-tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-semibold';
+          b.className = 'portal-tab-btn portal-tab-inactive w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-left transition-all duration-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-semibold';
         }
       } else {
         b.style.display = 'none';
