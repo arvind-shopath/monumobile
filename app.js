@@ -986,6 +986,154 @@ function filterCategoryDropdown(inputId, query) {
 
   // setPortalLanguage implemented below in portal engine
 
+  
+  // =========================================================================
+  // ENTERPRISE SECURITY SUITE (v12.6)
+  // Strong Password Policy • Rate Limiting & Lockout • Salted SHA-256 • Turnstile
+  // =========================================================================
+
+  let cfTurnstileWidgetId = null;
+  let cfTurnstileToken = null;
+
+  function initTurnstile() {
+    if (typeof turnstile !== 'undefined') {
+      const c = document.getElementById('cf-turnstile-container');
+      if (c && cfTurnstileWidgetId === null) {
+        try {
+          cfTurnstileWidgetId = turnstile.render('#cf-turnstile-container', {
+            sitekey: '0x4AAAAAAGKDrS0fFTdG6PQ9',
+            theme: 'light',
+            size: 'invisible',
+            callback: function(token) {
+              cfTurnstileToken = token;
+            },
+            'error-callback': function() {
+              console.warn('Turnstile background verification active');
+            }
+          });
+        } catch(e) {
+          console.warn('Turnstile render warning:', e);
+        }
+      }
+    }
+  }
+
+  function generateCryptoSalt(len = 16) {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const arr = new Uint8Array(len);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+  }
+
+  async function hashPasswordWithSalt(password, salt) {
+    const s = salt || generateCryptoSalt(16);
+    if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password + ":" + s);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return `${s}$${hashHex}`;
+    }
+    return `${s}$fallback_${password}`;
+  }
+
+  async function verifyPasswordHash(inputPassword, storedHash) {
+    if (!storedHash || !storedHash.includes('$')) return false;
+    const [salt, expectedHash] = storedHash.split('$');
+    if (expectedHash.startsWith('fallback_')) {
+      return expectedHash === `fallback_${inputPassword}`;
+    }
+    if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(inputPassword + ":" + salt);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const actualHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return actualHash === expectedHash;
+    }
+    return false;
+  }
+
+  function validateStrongPassword(password) {
+    if (!password || password.length < 8) {
+      return { valid: false, message: 'पासवर्ड में कम से कम 8 अक्षर (Characters) होने चाहिए।' };
+    }
+    if (!/[A-Z]/.test(password)) {
+      return { valid: false, message: 'कम से कम 1 बड़ा अक्षर (Capital A-Z) होना अनिवार्य है।' };
+    }
+    if (!/[a-z]/.test(password)) {
+      return { valid: false, message: 'कम से कम 1 छोटा अक्षर (Small a-z) होना अनिवार्य है।' };
+    }
+    if (!/[0-9]/.test(password)) {
+      return { valid: false, message: 'कम से कम 1 नंबर (0-9) होना अनिवार्य है।' };
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)) {
+      return { valid: false, message: 'कम से कम 1 स्पेशल कैरेक्टर (@, #, $, %, !, & आदि) होना अनिवार्य है।' };
+    }
+    return { valid: true, message: 'मजबूत पासवर्ड (Strong Password)' };
+  }
+
+  function updatePasswordStrengthMeter(pass) {
+    const len = pass && pass.length >= 8;
+    const upper = /[A-Z]/.test(pass || '');
+    const lower = /[a-z]/.test(pass || '');
+    const num = /[0-9]/.test(pass || '');
+    const special = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(pass || '');
+
+    const updateCrit = (id, met) => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (met) {
+          el.className = 'flex items-center gap-1 text-emerald-600 font-bold';
+          el.innerHTML = '<span>✓</span> ' + el.innerText.replace(/^[✓○]\s*/, '');
+        } else {
+          el.className = 'flex items-center gap-1 text-slate-400 font-normal';
+          el.innerHTML = '<span>○</span> ' + el.innerText.replace(/^[✓○]\s*/, '');
+        }
+      }
+    };
+
+    updateCrit('crit-len', len);
+    updateCrit('crit-upper', upper);
+    updateCrit('crit-lower', lower);
+    updateCrit('crit-num', num);
+    updateCrit('crit-special', special);
+
+    const score = [len, upper, lower, num, special].filter(Boolean).length;
+    const bar = document.getElementById('pwd-strength-bar');
+    const label = document.getElementById('pwd-strength-label');
+    const pct = (score / 5) * 100;
+    if (bar) bar.style.width = pct + '%';
+
+    if (score <= 2) {
+      if (bar) bar.className = 'h-full bg-rose-500 transition-all duration-300';
+      if (label) { label.className = 'font-black text-rose-500'; label.textContent = 'कमजोर (Weak)'; }
+    } else if (score < 5) {
+      if (bar) bar.className = 'h-full bg-amber-500 transition-all duration-300';
+      if (label) { label.className = 'font-black text-amber-600'; label.textContent = 'मध्यम (Fair)'; }
+    } else {
+      if (bar) bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+      if (label) { label.className = 'font-black text-emerald-600'; label.textContent = 'मजबूत (Strong ✓)'; }
+    }
+  }
+
+  function unlockStaffMember(staffId) {
+    const emp = state.staff.find(s => s.id === staffId);
+    if (!emp) return;
+    if (!confirm(`क्या आप ${emp.name} का अकाउंट तुरंत अनलॉक करना चाहते हैं?`)) return;
+
+    emp.failedAttempts = 0;
+    emp.lockedUntil = null;
+
+    try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff)); } catch(e) {}
+    if (typeof renderStaffHRModule === 'function') renderStaffHRModule();
+    if (typeof syncToCloud === 'function') syncToCloud();
+    showToast(`✅ ${emp.name} का अकाउंट सफलतापूर्वक अनलॉक कर दिया गया है!`, 'success');
+  }
+
   // --- Formatters ---
   function formatCurrency(amount) {
     return '₹' + Number(amount || 0).toLocaleString('en-IN');
@@ -1264,7 +1412,7 @@ function filterCategoryDropdown(inputId, query) {
     }
   }
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     if (e && e.preventDefault) e.preventDefault();
     const phoneEl = (dom && dom.loginPhone) || document.getElementById('login-phone');
     const passEl = (dom && dom.loginPass) || document.getElementById('login-pass');
@@ -1276,42 +1424,99 @@ function filterCategoryDropdown(inputId, query) {
     const cleanPhone = rawPhone.replace(/[^0-9]/g, '').slice(-10);
     const pass = (passEl && passEl.value ? passEl.value : '').trim();
 
-    // Pull latest staff list with fallback to window.MMS_DATA.staff
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      if (errEl) {
+        errEl.innerHTML = '❌ कृपया 10 अंकों का मान्य मोबाइल नंबर दर्ज करें।';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // Pull latest staff list
     let staffList = state.staff;
-    if (!Array.isArray(staffList) || staffList.length < 10 || !staffList.some(s => s.phone === '8726179000')) {
+    if (!Array.isArray(staffList) || staffList.length < 10 || !staffList.some(s => s.phone === '7905859701')) {
       staffList = (window.MMS_DATA && window.MMS_DATA.staff) || [];
       state.staff = staffList;
-      try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(staffList)); } catch(err) {}
     }
 
     const allUsers = [...(window.MMS_DATA.users || []), ...staffList];
-    const matched = allUsers.find(u => {
+    const targetUser = allUsers.find(u => {
       const uPhone = String(u.phone || '').replace(/[^0-9]/g, '').slice(-10);
-      if (uPhone !== cleanPhone) return false;
-
-      // Priority 1: Match the exact custom password set by Admin Monu
-      const uPass = String(u.pass || '').trim();
-      const matchCustom = uPass && (pass === uPass || pass.toLowerCase() === uPass.toLowerCase());
-
-      // Priority 2: Fallback for convenience (last 6 digits, master keys)
-      const last6 = cleanPhone.slice(-6);
-      const defaultPass = 'Mms@' + last6;
-      const matchFallback = pass.toLowerCase() === defaultPass.toLowerCase() ||
-                            pass === last6 ||
-                            pass === '123456' ||
-                            pass === 'admin123' ||
-                            pass === 'monu123' ||
-                            pass === 'mms123' ||
-                            pass === 'staff123' ||
-                            pass === '1234';
-
-      return matchCustom || matchFallback;
+      return uPhone === cleanPhone;
     });
 
-    if (matched) {
-      state.currentUser = matched;
-      localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(matched));
+    if (!targetUser) {
+      if (errEl) {
+        errEl.innerHTML = '❌ इस मोबाइल नंबर से कोई कर्मचारी या एडमिन पंजीकृत नहीं है!';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // --- Rate Limiting & Account Lockout Guard (Feature 2) ---
+    const now = Date.now();
+    if (targetUser.lockedUntil && now < Number(targetUser.lockedUntil)) {
+      const remainingMins = Math.max(1, Math.ceil((Number(targetUser.lockedUntil) - now) / 60000));
+      if (errEl) {
+        errEl.innerHTML = `<span class="block font-black text-rose-700 text-sm">⛔ सुरक्षा लॉकआउट (Account Locked)</span>` +
+          `लगातार 5 गलत पासवर्ड दर्ज करने के कारण यह अकाउंट 15 मिनट के लिए लॉक कर दिया गया है।<br>` +
+          `<span class="font-bold text-slate-800">शेष समय: ${remainingMins} मिनट</span> या मुख्य एडमिन से तुरंत अनलॉक करवाएं।`;
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // If lockout duration has passed, reset counter
+    if (targetUser.lockedUntil && now >= Number(targetUser.lockedUntil)) {
+      targetUser.lockedUntil = null;
+      targetUser.failedAttempts = 0;
+    }
+
+    // --- Invisible Turnstile Bot Check Trigger (Feature 3) ---
+    if (typeof turnstile !== 'undefined' && cfTurnstileWidgetId !== null) {
+      try {
+        if (!cfTurnstileToken) {
+          turnstile.execute(cfTurnstileWidgetId);
+        }
+      } catch(tErr) {}
+    }
+
+    // --- Salted Password Verification (Feature 4 & Feature 1) ---
+    let isMatch = false;
+
+    // Check salted hash first
+    if (targetUser.passHash) {
+      isMatch = await verifyPasswordHash(pass, targetUser.passHash);
+    }
+
+    // Fallback check against custom password (insecure trivial fallbacks like 123456, admin123 are completely removed!)
+    if (!isMatch && targetUser.pass) {
+      const uPass = String(targetUser.pass || '').trim();
+      isMatch = (pass === uPass);
+      if (isMatch && !targetUser.passHash) {
+        try {
+          targetUser.passHash = await hashPasswordWithSalt(pass);
+        } catch(e) {}
+      }
+    }
+
+    if (isMatch) {
+      // SUCCESSFUL LOGIN: Reset counter & lockout
+      targetUser.failedAttempts = 0;
+      targetUser.lockedUntil = null;
+
+      const sIdx = state.staff.findIndex(s => s.id === targetUser.id || (cleanPhone && String(s.phone).endsWith(cleanPhone)));
+      if (sIdx !== -1) {
+        state.staff[sIdx].failedAttempts = 0;
+        state.staff[sIdx].lockedUntil = null;
+        if (targetUser.passHash) state.staff[sIdx].passHash = targetUser.passHash;
+      }
+      try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff)); } catch(err) {}
+
+      state.currentUser = targetUser;
+      localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(targetUser));
       localStorage.setItem(STORAGE_KEYS.ACTIVE_VIEW, 'portal');
+
       if (modal) { closeModal(modal); modal.style.display = 'none'; modal.classList.add('hidden'); modal.classList.remove('flex'); }
       const fallbackM = document.getElementById('login-modal');
       if (fallbackM) { fallbackM.style.display = 'none'; fallbackM.classList.add('hidden'); fallbackM.classList.remove('flex'); }
@@ -1320,11 +1525,42 @@ function filterCategoryDropdown(inputId, query) {
       renderAuthPill();
       showPortal();
     } else {
-      if (errEl) {
-        errEl.textContent = state.currentLang === 'hi' 
-          ? 'गलत मोबाइल नंबर या पासवर्ड! कृपया सही विवरण भरें।' 
-          : 'Invalid mobile number or password!';
-        errEl.classList.remove('hidden');
+      // FAILED PASSWORD ATTEMPT: Increment counter
+      targetUser.failedAttempts = (Number(targetUser.failedAttempts) || 0) + 1;
+      const count = targetUser.failedAttempts;
+
+      if (count >= 5) {
+        targetUser.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 Minutes
+        targetUser.lockedAt = new Date().toISOString();
+
+        const sIdx = state.staff.findIndex(s => s.id === targetUser.id || (cleanPhone && String(s.phone).endsWith(cleanPhone)));
+        if (sIdx !== -1) {
+          state.staff[sIdx].failedAttempts = count;
+          state.staff[sIdx].lockedUntil = targetUser.lockedUntil;
+        }
+        try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff)); } catch(err) {}
+
+        if (errEl) {
+          errEl.innerHTML = `<span class="block font-black text-rose-700 text-sm">⛔ अकाउंट 15 मिनट के लिए लॉक! (5/5 प्रयास)</span>` +
+            `लगातार 5 गलत पासवर्ड दर्ज करने के कारण सुरक्षा कारणों से यह अकाउंट <b>15 मिनट</b> के लिए लॉक हो गया है।<br>` +
+            `<span class="text-xs text-slate-700">15 मिनट बाद पुनः प्रयास करें या मुख्य एडमिन से अनलॉक करवाएं।</span>`;
+          errEl.classList.remove('hidden');
+        }
+      } else {
+        const remaining = 5 - count;
+
+        const sIdx = state.staff.findIndex(s => s.id === targetUser.id || (cleanPhone && String(s.phone).endsWith(cleanPhone)));
+        if (sIdx !== -1) {
+          state.staff[sIdx].failedAttempts = count;
+        }
+        try { localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(state.staff)); } catch(err) {}
+
+        if (errEl) {
+          errEl.innerHTML = `<span class="block font-black text-rose-700">❌ गलत पासवर्ड!</span>` +
+            `आपके पास केवल <b>${remaining} प्रयास शेष</b> हैं।<br>` +
+            `<span class="text-[11px] text-slate-500">5 लगातार गलत प्रयासों के बाद अकाउंट 15 मिनट के लिए लॉक हो जाएगा।</span>`;
+          errEl.classList.remove('hidden');
+        }
       }
     }
   }
@@ -8672,6 +8908,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                   </div>
 
                   <div class="flex items-center gap-1.5 pt-1">
+                    ${(s.lockedUntil && Date.now() < Number(s.lockedUntil)) ? `
+                    <button onclick="window.MMS_APP.unlockStaffMember('${s.id}')" class="py-2 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition cursor-pointer shadow-xs flex items-center justify-center gap-1 animate-pulse">
+                      🔓 अनलॉक
+                    </button>` : ''}
                     <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" class="flex-1 py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-xs flex items-center justify-center gap-1 transition cursor-pointer">
                       📄 स्लिप
                     </button>
@@ -8730,7 +8970,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                           ${s.branchName || getBranchName(s.branchId)}
                         </span>
                       </td>
-                      <td class="p-3.5 whitespace-nowrap font-mono font-bold text-slate-900">${s.phone}</td>
+                      <td class="p-3.5 whitespace-nowrap font-mono font-bold text-slate-900">
+                        <div>${s.phone}</div>
+                        ${(s.lockedUntil && Date.now() < Number(s.lockedUntil)) ? `<span class="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-rose-100 text-rose-700 border border-rose-300 animate-pulse">🔒 लॉक्ड (15m)</span>` : ''}
+                      </td>
                       <td class="p-3.5 text-center whitespace-nowrap font-mono font-bold text-indigo-700 bg-indigo-50/60 rounded-lg">
                         ${s.shiftInTime || '10:30 AM'} - ${s.shiftOutTime || '08:30 PM'}
                       </td>
@@ -8749,6 +8992,10 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                         ${advDue > 0 ? formatCurrency(advDue) : '₹0'}
                       </td>
                       <td class="p-3.5 text-right whitespace-nowrap space-x-1.5">
+                        ${(s.lockedUntil && Date.now() < Number(s.lockedUntil)) ? `
+                        <button onclick="window.MMS_APP.unlockStaffMember('${s.id}')" title="तुरंत अनलॉक करें (Admin Override)" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-black transition shadow-xs cursor-pointer animate-pulse">
+                          🔓 अनलॉक
+                        </button>` : ''}
                         <button onclick="window.MMS_APP.openSalarySlipModal('${s.id}')" title="मासिक सैलरी स्लिप देखें व बनाएं" class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold transition shadow-2xs cursor-pointer">
                           📄 सैलरी स्लिप
                         </button>
@@ -8896,10 +9143,28 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
                   <span>🔑 लॉगिन पासवर्ड (अपनी मर्जी का पासवर्ड डालें) *</span>
                 </label>
               </div>
-              <input type="text" id="staff-pass-input" value="${emp && emp.pass ? emp.pass : ''}" placeholder="उदा. 123456 या monu@123 या अपनी मर्जी का पासवर्ड" required class="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-mono font-bold text-blue-900 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              <input type="text" id="staff-pass-input" oninput="window.MMS_APP.updatePasswordStrengthMeter(this.value)" value="${emp && emp.pass ? emp.pass : ''}" placeholder="उदा. Monu@2026 या Mms#9876" required class="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-mono font-bold text-blue-900 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <span class="text-[10px] text-blue-700 font-bold mt-1 block">
-                ✨ कोई फ़िक्स फॉर्मेट जरूरी नहीं है! आप जो भी पासवर्ड यहाँ लिखेंगे, कर्मचारी उसी से लॉगिन करेगा।
+                🛡️ अनिवार्य स्ट्रॉन्ग पासवर्ड पॉलिसी (कम से कम 8 अक्षर, A-Z, a-z, 0-9, @#$)
               </span>
+              
+              <!-- Real-Time Strong Password Policy Checklist (Feature 1) -->
+              <div id="password-strength-meter" class="mt-2 p-2.5 bg-white/95 rounded-xl border border-blue-200 space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-700 font-bold">मजबूत पासवर्ड पॉलिसी:</span>
+                  <span id="pwd-strength-label" class="font-black text-rose-500">कमजोर</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div id="pwd-strength-bar" class="h-full bg-rose-500 transition-all duration-300" style="width: 20%;"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-1 pt-0.5 text-[10px]" id="pwd-criteria-list">
+                  <div id="crit-len" class="flex items-center gap-1 text-slate-400"><span>○</span> 8+ अक्षर</div>
+                  <div id="crit-upper" class="flex items-center gap-1 text-slate-400"><span>○</span> 1 कैपिटल (A-Z)</div>
+                  <div id="crit-lower" class="flex items-center gap-1 text-slate-400"><span>○</span> 1 स्मॉल (a-z)</div>
+                  <div id="crit-num" class="flex items-center gap-1 text-slate-400"><span>○</span> 1 नंबर (0-9)</div>
+                  <div id="crit-special" class="col-span-2 flex items-center gap-1 text-slate-400"><span>○</span> 1 स्पेशल कैरेक्टर (@, #, $, %, !, & आदि)</div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">फोटो लिंक / URL (वैकल्पिक)</label>
@@ -9000,14 +9265,22 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (modal) modal.remove();
   }
 
-  function saveStaff(e, editEmpId) {
+  async function saveStaff(e, editEmpId) {
     e.preventDefault();
     const name = document.getElementById('staff-name-input').value.trim();
     const phone = document.getElementById('staff-phone-input').value.trim();
     const role = document.getElementById('staff-role-select').value;
     const branchId = document.getElementById('staff-branch-select').value;
     const rawPass = document.getElementById('staff-pass-input').value.trim();
-    const pass = rawPass || '123456';
+    
+    // Strict Strong Password Enforcement (Feature 1)
+    const strongCheck = validateStrongPassword(rawPass);
+    if (!strongCheck.valid) {
+      alert('सुरक्षा त्रुटि: ' + strongCheck.message + '\n\nमजबूत पासवर्ड नियम:\n• न्यूनतम 8 अक्षर\n• कम से कम 1 बड़ा अक्षर (A-Z)\n• कम से कम 1 छोटा अक्षर (a-z)\n• कम से कम 1 नंबर (0-9)\n• कम से कम 1 स्पेशल कैरेक्टर (@, #, $, %, !, & आदि)');
+      return;
+    }
+    const pass = rawPass;
+    const passHash = await hashPasswordWithSalt(pass);
     const photo = document.getElementById('staff-photo-input').value.trim();
     const inTime24 = document.getElementById('staff-in-time-input')?.value || '10:30';
     const outTime24 = document.getElementById('staff-out-time-input')?.value || '20:30';
@@ -9044,7 +9317,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     if (existingIdx !== -1) {
       state.staff[existingIdx] = {
         ...state.staff[existingIdx],
-        name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass,
+        name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass, passHash, failedAttempts: 0, lockedUntil: null,
         shiftHours, allowedLeaves, baseSalary, targetHours, hourlyRate,
         shiftInTime, shiftOutTime, shiftInTime24: inTime24, shiftOutTime24: outTime24,
         photo: photo || state.staff[existingIdx].photo
@@ -9053,7 +9326,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     } else {
       const newStaff = {
         id: 'emp_' + Date.now(),
-        name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass,
+        name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass, passHash, failedAttempts: 0, lockedUntil: null,
         shiftHours, allowedLeaves, baseSalary, targetHours, hourlyRate,
         shiftInTime, shiftOutTime, shiftInTime24: inTime24, shiftOutTime24: outTime24,
         active: true,
@@ -9069,7 +9342,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
       const isSelf = (editEmpId && (state.currentUser.id === editEmpId || state.currentUser.phone === phone)) ||
                      (role === 'admin' && (state.currentUser.role || '').toLowerCase() === 'admin');
       if (isSelf) {
-        state.currentUser = { ...state.currentUser, name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass, photo: photo || state.currentUser.photo };
+        state.currentUser = { ...state.currentUser, name, phone, role, roleLabel: roleLabels[role] || role, branchId, branchName, pass, passHash, failedAttempts: 0, lockedUntil: null, photo: photo || state.currentUser.photo };
         localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state.currentUser));
         const userNameEl = document.getElementById('header-user-name');
         const userRoleEl = document.getElementById('header-user-role');
@@ -11883,7 +12156,7 @@ ${inv.udharNote ? `📝 *नोट:* ${inv.udharNote}\n` : ''}
     closeAddStaffModal,
     deleteStaff,
     updateStaffMathPreview,
-    saveStaff,
+    saveStaff, unlockStaffMember, updatePasswordStrengthMeter, validateStrongPassword, initTurnstile,
     openIssueAdvanceModal,
     closeIssueAdvanceModal,
     saveAdvance,

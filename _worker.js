@@ -46,6 +46,7 @@ export default {
     }
 
     if (url.pathname === "/api/health") {
+
       return jsonResponse({
         success: true,
         status: "connected",
@@ -54,6 +55,32 @@ export default {
         timestamp: new Date().toISOString()
       });
     }
+
+    // 1.2 Cloudflare Turnstile Invisible Bot Verification Endpoint
+    if (url.pathname === "/api/verify-turnstile" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const token = body.token;
+        if (!token) {
+          return jsonResponse({ success: false, error: "Missing Turnstile token" }, 400);
+        }
+        const ip = request.headers.get("CF-Connecting-IP") || "";
+        const formData = new FormData();
+        formData.append("secret", "0x4AAAAAAGKDrbCn7raANh5deDdiPaFOWbc");
+        formData.append("response", token);
+        if (ip) formData.append("remoteip", ip);
+
+        const cfRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+          method: "POST",
+          body: formData
+        });
+        const cfOutcome = await cfRes.json();
+        return jsonResponse(cfOutcome);
+      } catch (err) {
+        return jsonResponse({ success: false, error: err.message }, 500);
+      }
+    }
+
 
     
     // 2. Public Live Token & Mobile Tracker API: /api/track?q=...
