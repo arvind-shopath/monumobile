@@ -37,7 +37,7 @@ export default {
       return jsonResponse({
         success: true,
         version: "11.0",
-        build: "20261119_120",
+        build: "20261120_121",
         timestamp: Date.now()
       });
     }
@@ -417,7 +417,7 @@ export default {
               success: true,
               source: "enterprise_cache",
               version: "11.0",
-              build: "20261119_120",
+              build: "20261120_121",
               timestamp: new Date().toISOString(),
               data: store
             });
@@ -426,10 +426,10 @@ export default {
           if (env.DB) {
             const cutoffDateStr = new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0];
             const [attRows, invRows, jobRows, expRows] = await Promise.all([
-              env.DB.prepare("SELECT * FROM attendance ORDER BY created_at DESC LIMIT 1000").all(),
-              env.DB.prepare("SELECT * FROM invoices ORDER BY created_at DESC LIMIT 100").all(),
-              env.DB.prepare("SELECT * FROM repair_jobs ORDER BY updated_at DESC LIMIT 100").all(),
-              env.DB.prepare("SELECT * FROM expenses ORDER BY created_at DESC LIMIT 100").all()
+              env.DB.prepare("SELECT * FROM attendance ORDER BY created_at DESC LIMIT 200").all(),
+              env.DB.prepare("SELECT * FROM invoices ORDER BY created_at DESC LIMIT 50").all(),
+              env.DB.prepare("SELECT * FROM repair_jobs ORDER BY updated_at DESC LIMIT 50").all(),
+              env.DB.prepare("SELECT * FROM expenses ORDER BY created_at DESC LIMIT 50").all()
             ]);
 
             const attendance = (attRows.results || []).map(r => ({
@@ -515,7 +515,7 @@ export default {
               success: true,
               source: "enterprise_db",
               version: "11.0",
-              build: "20261119_120",
+              build: "20261120_121",
               timestamp: new Date().toISOString(),
               data: fullData
             });

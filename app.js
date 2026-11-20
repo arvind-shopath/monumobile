@@ -160,19 +160,51 @@ function filterCategoryDropdown(inputId, query) {
       // 2. Initial instant pull
       this.pullFromCloud();
 
-      // 3. Ultra-fast 2.5-second reactive polling for multi-device sync
+      // 3. Smart Adaptive Sync with Zero-Quota Overnight Sleep Guardian
       if (typeof window !== 'undefined') {
-        setInterval(() => {
-          this.pullFromCloud(true);
-        }, 2500);
+        let syncPollTimer = null;
 
-        // 4. Instant Wakeup Triggers: Trigger immediately on tab focus, click, or visibility change
+        const startPoll = () => {
+          if (syncPollTimer) clearInterval(syncPollTimer);
+          // Poll every 60 seconds ONLY when tab is actively visible and unlocked
+          syncPollTimer = setInterval(() => {
+            if (!document.hidden) {
+              this.pullFromCloud(true);
+            }
+          }, 60000); // 60s safe interval (zero quota exhaustion)
+        };
+
+        const stopPoll = () => {
+          if (syncPollTimer) {
+            clearInterval(syncPollTimer);
+            syncPollTimer = null;
+          }
+        };
+
+        // Start polling initially
+        startPoll();
+
+        // 4. Instant Wakeup & Sleep Triggers:
+        // When tab is hidden/locked, stop polling completely (0 requests overnight)
+        // When tab becomes visible/active, pull once immediately and resume gentle 60s interval
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') {
             this.pullFromCloud(false);
+            startPoll();
+          } else {
+            stopPoll();
           }
         });
-        window.addEventListener('focus', () => this.pullFromCloud(false));
+
+        window.addEventListener('focus', () => {
+          this.pullFromCloud(false);
+          startPoll();
+        });
+
+        window.addEventListener('blur', () => {
+          // Window lost focus: pause background traffic
+          stopPoll();
+        });
       }
     },
 
