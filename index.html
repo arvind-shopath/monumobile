@@ -385,47 +385,48 @@
     }
   
     /* =========================================================================
-       SIDEBAR DUAL-TONE & COLLAPSED NAVIGATION DESIGN SYSTEM (v12.3)
+       SIDEBAR DUAL-TONE (WARM PEACH-CREAM & WHITE) DESIGN SYSTEM (v12.4)
        ========================================================================= */
     #portal-sidebar {
-      background: linear-gradient(180deg, #CBD5E1 0%, #BAC7D5 100%) !important;
-      border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
-      box-shadow: 0 24px 50px -10px rgba(70, 85, 105, 0.35), 0 8px 20px -4px rgba(70, 85, 105, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.95) !important;
+      background: linear-gradient(180deg, #FFF8EF 0%, #FFF2E2 100%) !important;
+      background-color: #FFF5E8 !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 24px 50px -10px rgba(180, 145, 120, 0.22), 0 8px 20px -4px rgba(180, 145, 120, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.95) !important;
       transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* Dual-tone inner floating cards on darker grey sidebar */
+    /* Dual-tone inner floating cards on warm peach sidebar */
     #portal-sidebar #portal-nav-group-ops > div {
       background: #FFFFFF !important;
       border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
-      box-shadow: 0 8px 22px rgba(60, 75, 95, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 8px 22px rgba(180, 145, 120, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
     }
     #portal-sidebar .p-3.bg-white\/95 {
       background: #FFFFFF !important;
       border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
-      box-shadow: 0 8px 22px rgba(60, 75, 95, 0.14), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 8px 22px rgba(180, 145, 120, 0.12), inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
     }
     
-    /* Text and Labels Contrast on Darker Grey */
+    /* Text and Labels Contrast on Peach Background */
     #portal-sidebar .sidebar-text-label {
-      color: #475569;
+      color: #78716C;
     }
     #portal-sidebar h3#sidebar-user-display-name {
-      color: #0F172A !important;
+      color: #1C1917 !important;
     }
     #portal-sidebar .portal-tab-btn:not(.portal-tab-active):not([class*="from-blue-600"]) {
-      color: #1E293B !important;
+      color: #292524 !important;
     }
     #portal-sidebar .portal-tab-btn:hover:not(.portal-tab-active):not([class*="from-blue-600"]) {
-      background-color: rgba(255, 255, 255, 0.75) !important;
-      color: #0F172A !important;
+      background-color: rgba(255, 255, 255, 0.8) !important;
+      color: #0c0a09 !important;
     }
     
     /* Footer buttons */
     #portal-sidebar #back-to-site-btn {
-      background-color: rgba(255, 255, 255, 0.85) !important;
+      background-color: rgba(255, 255, 255, 0.9) !important;
       border: 1px solid rgba(255, 255, 255, 0.95) !important;
-      color: #1E293B !important;
+      color: #292524 !important;
     }
     #portal-sidebar #logout-btn {
       background-color: #FFF1F2 !important;
@@ -452,11 +453,11 @@
     /* Inactive button hover styling */
     .portal-tab-btn.portal-tab-inactive div,
     .portal-tab-btn.portal-tab-inactive svg {
-      color: #64748b;
-      stroke: #64748b;
+      color: #78716C;
+      stroke: #78716C;
     }
 
-    /* COLLAPSED SIDEBAR RULES */
+    /* COLLAPSED SIDEBAR RULES (Preserves Dual-Tone Pattern in both states!) */
     #portal-sidebar.sidebar-collapsed {
       width: 4.75rem !important;
       min-width: 4.75rem !important;
@@ -470,12 +471,44 @@
       display: none !important;
     }
 
-    /* Neutralize ops card wrapper padding/border in collapsed mode so buttons fit cleanly */
+    /* PRESERVE DUAL-TONE IN COLLAPSED MODE: Ops card remains a clean white capsule */
     #portal-sidebar.sidebar-collapsed #portal-nav-group-ops > div {
-      padding: 0 !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 54px !important;
+      margin: 4px auto !important;
+      padding: 5px 0 !important;
+      background: #FFFFFF !important;
+      border-radius: 20px !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 4px 14px rgba(180, 145, 120, 0.14), inset 0 1px 1px #fff !important;
+      gap: 3px !important;
+    }
+    #portal-sidebar.sidebar-collapsed #portal-nav-group-ops > div > button {
+      margin: 0 auto !important;
+    }
+    
+    /* PRESERVE DUAL-TONE IN COLLAPSED MODE: Bottom action card remains a clean white capsule */
+    #portal-sidebar.sidebar-collapsed .p-3.pt-2 {
+      padding: 0.5rem 0.25rem !important;
+    }
+    #portal-sidebar.sidebar-collapsed .p-3.bg-white\/95 {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 54px !important;
+      margin: 4px auto !important;
+      padding: 6px 0 !important;
+      background: #FFFFFF !important;
+      border-radius: 20px !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 4px 14px rgba(180, 145, 120, 0.14), inset 0 1px 1px #fff !important;
+    }
+    #portal-sidebar.sidebar-collapsed .p-3.bg-white\/95 button {
+      width: 38px !important;
+      height: 38px !important;
+      margin: 0 auto !important;
     }
     
     /* Header controls in collapsed mode: hide Mac dots, center expand toggle */
@@ -497,8 +530,8 @@
     
     /* Nav padding in collapsed mode */
     #portal-sidebar.sidebar-collapsed nav {
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
+      padding-left: 0.25rem !important;
+      padding-right: 0.25rem !important;
     }
     
     /* All menu buttons in collapsed mode: clean 42x42 square pill centered */
@@ -525,21 +558,7 @@
       height: 1.25rem !important;
     }
     
-    /* Bottom Floating Action & Footer in collapsed mode */
-    #portal-sidebar.sidebar-collapsed .p-3.pt-2 {
-      padding: 0.5rem 0.25rem !important;
-    }
-    #portal-sidebar.sidebar-collapsed .p-3.bg-white\/95 {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 4px 0 !important;
-    }
-    #portal-sidebar.sidebar-collapsed .p-3.bg-white\/95 button {
-      width: 38px !important;
-      height: 38px !important;
-      margin: 0 auto !important;
-    }
+    /* Bottom Footer in collapsed mode */
     #portal-sidebar.sidebar-collapsed .border-t.border-slate-200\/60 {
       flex-direction: column !important;
       gap: 6px !important;
@@ -2521,6 +2540,6 @@
   <!-- Application Logic & Scripts -->
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="data.js?v=20261120_121"></script>
-  <script src="app.js?v=20261120_123"></script>
+  <script src="app.js?v=20261120_124"></script>
 </body>
 </html>
