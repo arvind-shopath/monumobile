@@ -1778,7 +1778,7 @@ function filterCategoryDropdown(inputId, query) {
       controlPanel: "Control Panel",
       greeting: "Hello,",
       subtitle: "Lucknow Head Lab • Live Control Panel",
-      publicSite: "Public Website",
+      publicSite: "Website",
       logout: "Sign Out",
       allBranches: "All Branches",
       quickBill: "+ New Invoice",
@@ -1903,7 +1903,7 @@ function filterCategoryDropdown(inputId, query) {
       controlPanel: "कंट्रोल पैनल",
       greeting: "नमस्ते,",
       subtitle: "लखनऊ हेड लैब • लाइव कंट्रोल पैनल",
-      publicSite: "पब्लिक वेबसाइट",
+      publicSite: "वेबसाइट",
       logout: "लॉगआउट",
       allBranches: "सभी शाखाएं",
       quickBill: "+ नया बिल",
@@ -2122,7 +2122,7 @@ function filterCategoryDropdown(inputId, query) {
     const publicSiteBtn = document.getElementById('back-to-site-btn');
     if (publicSiteBtn) {
       const label = publicSiteBtn.querySelector('.sidebar-text-label');
-      if (label) label.textContent = isEn ? 'Public Website' : 'पब्लिक वेबसाइट';
+      if (label) label.textContent = isEn ? 'Website' : 'वेबसाइट';
     }
 
     const logoutBtn = document.getElementById('logout-btn');
